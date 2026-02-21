@@ -42,7 +42,13 @@ export class ChannelManager {
   async startAll(): Promise<void> {
     for (const [platform, adapter] of this.adapters) {
       console.log(`[channels] Starting ${platform} adapter...`);
-      await adapter.start();
+      try {
+        await adapter.start();
+        console.log(`[channels] ${platform} adapter started`);
+      } catch (err) {
+        console.warn(`[channels] ${platform} adapter failed to start — skipping:`, (err as Error).message);
+        this.adapters.delete(platform);
+      }
     }
   }
 
