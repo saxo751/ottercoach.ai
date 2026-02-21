@@ -1,0 +1,152 @@
+import { WebSocketServer, WebSocket } from 'ws';
+import type { Server } from 'http';
+import type Database from 'better-sqlite3';
+import type { ChannelAdapter, Button, MessageCallback, ButtonCallback } from './adapter.js';
+import { findOrCreateUser } from '../db/queries/channels.js';
+import { getRecentMessages } from '../db/queries/conversations.js';
+
+interface WsClient {
+  ws: WebSocket;
+  userId: string | null;   // internal user ID (set after auth)
+  sessionId: string;        // browser session ID (= platformUserId)
+}
+
+export class WebAdapter implements ChannelAdapter {
+  private wss!: WebSocketServer;
+  private clients = new Map<string, WsClient>();  // sessionId -> client
+  private messageCallbacks: MessageCallback[] = [];
+  private buttonCallbacks: ButtonCallback[] = [];
+  private db: Database.Database;
+
+  constructor(private httpServer: Server, db: Database.Database) {
+    this.db = db;
+  }
+
+  onMessage(callback: MessageCallback): void {
+    this.messageCallbacks.push(callback);
+  }
+
+  onButtonPress(callback: ButtonCallback): void {
+    this.buttonCallbacks.push(callback);
+  }
+
+  async sendMessage(sessionId: string, text: string): Promise<void> {
+    console.log(`[web] sendMessage to ${sessionId}: "${text.substring(0, 80)}..."`);
+    const client = this.clients.get(sessionId);
+    if (!client || client.ws.readyState !== WebSocket.OPEN) {
+      console.log(`[web] ❌ Client not found or not open. clients=${this.clients.size}, readyState=${client?.ws.readyState}`);
+      return;
+    }
+    client.ws.send(JSON.stringify({ type: 'message', text }));
+    console.log(`[web] ✓ Message sent`);
+  }
+
+  async sendButtons(sessionId: string, text: string, buttons: Button[]): Promise<void> {
+    console.log(`[web] sendButtons to ${sessionId}: "${text.substring(0, 80)}..."`);
+    const client = this.clients.get(sessionId);
+    if (!client || client.ws.readyState !== WebSocket.OPEN) return;
+    client.ws.send(JSON.stringify({ type: 'buttons', text, buttons }));
+  }
+
+  async start(): Promise<void> {
+    this.wss = new WebSocketServer({ server: this.httpServer, path: '/ws' });
+
+    this.wss.on('connection', (ws, req) => {
+      console.log(`[web] 🔌 New WebSocket connection from ${req.socket.remoteAddress}`);
+      let client: WsClient | null = null;
+
+      ws.on('message', (raw) => {
+        const rawStr = raw.toString();
+        console.log(`[web] 📩 Received: ${rawStr.substring(0, 200)}`);
+
+        let msg: any;
+        try {
+          msg = JSON.parse(rawStr);
+        } catch (e) {
+          console.log(`[web] ❌ Failed to parse JSON`);
+          return;
+        }
+
+        if (msg.type === 'auth' && msg.sessionId) {
+          console.log(`[web] 🔑 Auth request for session: ${msg.sessionId}`);
+          const { user, isNew } = findOrCreateUser(this.db, 'web', msg.sessionId);
+          console.log(`[web] User: ${user.id} (new=${isNew}, mode=${user.conversation_mode})`);
+
+          client = { ws, userId: user.id, sessionId: msg.sessionId };
+
+          const prev = this.clients.get(msg.sessionId);
+          if (prev && prev.ws !== ws && prev.ws.readyState === WebSocket.OPEN) {
+            prev.ws.close();
+          }
+          this.clients.set(msg.sessionId, client);
+
+          ws.send(JSON.stringify({ type: 'auth_ok' }));
+
+          const history = getRecentMessages(this.db, user.id, 50);
+          console.log(`[web] Sending ${history.length} history messages`);
+          ws.send(JSON.stringify({
+            type: 'history',
+            messages: history.map((m) => ({
+              role: m.role,
+              content: m.content,
+              created_at: m.created_at,
+            })),
+          }));
+          return;
+        }
+
+        if (!client) {
+          console.log(`[web] ❌ Message before auth`);
+          ws.send(JSON.stringify({ type: 'error', message: 'Not authenticated. Send auth first.' }));
+          return;
+        }
+
+        if (msg.type === 'message' && typeof msg.text === 'string') {
+          console.log(`[web] 💬 Message from ${client.sessionId}: "${msg.text}"`);
+          console.log(`[web] Firing ${this.messageCallbacks.length} message callbacks`);
+          for (const cb of this.messageCallbacks) {
+            cb(client.sessionId, msg.text, 'web');
+          }
+        }
+
+        if (msg.type === 'button' && typeof msg.data === 'string') {
+          console.log(`[web] 🔘 Button from ${client.sessionId}: "${msg.data}"`);
+          for (const cb of this.buttonCallbacks) {
+            cb(client.sessionId, msg.data, 'web');
+          }
+          for (const cb of this.messageCallbacks) {
+            cb(client.sessionId, msg.data, 'web');
+          }
+        }
+      });
+
+      ws.on('close', (code, reason) => {
+        console.log(`[web] 🔌 Connection closed (code=${code}, reason=${reason.toString()})`);
+        if (client) {
+          const current = this.clients.get(client.sessionId);
+          if (current && current.ws === ws) {
+            this.clients.delete(client.sessionId);
+          }
+        }
+      });
+
+      ws.on('error', (err) => {
+        console.error(`[web] ❌ WebSocket error:`, err.message);
+      });
+    });
+
+    this.wss.on('error', (err) => {
+      console.error(`[web] ❌ WebSocketServer error:`, err.message);
+    });
+
+    console.log('[web] WebSocket adapter started on /ws');
+  }
+
+  async stop(): Promise<void> {
+    for (const client of this.clients.values()) {
+      client.ws.close();
+    }
+    this.clients.clear();
+    this.wss?.close();
+  }
+}

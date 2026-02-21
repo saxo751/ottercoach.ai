@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BJJ Coach Bot — Desktop Preview v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --color-desktop: #f3efe6;
+    --color-desktop-darker: #e8e2d6;
+    --color-surface: #ffffff;
+    --color-surface-muted: #faf8f4;
+    --color-accent: #f5a623;
+    --color-accent-hover: #e09400;
+    --color-accent-text: #1a1a1a;
+    --color-navy: #1d2433;
+    --color-titlebar: #e8e2d6;
+    --color-titlebar-text: #1a1a1a;
+    --color-window-border: #c4bfb3;
+    --color-text: #1a1a1a;
+    --color-text-secondary: #5a5650;
+    --color-text-muted: #9b9589;
+    --color-text-inverse: #ffffff;
+    --color-success: #22c55e;
+    --color-warning: #f5a623;
+    --color-danger: #ef4444;
+    --border-subtle: 1px solid #d4cfc5;
+    --border-medium: 2px solid #c4bfb3;
+    --shadow-window: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
+    --shadow-window-active: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+    --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+    --font-display: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--color-desktop);
+    font-family: var(--font-body);
+    color: var(--color-text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Paper grain texture */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ===== TOP BAR ===== */
+  .topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: var(--color-desktop);
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+    border-bottom: var(--border-subtle);
+  }
+
+  .topbar__logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 28px;
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .topbar__logo-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .topbar__nav {
+    display: flex;
+    gap: 4px;
+  }
+
+  .topbar__link {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background 0.12s;
+  }
+
+  .topbar__link:hover {
+    background: rgba(0,0,0,0.05);
+  }
+
+  .topbar__right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .topbar__cta {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+    border: 2px solid var(--color-text);
+    border-radius: 6px;
+    padding: 5px 14px;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+
+  .topbar__cta:hover {
+    background: var(--color-accent-hover);
+  }
+
+  .topbar__icon-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    border: var(--border-subtle);
+    background: transparent;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--color-text);
+  }
+
+  .topbar__icon-btn:hover {
+    background: rgba(0,0,0,0.05);
+  }
+
+  /* ===== DESKTOP ===== */
+  .desktop {
+    padding-top: 56px;
+    min-height: 100vh;
+    position: relative;
+  }
+
+  /* ===== DESKTOP ICONS ===== */
+  .desktop-icons {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px;
+    position: fixed;
+    top: 56px;
+    z-index: 10;
+  }
+
+  .desktop-icons--left { left: 0; }
+  .desktop-icons--right { right: 0; }
+
+  .desktop-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: background 0.12s;
+    width: 92px;
+  }
+
+  .desktop-icon:hover {
+    background: rgba(0,0,0,0.05);
+  }
+
+  .desktop-icon--active {
+    background: rgba(245, 166, 35, 0.12);
+  }
+
+  .desktop-icon__img {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  /* Styled icon containers — each icon gets a unique look */
+  .icon-styled {
+    width: 48px;
+    height: 48px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    position: relative;
+  }
+
+  .icon-styled--chat {
+    background: linear-gradient(135deg, #fef3c7, #fde68a);
+    border: 1.5px solid #d4a017;
+  }
+
+  .icon-styled--folder {
+    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    border: 1.5px solid #c2854a;
+  }
+
+  .icon-styled--dashboard {
+    background: linear-gradient(135deg, #f0fdf4, #bbf7d0);
+    border: 1.5px solid #4ade80;
+  }
+
+  .icon-styled--doc {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border: 1.5px solid #94a3b8;
+  }
+
+  .icon-styled--video {
+    background: linear-gradient(135deg, #fef2f2, #fecaca);
+    border: 1.5px solid #ef4444;
+  }
+
+  .icon-styled--settings {
+    background: linear-gradient(135deg, #f5f3ff, #ddd6fe);
+    border: 1.5px solid #8b5cf6;
+  }
+
+  .icon-styled--log {
+    background: linear-gradient(135deg, #eff6ff, #bfdbfe);
+    border: 1.5px solid #3b82f6;
+  }
+
+  .icon-styled--focus {
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    border: 1.5px solid #f97316;
+  }
+
+  .icon-styled--help {
+    background: linear-gradient(135deg, #fdf4ff, #f5d0fe);
+    border: 1.5px solid #d946ef;
+  }
+
+  .icon-styled--handbook {
+    background: linear-gradient(135deg, #ecfdf5, #a7f3d0);
+    border: 1.5px solid #10b981;
+  }
+
+  .icon-styled--belt {
+    background: linear-gradient(135deg, #faf5ff, #e9d5ff);
+    border: 1.5px solid #a78bfa;
+  }
+
+  .desktop-icon__label {
+    font-size: 12px;
+    font-weight: 500;
+    text-align: center;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+
+  /* ===== MASCOT SCENE ===== */
+  .desktop-scene {
+    position: fixed;
+    bottom: 0;
+    right: 10%;
+    width: 480px;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* ===== FLOATING WINDOW ===== */
+  .retro-window {
+    background: var(--color-surface);
+    border: var(--border-medium);
+    border-radius: 10px 10px 6px 6px;
+    box-shadow: var(--shadow-window-active);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: absolute;
+    z-index: 50;
+  }
+
+  .retro-window__titlebar {
+    background: var(--color-titlebar);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: var(--border-subtle);
+    cursor: grab;
+  }
+
+  .retro-window__controls {
+    display: flex;
+    gap: 6px;
+  }
+
+  .retro-window__dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1px solid rgba(0,0,0,0.12);
+  }
+
+  .retro-window__dot--close { background: #ef6b5e; }
+  .retro-window__dot--min { background: #f5bf4f; }
+  .retro-window__dot--max { background: #62c554; }
+
+  .retro-window__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--color-titlebar-text);
+    flex: 1;
+  }
+
+  .retro-window__content {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--color-surface);
+  }
+
+  .retro-window__statusbar {
+    background: var(--color-desktop-darker);
+    padding: 5px 14px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    display: flex;
+    justify-content: space-between;
+    border-top: var(--border-subtle);
+  }
+
+  /* ===== CHAT ===== */
+  .chat-messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .chat-msg {
+    display: flex;
+    gap: 10px;
+    max-width: 88%;
+  }
+
+  .chat-msg--coach {
+    align-self: flex-start;
+  }
+
+  .chat-msg--user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+  }
+
+  .chat-msg__avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-desktop-darker);
+    border: 2px solid var(--color-window-border);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .chat-msg__bubble {
+    font-size: 14px;
+    line-height: 1.65;
+  }
+
+  .chat-msg__bubble--coach {
+    background: var(--color-desktop);
+    border: var(--border-subtle);
+    border-radius: 3px 14px 14px 14px;
+    padding: 10px 14px;
+  }
+
+  .chat-msg__bubble--user {
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+    border-radius: 14px 3px 14px 14px;
+    padding: 10px 14px;
+  }
+
+  .chat-msg__time {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+  }
+
+  .chat-input-area {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    border-top: var(--border-subtle);
+    background: var(--color-desktop);
+    align-items: flex-end;
+  }
+
+  .chat-input {
+    flex: 1;
+    font-family: var(--font-body);
+    font-size: 14px;
+    padding: 10px 14px;
+    border: var(--border-medium);
+    border-radius: 8px;
+    background: var(--color-surface);
+    outline: none;
+    resize: none;
+    min-height: 38px;
+  }
+
+  .chat-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+  }
+
+  .chat-send {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--color-accent);
+    border: 2px solid var(--color-text);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: background 0.12s;
+  }
+
+  .chat-send:hover { background: var(--color-accent-hover); }
+
+  .quick-replies {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 14px;
+    border-top: var(--border-subtle);
+    background: var(--color-surface-muted);
+  }
+
+  .quick-reply {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 14px;
+    background: var(--color-surface);
+    border: var(--border-subtle);
+    border-radius: 20px;
+    cursor: pointer;
+    color: var(--color-text-secondary);
+    transition: all 0.12s;
+  }
+
+  .quick-reply:hover {
+    background: var(--color-accent);
+    color: var(--color-accent-text);
+    border-color: var(--color-accent);
+  }
+
+  /* ===== DASHBOARD WINDOW ===== */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .stat-cell {
+    padding: 18px 14px;
+    text-align: center;
+    border-bottom: var(--border-subtle);
+    border-right: var(--border-subtle);
+  }
+
+  .stat-cell:nth-child(2n) { border-right: none; }
+  .stat-cell:nth-last-child(-n+2) { border-bottom: none; }
+
+  .stat-cell__value {
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1;
+  }
+
+  .stat-cell__label {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    margin-top: 6px;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 8px;
+    background: var(--color-desktop-darker);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar__fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+
+  .progress-bar__fill--accent { background: var(--color-accent); }
+  .progress-bar__fill--success { background: var(--color-success); }
+  .progress-bar__fill--danger { background: var(--color-danger); }
+
+  /* ===== TECHNIQUE ROW ===== */
+  .technique-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-bottom: var(--border-subtle);
+    font-size: 13px;
+  }
+
+  .technique-row:last-child { border-bottom: none; }
+  .technique-row:hover { background: var(--color-surface-muted); }
+
+  .technique-row__name {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .technique-row__type {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    width: 60px;
+    text-align: center;
+    background: var(--color-desktop);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+
+  .technique-row__bar {
+    width: 80px;
+  }
+
+  .technique-row__date {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    width: 60px;
+    text-align: right;
+  }
+
+  /* ===== FOCUS SECTION ===== */
+  .focus-section {
+    padding: 14px;
+  }
+
+  .focus-section__title {
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .focus-section__sub {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .focus-section__meta {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes window-open {
+    from { opacity: 0; transform: scale(0.96) translateY(6px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .retro-window { animation: window-open 0.2s ease-out; }
+
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .desktop-icon {
+    animation: fade-in 0.4s ease-out both;
+  }
+
+  .desktop-icons--left .desktop-icon:nth-child(1) { animation-delay: 0.05s; }
+  .desktop-icons--left .desktop-icon:nth-child(2) { animation-delay: 0.1s; }
+  .desktop-icons--left .desktop-icon:nth-child(3) { animation-delay: 0.15s; }
+  .desktop-icons--left .desktop-icon:nth-child(4) { animation-delay: 0.2s; }
+  .desktop-icons--left .desktop-icon:nth-child(5) { animation-delay: 0.25s; }
+  .desktop-icons--left .desktop-icon:nth-child(6) { animation-delay: 0.3s; }
+
+  .desktop-icons--right .desktop-icon:nth-child(1) { animation-delay: 0.08s; }
+  .desktop-icons--right .desktop-icon:nth-child(2) { animation-delay: 0.13s; }
+  .desktop-icons--right .desktop-icon:nth-child(3) { animation-delay: 0.18s; }
+  .desktop-icons--right .desktop-icon:nth-child(4) { animation-delay: 0.23s; }
+  .desktop-icons--right .desktop-icon:nth-child(5) { animation-delay: 0.28s; }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 1100px) {
+    .retro-window { position: static !important; width: 100% !important; }
+    .desktop-icons { position: static; }
+    .desktop-scene { position: static; width: 100%; }
+    .desktop {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 12px;
+    }
+    .desktop-icons {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .desktop-icon { width: auto; min-width: 80px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP BAR ===== -->
+<div class="topbar">
+  <a class="topbar__logo" href="#">
+    <svg class="topbar__logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="4" fill="#1a1a1a"/>
+      <text x="5" y="20" font-family="'Bricolage Grotesque', sans-serif" font-size="16" font-weight="800" fill="#f5a623">🦦</text>
+    </svg>
+  </a>
+  <nav class="topbar__nav">
+    <a class="topbar__link" href="#">Coach</a>
+    <a class="topbar__link" href="#">Training</a>
+    <a class="topbar__link" href="#">Techniques</a>
+    <a class="topbar__link" href="#">More</a>
+  </nav>
+  <div class="topbar__right">
+    <button class="topbar__cta">Get started – free</button>
+    <button class="topbar__icon-btn">🔍</button>
+    <button class="topbar__icon-btn">👤</button>
+  </div>
+</div>
+
+<!-- ===== DESKTOP ===== -->
+<div class="desktop">
+
+  <!-- Left icons -->
+  <div class="desktop-icons desktop-icons--left">
+    <a class="desktop-icon desktop-icon--active" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--chat">💬</div></div>
+      <span class="desktop-icon__label">coach.chat</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--folder">📁</div></div>
+      <span class="desktop-icon__label">techniques/</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--dashboard">📊</div></div>
+      <span class="desktop-icon__label">stats.dashboard</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--doc">📋</div></div>
+      <span class="desktop-icon__label">training.log</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--video">▶️</div></div>
+      <span class="desktop-icon__label">demo.mov</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--help">❓</div></div>
+      <span class="desktop-icon__label">Ask coach</span>
+    </a>
+  </div>
+
+  <!-- Right icons -->
+  <div class="desktop-icons desktop-icons--right">
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--focus">🎯</div></div>
+      <span class="desktop-icon__label">focus-plan.md</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--handbook">📖</div></div>
+      <span class="desktop-icon__label">BJJ handbook</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--belt">🥋</div></div>
+      <span class="desktop-icon__label">Belt progress</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--settings">⚙️</div></div>
+      <span class="desktop-icon__label">settings.cfg</span>
+    </a>
+    <a class="desktop-icon" href="#">
+      <div class="desktop-icon__img"><div class="icon-styled icon-styled--log">📅</div></div>
+      <span class="desktop-icon__label">Schedule</span>
+    </a>
+  </div>
+
+  <!-- ===== CHAT WINDOW (floating) ===== -->
+  <div class="retro-window" style="top: 64px; left: 130px; width: 480px; height: 520px;">
+    <div class="retro-window__titlebar">
+      <div class="retro-window__controls">
+        <div class="retro-window__dot retro-window__dot--close"></div>
+        <div class="retro-window__dot retro-window__dot--min"></div>
+        <div class="retro-window__dot retro-window__dot--max"></div>
+      </div>
+      <span class="retro-window__title">💬 coach.chat</span>
+    </div>
+    <div class="retro-window__content" style="display: flex; flex-direction: column;">
+      <div class="chat-messages" style="flex: 1;">
+        <div class="chat-msg chat-msg--coach">
+          <div class="chat-msg__avatar">🦦</div>
+          <div>
+            <div class="chat-msg__bubble chat-msg__bubble--coach">
+              Hey! Training today? I see you've got Wednesday as a regular day.
+            </div>
+            <div class="chat-msg__time">8:02 AM</div>
+          </div>
+        </div>
+
+        <div class="chat-msg chat-msg--user">
+          <div>
+            <div class="chat-msg__bubble chat-msg__bubble--user">
+              Yeah training tonight at 7
+            </div>
+            <div class="chat-msg__time" style="text-align: right;">8:15 AM</div>
+          </div>
+        </div>
+
+        <div class="chat-msg chat-msg--coach">
+          <div class="chat-msg__avatar">🦦</div>
+          <div>
+            <div class="chat-msg__bubble chat-msg__bubble--coach">
+              Quick focus for tonight — you haven't worked your butterfly sweep in 3 weeks. Try this: in half guard bottom, fight for the underhook early before they settle their weight. Get it, transition to butterfly, look for the sweep.
+            </div>
+            <div class="chat-msg__time">5:31 PM</div>
+          </div>
+        </div>
+
+        <div class="chat-msg chat-msg--user">
+          <div>
+            <div class="chat-msg__bubble chat-msg__bubble--user">
+              Makes sense. I keep getting flattened before I can do anything
+            </div>
+            <div class="chat-msg__time" style="text-align: right;">5:33 PM</div>
+          </div>
+        </div>
+
+        <div class="chat-msg chat-msg--coach">
+          <div class="chat-msg__avatar">🦦</div>
+          <div>
+            <div class="chat-msg__bubble chat-msg__bubble--coach">
+              Exactly — the underhook has to happen <em>before</em> they get chest-to-chest. Frame, space, underhook. That's the sequence. Good luck tonight 🤙
+            </div>
+            <div class="chat-msg__time">5:34 PM</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-replies">
+        <button class="quick-reply">Thanks!</button>
+        <button class="quick-reply">Got it</button>
+        <button class="quick-reply">Any video?</button>
+      </div>
+
+      <div class="chat-input-area">
+        <textarea class="chat-input" rows="1" placeholder="Type a message..."></textarea>
+        <button class="chat-send">↑</button>
+      </div>
+    </div>
+    <div class="retro-window__statusbar">
+      <span>🟢 Coach active</span>
+      <span>Pre-session briefing</span>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD WINDOW (floating, behind chat) ===== -->
+  <div class="retro-window" style="top: 80px; left: 640px; width: 340px;">
+    <div class="retro-window__titlebar">
+      <div class="retro-window__controls">
+        <div class="retro-window__dot retro-window__dot--close"></div>
+        <div class="retro-window__dot retro-window__dot--min"></div>
+        <div class="retro-window__dot retro-window__dot--max"></div>
+      </div>
+      <span class="retro-window__title">📊 stats.dashboard</span>
+    </div>
+    <div class="retro-window__content">
+      <div class="stat-grid">
+        <div class="stat-cell">
+          <div class="stat-cell__value">47</div>
+          <div class="stat-cell__label">Sessions</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__value" style="color: var(--color-accent);">3.2×</div>
+          <div class="stat-cell__label">Per Week</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__value">14</div>
+          <div class="stat-cell__label">Techniques</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__value">🔵</div>
+          <div class="stat-cell__label">Blue Belt</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== FOCUS WINDOW ===== -->
+  <div class="retro-window" style="top: 310px; left: 640px; width: 340px;">
+    <div class="retro-window__titlebar">
+      <div class="retro-window__controls">
+        <div class="retro-window__dot retro-window__dot--close"></div>
+        <div class="retro-window__dot retro-window__dot--min"></div>
+        <div class="retro-window__dot retro-window__dot--max"></div>
+      </div>
+      <span class="retro-window__title">🎯 focus-plan.md</span>
+    </div>
+    <div class="retro-window__content">
+      <div class="focus-section">
+        <div class="focus-section__title">Guard Retention Block</div>
+        <div class="focus-section__sub">Half guard bottom, butterfly guard, frames & recovery</div>
+        <div class="focus-section__meta">Week 2 of 4 · Started Jan 27</div>
+        <div class="progress-bar">
+          <div class="progress-bar__fill progress-bar__fill--accent" style="width: 50%;"></div>
+        </div>
+      </div>
+
+      <div style="border-top: var(--border-subtle);">
+        <div class="technique-row">
+          <span class="technique-row__name">Butterfly Sweep</span>
+          <span class="technique-row__type">sweep</span>
+          <div class="technique-row__bar">
+            <div class="progress-bar">
+              <div class="progress-bar__fill progress-bar__fill--danger" style="width: 35%;"></div>
+            </div>
+          </div>
+          <span class="technique-row__date">21d ago</span>
+        </div>
+        <div class="technique-row">
+          <span class="technique-row__name">Scissor Sweep</span>
+          <span class="technique-row__type">sweep</span>
+          <div class="technique-row__bar">
+            <div class="progress-bar">
+              <div class="progress-bar__fill progress-bar__fill--accent" style="width: 65%;"></div>
+            </div>
+          </div>
+          <span class="technique-row__date">14d ago</span>
+        </div>
+        <div class="technique-row">
+          <span class="technique-row__name">Underhook Recovery</span>
+          <span class="technique-row__type">escape</span>
+          <div class="technique-row__bar">
+            <div class="progress-bar">
+              <div class="progress-bar__fill progress-bar__fill--success" style="width: 80%;"></div>
+            </div>
+          </div>
+          <span class="technique-row__date">3d ago</span>
+        </div>
+      </div>
+    </div>
+    <div class="retro-window__statusbar">
+      <span>3 techniques due for review</span>
+    </div>
+  </div>
+
+  <!-- ===== OTTER MASCOT SCENE (bottom right) ===== -->
+  <div class="desktop-scene">
+    <svg viewBox="0 0 480 380" xmlns="http://www.w3.org/2000/svg">
+      <!-- Isometric dojo scene with otter -->
+
+      <!-- Mat / ground -->
+      <path d="M60 280 L240 200 L420 280 L240 360 Z" fill="#4a7c59" opacity="0.3"/>
+      <path d="M80 275 L240 205 L400 275 L240 345 Z" fill="#5a9a6a" opacity="0.25"/>
+
+      <!-- Mat lines -->
+      <path d="M160 240 L240 205 L320 240" stroke="#3d6b4a" stroke-width="0.5" fill="none" opacity="0.3"/>
+      <path d="M120 260 L240 210 L360 260" stroke="#3d6b4a" stroke-width="0.5" fill="none" opacity="0.3"/>
+
+      <!-- Wooden training post -->
+      <rect x="340" y="180" width="12" height="80" rx="2" fill="#8B6914" opacity="0.6"/>
+      <rect x="336" y="170" width="20" height="14" rx="3" fill="#a07828" opacity="0.5"/>
+      <rect x="338" y="240" width="16" height="4" rx="1" fill="#6B4F12" opacity="0.4"/>
+
+      <!-- Belt rack on post -->
+      <rect x="330" y="188" width="32" height="3" rx="1" fill="#6B4F12" opacity="0.5"/>
+      <rect x="332" y="192" width="5" height="8" rx="1" fill="#f0f0f0"/> <!-- white -->
+      <rect x="339" y="192" width="5" height="8" rx="1" fill="#3b82f6"/> <!-- blue -->
+      <rect x="346" y="192" width="5" height="8" rx="1" fill="#8b5cf6"/> <!-- purple -->
+      <rect x="353" y="192" width="5" height="8" rx="1" fill="#92400e"/> <!-- brown -->
+
+      <!-- Small plant -->
+      <ellipse cx="380" cy="290" rx="12" ry="6" fill="#4a7c59" opacity="0.3"/>
+      <path d="M380 290 Q378 275 372 268" stroke="#5a9a6a" stroke-width="2" fill="none" opacity="0.5"/>
+      <path d="M380 290 Q382 272 388 265" stroke="#5a9a6a" stroke-width="2" fill="none" opacity="0.5"/>
+      <path d="M380 290 Q380 278 380 270" stroke="#4a8a5a" stroke-width="2" fill="none" opacity="0.5"/>
+      <ellipse cx="372" cy="266" rx="5" ry="3" fill="#5a9a6a" opacity="0.4"/>
+      <ellipse cx="388" cy="263" rx="5" ry="3" fill="#5a9a6a" opacity="0.4"/>
+      <ellipse cx="380" cy="268" rx="4" ry="3" fill="#4a8a5a" opacity="0.4"/>
+
+      <!-- === OTTER COACH (center, standing on mat) === -->
+      <g transform="translate(220, 220)">
+        <!-- Shadow -->
+        <ellipse cx="0" cy="65" rx="22" ry="6" fill="rgba(0,0,0,0.1)"/>
+
+        <!-- Tail -->
+        <path d="M-12 50 Q-28 56 -32 68 Q-34 72 -30 70 Q-20 64 -8 54" fill="#7A5C2B" stroke="#5a4420" stroke-width="1"/>
+
+        <!-- Feet -->
+        <ellipse cx="-6" cy="62" rx="8" ry="4" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.8"/>
+        <ellipse cx="8" cy="62" rx="8" ry="4" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.8"/>
+
+        <!-- Gi pants -->
+        <rect x="-10" y="30" width="10" height="30" rx="4" fill="#f0ece4" stroke="#d4cfc5" stroke-width="0.8"/>
+        <rect x="2" y="30" width="10" height="30" rx="4" fill="#f0ece4" stroke="#d4cfc5" stroke-width="0.8"/>
+
+        <!-- Body / Gi top -->
+        <path d="M-14 -12 Q-16 25 -8 42 L10 42 Q18 25 16 -12 Z" fill="#f0ece4" stroke="#d4cfc5" stroke-width="1"/>
+
+        <!-- Gi lapel -->
+        <path d="M-2 -12 L-4 18 L1 42" fill="none" stroke="#d4cfc5" stroke-width="1"/>
+        <path d="M4 -12 L6 18 L1 42" fill="none" stroke="#d4cfc5" stroke-width="1"/>
+
+        <!-- Belly visible through gi -->
+        <path d="M-4 -6 Q1 -10 6 -6 L6 18 Q1 22 -4 18 Z" fill="#D4C4A0" opacity="0.4"/>
+
+        <!-- Belt -->
+        <rect x="-13" y="22" width="28" height="5" rx="2" fill="#8b5cf6"/>
+        <path d="M6 27 L2 36" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M6 27 L10 35" stroke="#8b5cf6" stroke-width="2.5" stroke-linecap="round"/>
+
+        <!-- Arms -->
+        <path d="M-14 -5 Q-24 2 -26 14 Q-27 17 -24 15 Q-20 10 -14 4" fill="#f0ece4" stroke="#d4cfc5" stroke-width="1"/>
+        <path d="M16 -5 Q26 2 28 14 Q29 17 26 15 Q22 10 16 4" fill="#f0ece4" stroke="#d4cfc5" stroke-width="1"/>
+
+        <!-- Paws -->
+        <ellipse cx="-25" cy="15" rx="5" ry="4" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.8"/>
+        <ellipse cx="27" cy="15" rx="5" ry="4" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.8"/>
+
+        <!-- Head (wide, flat, otter-shaped) -->
+        <ellipse cx="1" cy="-25" rx="22" ry="15" fill="#7A5C2B"/>
+
+        <!-- Tiny ears -->
+        <circle cx="-18" cy="-33" r="3.5" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.7"/>
+        <circle cx="-18" cy="-33" r="1.8" fill="#C8B488"/>
+        <circle cx="20" cy="-33" r="3.5" fill="#7A5C2B" stroke="#5a4420" stroke-width="0.7"/>
+        <circle cx="20" cy="-33" r="1.8" fill="#C8B488"/>
+
+        <!-- Face patch -->
+        <ellipse cx="1" cy="-20" rx="15" ry="10" fill="#C8B488"/>
+        <ellipse cx="1" cy="-18" rx="9" ry="6" fill="#D4C4A0"/>
+
+        <!-- Eyes -->
+        <ellipse cx="-6" cy="-26" rx="2.5" ry="3" fill="#2C1810"/>
+        <ellipse cx="8" cy="-26" rx="2.5" ry="3" fill="#2C1810"/>
+        <circle cx="-5" cy="-27" r="1" fill="white" opacity="0.7"/>
+        <circle cx="9" cy="-27" r="1" fill="white" opacity="0.7"/>
+
+        <!-- Eyebrows -->
+        <path d="M-9 -31 Q-6 -33 -3 -31" stroke="#5a4420" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+        <path d="M5 -31 Q8 -33 12 -30" stroke="#5a4420" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+        <!-- Nose -->
+        <ellipse cx="1" cy="-21" rx="3" ry="2" fill="#2C1810"/>
+
+        <!-- Smile -->
+        <path d="M-5 -16 Q1 -12 7 -16" stroke="#5a4420" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+        <!-- Whiskers -->
+        <line x1="-7" y1="-19" x2="-22" y2="-22" stroke="#5a4420" stroke-width="0.7" opacity="0.4"/>
+        <line x1="-7" y1="-17" x2="-23" y2="-17" stroke="#5a4420" stroke-width="0.7" opacity="0.4"/>
+        <line x1="9" y1="-19" x2="24" y2="-22" stroke="#5a4420" stroke-width="0.7" opacity="0.4"/>
+        <line x1="9" y1="-17" x2="25" y2="-17" stroke="#5a4420" stroke-width="0.7" opacity="0.4"/>
+      </g>
+
+      <!-- === SMALL OTTER (seated, watching) === -->
+      <g transform="translate(130, 268) scale(0.6)">
+        <ellipse cx="0" cy="25" rx="12" ry="5" fill="rgba(0,0,0,0.08)"/>
+        <!-- Simple seated body -->
+        <ellipse cx="0" cy="10" rx="10" ry="14" fill="#7A5C2B"/>
+        <!-- Belly -->
+        <ellipse cx="0" cy="12" rx="7" ry="10" fill="#D4C4A0"/>
+        <!-- Gi top hint -->
+        <path d="M-8 2 L-6 -5 L6 -5 L8 2" fill="#f0ece4" stroke="#d4cfc5" stroke-width="0.6"/>
+        <!-- Head -->
+        <ellipse cx="0" cy="-10" rx="12" ry="9" fill="#7A5C2B"/>
+        <ellipse cx="0" cy="-6" rx="8" ry="6" fill="#C8B488"/>
+        <!-- Eyes -->
+        <ellipse cx="-4" cy="-11" rx="2" ry="2.5" fill="#2C1810"/>
+        <ellipse cx="4" cy="-11" rx="2" ry="2.5" fill="#2C1810"/>
+        <circle cx="-3" cy="-12" r="0.8" fill="white" opacity="0.7"/>
+        <circle cx="5" cy="-12" r="0.8" fill="white" opacity="0.7"/>
+        <!-- Nose -->
+        <ellipse cx="0" cy="-7" rx="2" ry="1.3" fill="#2C1810"/>
+        <!-- Smile -->
+        <path d="M-3 -4 Q0 -1 3 -4" stroke="#5a4420" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+        <!-- Whiskers -->
+        <line x1="-5" y1="-6" x2="-14" y2="-8" stroke="#5a4420" stroke-width="0.5" opacity="0.3"/>
+        <line x1="5" y1="-6" x2="14" y2="-8" stroke="#5a4420" stroke-width="0.5" opacity="0.3"/>
+      </g>
+
+      <!-- Speech bubble from coach otter -->
+      <g transform="translate(260, 165)">
+        <rect x="0" y="0" width="80" height="30" rx="8" fill="rgba(245,166,35,0.15)" stroke="rgba(245,166,35,0.3)" stroke-width="1"/>
+        <path d="M15 30 L10 40 L25 30" fill="rgba(245,166,35,0.15)"/>
+        <text x="40" y="20" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="12" fill="#b8860b" font-weight="600">OSS! 🤙</text>
+      </g>
+    </svg>
+  </div>
+</div>
+
+</body>
+</html>

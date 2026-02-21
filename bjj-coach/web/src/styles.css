@@ -1,0 +1,138 @@
+:root {
+  /* Desktop & backgrounds */
+  --color-desktop: #f3efe6;
+  --color-desktop-darker: #e8e2d6;
+  --color-surface: #ffffff;
+  --color-surface-muted: #faf8f4;
+
+  /* Primary accent — warm orange */
+  --color-accent: #f5a623;
+  --color-accent-hover: #e09400;
+  --color-accent-text: #1a1a1a;
+
+  /* Secondary accent — deep navy */
+  --color-navy: #1d2433;
+  --color-navy-light: #2d3748;
+
+  /* Window chrome */
+  --color-titlebar: #e8e2d6;
+  --color-titlebar-text: #1a1a1a;
+  --color-titlebar-active: #f5a623;
+  --color-window-bg: #f0ece4;
+  --color-window-border: #c4bfb3;
+  --color-window-shadow: rgba(0,0,0,0.12);
+
+  /* Text */
+  --color-text: #1a1a1a;
+  --color-text-secondary: #5a5650;
+  --color-text-muted: #9b9589;
+  --color-text-inverse: #ffffff;
+
+  /* BJJ belt colors */
+  --color-belt-white: #f0ece4;
+  --color-belt-blue: #3b82f6;
+  --color-belt-purple: #8b5cf6;
+  --color-belt-brown: #92400e;
+  --color-belt-black: #1a1a1a;
+
+  /* Status */
+  --color-success: #22c55e;
+  --color-warning: #f5a623;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  /* Borders & shadows */
+  --border-subtle: 1px solid #d4cfc5;
+  --border-medium: 2px solid #c4bfb3;
+  --shadow-window: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
+  --shadow-window-active: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+
+  /* Typography */
+  --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
+  --font-display: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 15px;
+  --text-lg: 18px;
+  --text-xl: 24px;
+  --text-2xl: 32px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body.desktop {
+  font-family: var(--font-body);
+  color: var(--color-text);
+  background-color: var(--color-desktop);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Retro window base */
+.retro-window {
+  background: var(--color-surface);
+  border: var(--border-medium);
+  border-radius: 8px 8px 4px 4px;
+  box-shadow: var(--shadow-window);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.retro-window__titlebar {
+  background: var(--color-titlebar);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: var(--border-subtle);
+  user-select: none;
+}
+
+.retro-window__controls {
+  display: flex;
+  gap: 6px;
+}
+
+.retro-window__dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: filter 0.1s;
+}
+.retro-window__dot:hover { filter: brightness(0.9); }
+.retro-window__dot--close { background: #ef6b5e; }
+.retro-window__dot--minimize { background: #f5bf4f; }
+.retro-window__dot--maximize { background: #62c554; }
+
+.retro-window__title {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-titlebar-text);
+  flex: 1;
+}
+
+.retro-window__statusbar {
+  background: var(--color-desktop);
+  padding: 4px 12px;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  border-top: var(--border-subtle);
+}
+
+.retro-window__body {
+  flex: 1;
+  overflow: auto;
+}

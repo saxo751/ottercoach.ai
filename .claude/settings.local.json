@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C \"/Users/SaxoM/Desktop/martial arts pocket coach\" log --oneline --all)",
+      "Bash(node --version:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm view:*)",
+      "Bash(npm install)",
+      "Bash(npx tsx:*)",
+      "Bash(npx:*)"
+    ]
+  }
+}

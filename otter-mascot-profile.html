@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BJJ Coach Bot — Otter Mascot Concept v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --otter-brown: #7A5C2B;
+    --otter-mid: #9B7A3C;
+    --otter-belly: #D4C4A0;
+    --otter-face: #C8B488;
+    --otter-dark: #4A3618;
+    --otter-nose: #2C1810;
+    --gi-white: #F0EDE8;
+    --gi-shadow: #D8D2C8;
+    --belt-purple: #7B4BAA;
+    --belt-shadow: #5E3388;
+    --tape-white: #E8E4DC;
+    --bg: #1A1714;
+    --bg-card: #252119;
+    --bg-card-hover: #2E281F;
+    --text: #F5F0E8;
+    --text-muted: #9B8E7A;
+    --accent: #C4A24E;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  .page {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 60px 40px 80px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 72px;
+    animation: fadeUp 0.8s ease-out;
+  }
+
+  .header-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .header h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .header p {
+    color: var(--text-muted);
+    font-size: 17px;
+    max-width: 560px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .poses-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  .pose-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 32px 24px 24px;
+    text-align: center;
+    border: 1px solid rgba(196, 162, 78, 0.08);
+    transition: all 0.3s ease;
+    animation: fadeUp 0.8s ease-out both;
+  }
+
+  .pose-card:nth-child(1) { animation-delay: 0.1s; }
+  .pose-card:nth-child(2) { animation-delay: 0.2s; }
+  .pose-card:nth-child(3) { animation-delay: 0.3s; }
+
+  .pose-card:hover {
+    background: var(--bg-card-hover);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  .pose-card svg {
+    width: 220px;
+    height: 240px;
+    margin: 0 auto 20px;
+  }
+
+  .pose-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+
+  .pose-desc {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .specs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 64px;
+  }
+
+  .spec-card {
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 32px;
+    border: 1px solid rgba(196, 162, 78, 0.08);
+    animation: fadeUp 0.8s ease-out both;
+  }
+
+  .spec-card:nth-child(1) { animation-delay: 0.35s; }
+  .spec-card:nth-child(2) { animation-delay: 0.45s; }
+
+  .spec-card h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  .color-swatches {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .swatch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .swatch-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+
+  .swatch-info {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .swatch-name {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .swatch-hex {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  .trait-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .trait-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  .trait-icon {
+    color: var(--accent);
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .avatar-section {
+    animation: fadeUp 0.8s ease-out 0.55s both;
+  }
+
+  .avatar-section h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 24px;
+  }
+
+  .avatars {
+    display: flex;
+    align-items: end;
+    gap: 40px;
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 40px;
+    border: 1px solid rgba(196, 162, 78, 0.08);
+  }
+
+  .avatar-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .avatar-item svg {
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid rgba(196, 162, 78, 0.15);
+  }
+
+  .avatar-size {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: monospace;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    .poses-grid { grid-template-columns: 1fr; }
+    .specs { grid-template-columns: 1fr; }
+    .header h1 { font-size: 36px; }
+    .page { padding: 40px 20px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <span class="header-label">BJJ Coach Bot — v2</span>
+    <h1>Meet the Otter</h1>
+    <p>Updated with proper otter anatomy: wider flatter head, tiny ears low on the skull, prominent rounded muzzle with real whiskers, and a thick tapered tail. Less bear, more river creature in a gi.</p>
+  </div>
+
+  <div class="poses-grid">
+
+    <!-- Pose 1: Default standing -->
+    <div class="pose-card">
+      <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="beltShine" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="white"/>
+            <stop offset="100%" stop-color="transparent"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Shadow -->
+        <ellipse cx="110" cy="218" rx="42" ry="8" fill="rgba(0,0,0,0.2)"/>
+
+        <!-- Thick otter tail - tapered, slightly flat -->
+        <path d="M82 185 Q55 198 42 215 Q38 222 45 218 Q62 208 88 192" fill="#7A5C2B" stroke="#4A3618" stroke-width="1.5"/>
+        <!-- Tail thickness/flatness lines -->
+        <path d="M60 208 Q55 212 50 214" stroke="#6B4E22" stroke-width="1" fill="none" opacity="0.5"/>
+
+        <!-- Feet - slightly webbed look -->
+        <ellipse cx="92" cy="210" rx="15" ry="7" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <ellipse cx="128" cy="210" rx="15" ry="7" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <!-- Webbing lines on feet -->
+        <path d="M84 210 L80 214" stroke="#4A3618" stroke-width="0.7" opacity="0.4"/>
+        <path d="M88 210 L85 215" stroke="#4A3618" stroke-width="0.7" opacity="0.4"/>
+        <path d="M120 210 L117 215" stroke="#4A3618" stroke-width="0.7" opacity="0.4"/>
+        <path d="M124 210 L121 214" stroke="#4A3618" stroke-width="0.7" opacity="0.4"/>
+
+        <!-- Gi pants -->
+        <rect x="83" y="155" width="22" height="55" rx="8" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+        <rect x="115" y="155" width="22" height="55" rx="8" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+
+        <!-- Body / Gi top - slightly elongated (otters are long) -->
+        <path d="M78 92 Q75 150 86 175 L134 175 Q145 150 142 92 Z" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+
+        <!-- Gi lapel V -->
+        <path d="M104 92 L99 140 L110 175" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M116 92 L121 140 L110 175" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+
+        <!-- Belly patch visible through gi -->
+        <path d="M99 100 Q110 94 121 100 L121 140 Q110 148 99 140 Z" fill="#D4C4A0" opacity="0.5"/>
+
+        <!-- Belt -->
+        <rect x="80" y="142" width="60" height="8" rx="3" fill="#7B4BAA"/>
+        <rect x="80" y="142" width="60" height="8" rx="3" fill="url(#beltShine)" opacity="0.25"/>
+        <circle cx="118" cy="146" r="5" fill="#5E3388"/>
+        <path d="M118 151 L111 168" stroke="#7B4BAA" stroke-width="4" stroke-linecap="round"/>
+        <path d="M118 151 L125 166" stroke="#7B4BAA" stroke-width="4" stroke-linecap="round"/>
+
+        <!-- Arms (gi sleeves) -->
+        <path d="M78 100 Q58 112 52 132 Q50 138 56 135 Q65 128 75 120" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M142 100 Q162 112 168 132 Q170 138 164 135 Q155 128 145 120" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+
+        <!-- Paws - rounder, flatter -->
+        <ellipse cx="53" cy="134" rx="9" ry="7" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <ellipse cx="167" cy="134" rx="9" ry="7" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <!-- Tape on paws -->
+        <path d="M47 131 Q53 127 59 131" stroke="#E8E4DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M161 131 Q167 127 173 131" stroke="#E8E4DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+        <!-- HEAD - wider and flatter than v1, otter-shaped -->
+        <!-- Main head - wider ellipse, less tall -->
+        <ellipse cx="110" cy="68" rx="38" ry="26" fill="#7A5C2B"/>
+        <!-- Slight fur texture on top -->
+        <path d="M82 58 Q90 52 100 55" stroke="#6B4E22" stroke-width="0.8" fill="none" opacity="0.3"/>
+        <path d="M120 55 Q130 52 138 58" stroke="#6B4E22" stroke-width="0.8" fill="none" opacity="0.3"/>
+
+        <!-- Ears - tiny, round, low on the sides of head -->
+        <circle cx="76" cy="58" r="6" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <circle cx="76" cy="58" r="3" fill="#C8B488"/>
+        <circle cx="144" cy="58" r="6" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <circle cx="144" cy="58" r="3" fill="#C8B488"/>
+
+        <!-- Face/muzzle area - prominent, rounded, wider -->
+        <ellipse cx="110" cy="76" rx="24" ry="16" fill="#C8B488"/>
+        <!-- Muzzle bump - the rounded snout otters have -->
+        <ellipse cx="110" cy="80" rx="14" ry="9" fill="#D4C4A0"/>
+
+        <!-- Eyes - set wider apart on the flat head -->
+        <ellipse cx="95" cy="66" rx="4.5" ry="5" fill="#2C1810"/>
+        <ellipse cx="125" cy="66" rx="4.5" ry="5" fill="#2C1810"/>
+        <circle cx="97" cy="64" r="2" fill="white" opacity="0.8"/>
+        <circle cx="127" cy="64" r="2" fill="white" opacity="0.8"/>
+
+        <!-- Eyebrow raised (right) - signature smirk -->
+        <path d="M120 58 Q125 54 132 57" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M88 59 Q93 57 100 59" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- Nose - wider, rounder, more otter-like -->
+        <ellipse cx="110" cy="75" rx="5" ry="3.5" fill="#2C1810"/>
+        <ellipse cx="111.5" cy="74" rx="2" ry="1.2" fill="white" opacity="0.25"/>
+
+        <!-- Mouth / smirk -->
+        <path d="M101 83 Q110 88 119 83" stroke="#4A3618" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M119 83 Q121 81 122 82" stroke="#4A3618" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+        <!-- WHISKERS - prominent, real whiskers! -->
+        <line x1="88" y1="78" x2="65" y2="72" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+        <line x1="88" y1="81" x2="62" y2="79" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+        <line x1="88" y1="84" x2="66" y2="87" stroke="#4A3618" stroke-width="1" opacity="0.4"/>
+        <line x1="132" y1="78" x2="155" y2="72" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+        <line x1="132" y1="81" x2="158" y2="79" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+        <line x1="132" y1="84" x2="154" y2="87" stroke="#4A3618" stroke-width="1" opacity="0.4"/>
+      </svg>
+      <div class="pose-label">Default — Standing</div>
+      <div class="pose-desc">Wide flat head, tiny ears, big whiskers.<br>Confident smirk, tape on the paws.</div>
+    </div>
+
+    <!-- Pose 2: Playing Guard -->
+    <div class="pose-card">
+      <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
+        <!-- Mat -->
+        <rect x="15" y="180" width="190" height="30" rx="4" fill="#2a5a3a" opacity="0.25"/>
+
+        <!-- Thick tail poking out -->
+        <path d="M48 172 Q22 180 15 192 Q12 198 18 195 Q35 186 52 175" fill="#7A5C2B" stroke="#4A3618" stroke-width="1.5"/>
+        <path d="M25 188 Q20 192 17 193" stroke="#6B4E22" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+        <!-- Torso / Gi - lying back -->
+        <g transform="rotate(-10, 90, 148)">
+          <path d="M55 118 Q48 148 55 172 L125 172 Q132 148 125 118 Z" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+          <path d="M83 118 L80 150 L90 172" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+          <path d="M97 118 L100 150 L90 172" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+          <path d="M80 125 Q90 120 100 125 L100 150 Q90 156 80 150 Z" fill="#D4C4A0" opacity="0.5"/>
+          <rect x="56" y="150" width="56" height="7" rx="3" fill="#7B4BAA"/>
+          <path d="M94 157 L88 170" stroke="#7B4BAA" stroke-width="3.5" stroke-linecap="round"/>
+        </g>
+
+        <!-- Legs up (open guard) -->
+        <path d="M72 165 Q58 140 72 122 Q78 115 80 122" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M115 162 Q138 145 155 130 Q160 126 157 132" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+
+        <!-- Feet with webbing -->
+        <ellipse cx="77" cy="120" rx="11" ry="6" fill="#7A5C2B" stroke="#4A3618" stroke-width="1" transform="rotate(-25, 77, 120)"/>
+        <ellipse cx="157" cy="128" rx="11" ry="6" fill="#7A5C2B" stroke="#4A3618" stroke-width="1" transform="rotate(20, 157, 128)"/>
+        <path d="M70 120 L67 124" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+        <path d="M150 128 L147 132" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+
+        <!-- Arms reaching up (framing) -->
+        <path d="M58 125 Q40 108 42 90 Q42 84 47 90 Q52 100 60 112" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M125 122 Q148 108 162 96 Q166 93 164 98 Q158 108 142 118" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+
+        <!-- Paws -->
+        <ellipse cx="44" cy="88" rx="8" ry="6.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <ellipse cx="163" cy="95" rx="8" ry="6.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <path d="M38 86 Q44 82 50 86" stroke="#E8E4DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M157 93 Q163 89 169 93" stroke="#E8E4DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- HEAD - wide flat otter head, tilted back -->
+        <g transform="rotate(-12, 78, 100)">
+          <ellipse cx="78" cy="100" rx="35" ry="24" fill="#7A5C2B"/>
+          <!-- Tiny ears -->
+          <circle cx="49" cy="88" r="5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+          <circle cx="49" cy="88" r="2.5" fill="#C8B488"/>
+          <circle cx="107" cy="85" r="5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+          <circle cx="107" cy="85" r="2.5" fill="#C8B488"/>
+          <!-- Face -->
+          <ellipse cx="78" cy="107" rx="22" ry="14" fill="#C8B488"/>
+          <ellipse cx="78" cy="110" rx="13" ry="8" fill="#D4C4A0"/>
+          <!-- Eyes - focused -->
+          <ellipse cx="66" cy="97" rx="4" ry="4.5" fill="#2C1810"/>
+          <ellipse cx="91" cy="96" rx="4" ry="4.5" fill="#2C1810"/>
+          <circle cx="68" cy="95" r="1.5" fill="white" opacity="0.8"/>
+          <circle cx="93" cy="94" r="1.5" fill="white" opacity="0.8"/>
+          <!-- Focused brows -->
+          <path d="M61 91 Q66 88 72 90" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M86 90 Q91 88 97 91" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Nose -->
+          <ellipse cx="78" cy="105" rx="4.5" ry="3" fill="#2C1810"/>
+          <!-- Grin -->
+          <path d="M70 113 Q78 118 87 113" stroke="#4A3618" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <!-- Whiskers -->
+          <line x1="62" y1="108" x2="40" y2="103" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="62" y1="111" x2="38" y2="110" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="62" y1="114" x2="41" y2="117" stroke="#4A3618" stroke-width="0.9" opacity="0.4"/>
+          <line x1="94" y1="107" x2="116" y2="102" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="94" y1="110" x2="118" y2="109" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="94" y1="113" x2="115" y2="116" stroke="#4A3618" stroke-width="0.9" opacity="0.4"/>
+        </g>
+      </svg>
+      <div class="pose-label">Playing Guard</div>
+      <div class="pose-desc">On the back, legs active, arms framing.<br>Focused grin — right where they want to be.</div>
+    </div>
+
+    <!-- Pose 3: Thumbs up / OSS -->
+    <div class="pose-card">
+      <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
+        <!-- Speech bubble -->
+        <rect x="128" y="28" width="72" height="34" rx="12" fill="rgba(196,162,78,0.12)"/>
+        <path d="M143 62 L138 72 L152 62" fill="rgba(196,162,78,0.12)"/>
+        <text x="164" y="50" text-anchor="middle" font-family="DM Sans, sans-serif" font-size="14" fill="#C4A24E" font-weight="500">OSS!</text>
+
+        <!-- Shadow -->
+        <ellipse cx="100" cy="220" rx="38" ry="7" fill="rgba(0,0,0,0.2)"/>
+
+        <!-- Thick tail -->
+        <path d="M72 188 Q42 200 35 215 Q32 222 38 218 Q55 208 78 194" fill="#7A5C2B" stroke="#4A3618" stroke-width="1.5"/>
+        <path d="M45 210 Q40 214 37 216" stroke="#6B4E22" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+        <!-- Feet -->
+        <ellipse cx="85" cy="212" rx="14" ry="6.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <ellipse cx="118" cy="212" rx="14" ry="6.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <path d="M78 212 L75 216" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+        <path d="M82 212 L80 217" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+        <path d="M111 212 L109 217" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+        <path d="M115 212 L113 216" stroke="#4A3618" stroke-width="0.6" opacity="0.4"/>
+
+        <!-- Gi pants -->
+        <rect x="76" y="157" width="20" height="52" rx="7" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+        <rect x="107" y="157" width="20" height="52" rx="7" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+
+        <!-- Body / Gi -->
+        <path d="M70 95 Q67 152 78 175 L125 175 Q136 152 133 95 Z" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M96 95 L93 140 L101 175" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M107 95 L110 140 L101 175" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+        <path d="M93 102 Q101 96 110 102 L110 140 Q101 148 93 140 Z" fill="#D4C4A0" opacity="0.5"/>
+
+        <!-- Belt -->
+        <rect x="72" y="144" width="58" height="7" rx="3" fill="#7B4BAA"/>
+        <path d="M108 151 L102 166" stroke="#7B4BAA" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M108 151 L114 164" stroke="#7B4BAA" stroke-width="3.5" stroke-linecap="round"/>
+
+        <!-- Left arm -->
+        <path d="M70 103 Q52 114 46 132 Q44 137 50 134 Q59 128 68 120" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <ellipse cx="47" cy="133" rx="8" ry="6.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <path d="M41 131 Q47 127 53 131" stroke="#E8E4DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- Right arm (thumbs up!) -->
+        <path d="M133 103 Q152 92 158 78 Q160 73 155 76 Q148 84 140 98" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+        <ellipse cx="158" cy="75" rx="8" ry="7" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <!-- Thumb -->
+        <path d="M156 67 Q157 58 159 54" stroke="#7A5C2B" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M156 67 Q157 58 159 54" stroke="#4A3618" stroke-width="1" stroke-linecap="round" fill="none"/>
+        <path d="M152 73 Q158 69 164 73" stroke="#E8E4DC" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+        <!-- HEAD - wide flat otter -->
+        <ellipse cx="101" cy="72" rx="36" ry="25" fill="#7A5C2B"/>
+
+        <!-- Tiny ears low on head -->
+        <circle cx="70" cy="60" r="5.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <circle cx="70" cy="60" r="2.8" fill="#C8B488"/>
+        <circle cx="132" cy="60" r="5.5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+        <circle cx="132" cy="60" r="2.8" fill="#C8B488"/>
+
+        <!-- Face patch -->
+        <ellipse cx="101" cy="79" rx="23" ry="15" fill="#C8B488"/>
+        <ellipse cx="101" cy="82" rx="13" ry="8.5" fill="#D4C4A0"/>
+
+        <!-- Eyes (happy squint) -->
+        <path d="M87 67 Q91 62 95 67" stroke="#2C1810" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M108 67 Q112 62 116 67" stroke="#2C1810" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+        <!-- Nose -->
+        <ellipse cx="101" cy="77" rx="4.5" ry="3" fill="#2C1810"/>
+
+        <!-- Big happy smile -->
+        <path d="M91 85 Q101 92 111 85" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M96 86 Q101 89 106 86" stroke="#F0EDE8" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+        <!-- Whiskers -->
+        <line x1="85" y1="80" x2="62" y2="74" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+        <line x1="85" y1="83" x2="60" y2="82" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+        <line x1="85" y1="86" x2="63" y2="89" stroke="#4A3618" stroke-width="0.9" opacity="0.4"/>
+        <line x1="117" y1="80" x2="140" y2="74" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+        <line x1="117" y1="83" x2="142" y2="82" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+        <line x1="117" y1="86" x2="139" y2="89" stroke="#4A3618" stroke-width="0.9" opacity="0.4"/>
+      </svg>
+      <div class="pose-label">Thumbs Up — "Oss!"</div>
+      <div class="pose-desc">Happy coaching mode. Squinty smile,<br>big whiskers. The chat avatar energy.</div>
+    </div>
+  </div>
+
+  <!-- Specs -->
+  <div class="specs">
+    <div class="spec-card">
+      <h3>Color Palette</h3>
+      <div class="color-swatches">
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #7A5C2B;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Otter Brown</span>
+            <span class="swatch-hex">#7A5C2B</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #C8B488;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Face Patch</span>
+            <span class="swatch-hex">#C8B488</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #D4C4A0;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Muzzle / Belly</span>
+            <span class="swatch-hex">#D4C4A0</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #4A3618;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Dark Details</span>
+            <span class="swatch-hex">#4A3618</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #F0EDE8;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Gi White</span>
+            <span class="swatch-hex">#F0EDE8</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-circle" style="background: #7B4BAA;"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">Purple Belt</span>
+            <span class="swatch-hex">#7B4BAA</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="spec-card">
+      <h3>What Changed (v1 → v2)</h3>
+      <ul class="trait-list">
+        <li><span class="trait-icon">◆</span> Head is wider and flatter — otter skull shape, not round bear head</li>
+        <li><span class="trait-icon">◆</span> Ears are tiny circles, set low on the sides of the skull</li>
+        <li><span class="trait-icon">◆</span> Prominent rounded muzzle — the snout bump otters have</li>
+        <li><span class="trait-icon">◆</span> Real whiskers radiating from the muzzle, 3 per side</li>
+        <li><span class="trait-icon">◆</span> Wider, flatter nose (not a small bear button nose)</li>
+        <li><span class="trait-icon">◆</span> Tail is thick and tapered — otter rudder tail, not thin</li>
+        <li><span class="trait-icon">◆</span> Webbing hints on the feet</li>
+        <li><span class="trait-icon">◆</span> Eyes set wider apart on the flat head</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Avatar sizes -->
+  <div class="avatar-section">
+    <h2>Avatar Scales</h2>
+    <div class="avatars">
+      <div class="avatar-item">
+        <svg viewBox="0 0 120 120" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="56" fill="#252119"/>
+          <!-- Wide flat otter head -->
+          <ellipse cx="60" cy="58" rx="35" ry="24" fill="#7A5C2B"/>
+          <!-- Tiny ears -->
+          <circle cx="30" cy="44" r="5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+          <circle cx="30" cy="44" r="2.5" fill="#C8B488"/>
+          <circle cx="90" cy="44" r="5" fill="#7A5C2B" stroke="#4A3618" stroke-width="1"/>
+          <circle cx="90" cy="44" r="2.5" fill="#C8B488"/>
+          <!-- Face -->
+          <ellipse cx="60" cy="65" rx="22" ry="14" fill="#C8B488"/>
+          <ellipse cx="60" cy="68" rx="13" ry="8" fill="#D4C4A0"/>
+          <!-- Eyes -->
+          <ellipse cx="48" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <ellipse cx="72" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <circle cx="50" cy="53" r="1.5" fill="white" opacity="0.8"/>
+          <circle cx="74" cy="53" r="1.5" fill="white" opacity="0.8"/>
+          <!-- Raised brow -->
+          <path d="M67 48 Q72 45 78 48" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <!-- Nose -->
+          <ellipse cx="60" cy="63" rx="4.5" ry="3" fill="#2C1810"/>
+          <!-- Smirk -->
+          <path d="M52 72 Q60 77 68 72" stroke="#4A3618" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <path d="M68 72 Q70 70 71 71" stroke="#4A3618" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          <!-- Whiskers -->
+          <line x1="44" y1="66" x2="25" y2="62" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="44" y1="69" x2="23" y2="68" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="76" y1="66" x2="95" y2="62" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="76" y1="69" x2="97" y2="68" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <!-- Gi collar -->
+          <path d="M38" y="82" Q60 92 82 82" stroke="#F0EDE8" stroke-width="3" fill="none" stroke-linecap="round"/>
+        </svg>
+        <span class="avatar-size">120 × 120</span>
+      </div>
+
+      <div class="avatar-item">
+        <svg viewBox="0 0 120 120" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="56" fill="#252119"/>
+          <ellipse cx="60" cy="58" rx="35" ry="24" fill="#7A5C2B"/>
+          <circle cx="30" cy="44" r="5" fill="#7A5C2B"/>
+          <circle cx="90" cy="44" r="5" fill="#7A5C2B"/>
+          <ellipse cx="60" cy="65" rx="22" ry="14" fill="#C8B488"/>
+          <ellipse cx="60" cy="68" rx="13" ry="8" fill="#D4C4A0"/>
+          <ellipse cx="48" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <ellipse cx="72" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <circle cx="50" cy="53" r="1.5" fill="white" opacity="0.8"/>
+          <circle cx="74" cy="53" r="1.5" fill="white" opacity="0.8"/>
+          <ellipse cx="60" cy="63" rx="4.5" ry="3" fill="#2C1810"/>
+          <path d="M52 72 Q60 77 68 72" stroke="#4A3618" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+          <line x1="44" y1="66" x2="25" y2="62" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="44" y1="69" x2="23" y2="68" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="76" y1="66" x2="95" y2="62" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+          <line x1="76" y1="69" x2="97" y2="68" stroke="#4A3618" stroke-width="0.9" opacity="0.5"/>
+        </svg>
+        <span class="avatar-size">64 × 64</span>
+      </div>
+
+      <div class="avatar-item">
+        <svg viewBox="0 0 120 120" width="40" height="40" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="56" fill="#252119"/>
+          <ellipse cx="60" cy="58" rx="35" ry="24" fill="#7A5C2B"/>
+          <circle cx="32" cy="44" r="4.5" fill="#7A5C2B"/>
+          <circle cx="88" cy="44" r="4.5" fill="#7A5C2B"/>
+          <ellipse cx="60" cy="65" rx="21" ry="13" fill="#C8B488"/>
+          <ellipse cx="60" cy="68" rx="12" ry="7" fill="#D4C4A0"/>
+          <ellipse cx="48" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <ellipse cx="72" cy="55" rx="4" ry="4.5" fill="#2C1810"/>
+          <circle cx="50" cy="53" r="1.5" fill="white" opacity="0.7"/>
+          <circle cx="74" cy="53" r="1.5" fill="white" opacity="0.7"/>
+          <ellipse cx="60" cy="63" rx="4" ry="2.8" fill="#2C1810"/>
+          <path d="M52 72 Q60 77 68 72" stroke="#4A3618" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <line x1="44" y1="67" x2="28" y2="63" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+          <line x1="76" y1="67" x2="92" y2="63" stroke="#4A3618" stroke-width="1" opacity="0.5"/>
+        </svg>
+        <span class="avatar-size">40 × 40</span>
+      </div>
+
+      <div class="avatar-item">
+        <svg viewBox="0 0 120 120" width="24" height="24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="60" r="56" fill="#252119"/>
+          <ellipse cx="60" cy="58" rx="34" ry="23" fill="#7A5C2B"/>
+          <ellipse cx="60" cy="66" rx="20" ry="13" fill="#C8B488"/>
+          <ellipse cx="48" cy="55" rx="4.5" ry="5" fill="#2C1810"/>
+          <ellipse cx="72" cy="55" rx="4.5" ry="5" fill="#2C1810"/>
+          <ellipse cx="60" cy="63" rx="4" ry="2.8" fill="#2C1810"/>
+        </svg>
+        <span class="avatar-size">24 × 24</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
