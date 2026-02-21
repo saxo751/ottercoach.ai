@@ -33,6 +33,12 @@ export function createUserChannel(
   ).get(userId, platform) as UserChannel;
 }
 
+export function getPrimaryChannel(db: Database.Database, userId: string): UserChannel | undefined {
+  return db.prepare(
+    'SELECT * FROM user_channels WHERE user_id = ? ORDER BY is_primary DESC LIMIT 1'
+  ).get(userId) as UserChannel | undefined;
+}
+
 /** Find existing user by platform ID, or create a new user + channel mapping. */
 export function findOrCreateUser(
   db: Database.Database,

@@ -3,12 +3,15 @@ import { createServer } from 'http';
 import express from 'express';
 import apiRouter from './api/router.js';
 import { createDashboardRouter } from './api/routes/dashboard.js';
+import { createAuthRouter } from './api/routes/auth.js';
+import { createIdeasRouter } from './api/routes/ideas.js';
 import { initDatabase } from './db/database.js';
 import { createAIProvider } from './ai/factory.js';
 import { ChannelManager } from './channels/manager.js';
 import { TelegramAdapter } from './channels/telegram.js';
 import { WebAdapter } from './channels/web.js';
 import { CoachingEngine } from './core/engine.js';
+import { Scheduler } from './scheduler/scheduler.js';
 import { seedTechniqueLibrary } from './db/seed/techniqueLibrary.js';
 
 const PORT = parseInt(process.env.WEB_PORT || '3000', 10);
@@ -30,12 +33,19 @@ async function main() {
   // CORS for Angular dev server
   app.use((_req, res, next) => {
     res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Content-Type');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    if (_req.method === 'OPTIONS') {
+      res.sendStatus(204);
+      return;
+    }
     next();
   });
 
   app.use('/api', apiRouter);
+  app.use('/api/auth', createAuthRouter(db));
   app.use('/api/dashboard', createDashboardRouter(db));
+  app.use('/api/ideas', createIdeasRouter(db));
 
   const server = createServer(app);
 
@@ -56,7 +66,11 @@ async function main() {
   const engine = new CoachingEngine(db, ai, channelManager);
   engine.start();
 
-  // 6. Start channel adapters (begins listening for messages)
+  // 6. Scheduler (pre-session briefings + post-session debriefs)
+  const scheduler = new Scheduler(db, ai, channelManager);
+  scheduler.start();
+
+  // 7. Start channel adapters (begins listening for messages)
   await channelManager.startAll();
 
   server.listen(PORT, () => {
@@ -68,6 +82,7 @@ async function main() {
   // Graceful shutdown
   const shutdown = async () => {
     console.log('\n[shutdown] Shutting down...');
+    scheduler.stop();
     await channelManager.stopAll();
     server.close();
     db.close();

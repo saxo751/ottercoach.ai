@@ -223,3 +223,94 @@ ${buildPositionsSection(positions)}
 ${buildTechniquesSection(techniques)}
 ${buildSessionsSection(recentSessions)}`;
 }
+
+// ── Pre-Session Briefing prompt ────────────────────────────────────────────
+
+export interface BriefingContext {
+  user: User;
+  positions: Position[];
+  techniques: Technique[];
+  recentSessions: TrainingSession[];
+  activeFocus: FocusPeriod | undefined;
+  goals: Goal[];
+}
+
+export function buildBriefingPrompt(ctx: BriefingContext): string {
+  const { user, positions, techniques, recentSessions, activeFocus, goals } = ctx;
+
+  return `${COACH_PERSONA}
+
+## Current Mode: PRE-SESSION BRIEFING
+
+You're reaching out to your student before their training session today. This is a proactive message — they didn't text you first.
+
+Your message should:
+1. Ask if they're training today (keep it natural, not robotic)
+2. Tell them what to focus on based on their current focus area, goals, and skill gaps
+3. Briefly remind them of their last session — what went well or what they were struggling with
+4. Keep it to 2-4 sentences total. This is a quick text before training, not a lecture.
+
+If they respond saying they're not training today, be supportive — rest days matter too.
+If they respond with questions or want to discuss the plan, help them naturally.
+
+${buildProfileSection(user)}
+${buildGoalsSection(goals)}
+${buildFocusPeriodSection(activeFocus)}
+${buildPositionsSection(positions)}
+${buildTechniquesSection(techniques)}
+${buildSessionsSection(recentSessions)}`;
+}
+
+// ── Post-Session Debrief prompt ────────────────────────────────────────────
+
+export interface DebriefContext {
+  user: User;
+  positions: Position[];
+  techniques: Technique[];
+  recentSessions: TrainingSession[];
+  activeFocus: FocusPeriod | undefined;
+  goals: Goal[];
+}
+
+export function buildDebriefPrompt(ctx: DebriefContext): string {
+  const { user, positions, techniques, recentSessions, activeFocus, goals } = ctx;
+
+  return `${COACH_PERSONA}
+
+## Current Mode: POST-SESSION DEBRIEF
+
+You're checking in with your student after their training session. This is a proactive message — they didn't text you first.
+
+Your job:
+1. Ask how training went — keep it casual and warm
+2. Follow up on specifics: what positions they worked, techniques they tried, what clicked and what was hard
+3. If they mention new things they learned, take note
+4. Be encouraging but also honest — if they mention struggles, help them see the path forward
+
+This is a multi-turn conversation. Keep asking follow-up questions until you have a clear picture of their session. Don't try to extract everything in one message.
+
+After EVERY response, you MUST append a data block. Write your conversational response first, then add:
+
+---DATA---
+{
+  "session_type": "gi/nogi/open_mat/competition/private or null",
+  "duration_minutes": number or null,
+  "positions_worked": "description or null",
+  "techniques_worked": "description or null",
+  "wins": "what went well or null",
+  "struggles": "what was hard or null",
+  "new_techniques_learned": "any new moves or null",
+  "debrief_complete": false
+}
+
+Set debrief_complete to true ONLY when you feel you have a reasonable picture of their session (at minimum: what they worked on and how it went). Don't rush — it's okay to chat for a few messages.
+
+Only include fields you learned NEW information about. Use null for unknown fields. Always include debrief_complete.
+
+${buildProfileSection(user)}
+${buildGoalsSection(goals)}
+${buildFocusPeriodSection(activeFocus)}
+${buildPositionsSection(positions)}
+${buildTechniquesSection(techniques)}
+${buildSessionsSection(recentSessions)}`;
+}

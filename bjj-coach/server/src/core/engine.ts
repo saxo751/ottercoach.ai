@@ -8,6 +8,8 @@ import { getUserById, setConversationMode } from '../db/queries/users.js';
 import { addMessage } from '../db/queries/conversations.js';
 import { handleOnboarding } from './handlers/onboarding.js';
 import { handleFreeChat } from './handlers/freeChat.js';
+import { handleBriefing } from './handlers/briefing.js';
+import { handleDebrief } from './handlers/debrief.js';
 
 export class CoachingEngine {
   constructor(
@@ -65,11 +67,16 @@ export class CoachingEngine {
           response = await handleFreeChat(this.db, this.ai, currentUser, text);
           break;
 
-        // Stub future modes to free chat for now
         case CONVERSATION_MODES.CHECK_IN:
-        case CONVERSATION_MODES.BRIEFING:
-        case CONVERSATION_MODES.DEBRIEF:
           response = await handleFreeChat(this.db, this.ai, currentUser, text);
+          break;
+
+        case CONVERSATION_MODES.BRIEFING:
+          response = await handleBriefing(this.db, this.ai, currentUser, text);
+          break;
+
+        case CONVERSATION_MODES.DEBRIEF:
+          response = await handleDebrief(this.db, this.ai, currentUser, text);
           break;
 
         default:

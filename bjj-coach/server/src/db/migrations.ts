@@ -160,6 +160,90 @@ const migrations: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_technique_library_subcategory ON technique_library(subcategory);
     `,
   },
+  {
+    version: 4,
+    description: 'Add description column to technique library',
+    up: `
+      ALTER TABLE technique_library ADD COLUMN description TEXT;
+    `,
+  },
+  {
+    version: 5,
+    description: 'Add email to users and create magic_link_tokens table',
+    up: `
+      ALTER TABLE users ADD COLUMN email TEXT;
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL;
+
+      CREATE TABLE IF NOT EXISTS magic_link_tokens (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        token TEXT NOT NULL UNIQUE,
+        expires_at TEXT NOT NULL,
+        used INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_magic_link_tokens_token ON magic_link_tokens(token);
+      CREATE INDEX IF NOT EXISTS idx_magic_link_tokens_user ON magic_link_tokens(user_id);
+    `,
+  },
+  {
+    version: 6,
+    description: 'Add password_hash column to users',
+    up: `
+      ALTER TABLE users ADD COLUMN password_hash TEXT;
+    `,
+  },
+  {
+    version: 7,
+    description: 'Add scheduling tracking columns to users',
+    up: `
+      ALTER TABLE users ADD COLUMN last_scheduled_action TEXT;
+      ALTER TABLE users ADD COLUMN last_scheduled_date TEXT;
+    `,
+  },
+  {
+    version: 8,
+    description: 'Create feature ideas, votes, and comments tables',
+    up: `
+      CREATE TABLE IF NOT EXISTS feature_ideas (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        title TEXT NOT NULL,
+        description TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'open',
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS feature_idea_votes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        idea_id INTEGER NOT NULL,
+        user_id TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        UNIQUE(idea_id, user_id),
+        FOREIGN KEY (idea_id) REFERENCES feature_ideas(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE TABLE IF NOT EXISTS feature_idea_comments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        idea_id INTEGER NOT NULL,
+        user_id TEXT NOT NULL,
+        content TEXT NOT NULL,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (idea_id) REFERENCES feature_ideas(id) ON DELETE CASCADE,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_feature_ideas_user ON feature_ideas(user_id);
+      CREATE INDEX IF NOT EXISTS idx_feature_ideas_status ON feature_ideas(status);
+      CREATE INDEX IF NOT EXISTS idx_feature_idea_votes_idea ON feature_idea_votes(idea_id);
+      CREATE INDEX IF NOT EXISTS idx_feature_idea_comments_idea ON feature_idea_comments(idea_id);
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

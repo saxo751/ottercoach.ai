@@ -76,12 +76,12 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod } from '..
       display: flex;
       justify-content: center;
       padding: 24px 16px;
-      min-height: 100vh;
+      min-height: calc(100vh - 52px);
     }
     .dashboard-window {
       width: 100%;
       max-width: 720px;
-      min-height: calc(100vh - 48px);
+      min-height: calc(100vh - 52px - 48px);
     }
     .dashboard-body {
       padding: 20px;

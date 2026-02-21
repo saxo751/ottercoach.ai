@@ -1,5 +1,6 @@
 export interface User {
   id: string;
+  email: string | null;
   name: string | null;
   belt_rank: string | null;
   experience_months: number | null;
@@ -87,6 +88,7 @@ export interface LibraryTechnique {
   starting_position: string;
   youtube_url: string | null;
   youtube_search_url: string;
+  description: string | null;
   created_at: string;
 }
 
@@ -99,4 +101,27 @@ export interface ChatMessage {
 export interface Button {
   label: string;
   data: string;
+}
+
+export interface FeatureIdea {
+  id: number;
+  user_id: string;
+  title: string;
+  description: string;
+  status: string;
+  author_name: string | null;
+  vote_count: number;
+  comment_count: number;
+  user_has_voted: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeatureIdeaComment {
+  id: number;
+  idea_id: number;
+  user_id: string;
+  author_name: string | null;
+  content: string;
+  created_at: string;
 }

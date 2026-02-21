@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import type Database from 'better-sqlite3';
 import { findUserByPlatformId } from '../../db/queries/channels.js';
+import { verifyToken } from '../../utils/jwt.js';
+import { getUserById, updateUser } from '../../db/queries/users.js';
 import { getPositionsByUserId } from '../../db/queries/positions.js';
 import { getTechniquesByUserId } from '../../db/queries/techniques.js';
 import { getRecentSessionsByUserId } from '../../db/queries/sessions.js';
@@ -28,27 +30,79 @@ export function createDashboardRouter(db: Database.Database): Router {
 
   // --- Authenticated routes ---
 
-  // Middleware: resolve session ID → user
+  // Middleware: resolve user via JWT (preferred) or legacy session ID fallback
   router.use((req, res, next) => {
+    // Try JWT first
+    const authHeader = req.headers.authorization;
+    if (authHeader?.startsWith('Bearer ')) {
+      const payload = verifyToken(authHeader.slice(7));
+      if (payload) {
+        const user = getUserById(db, payload.userId);
+        if (user) {
+          (req as any).userId = user.id;
+          (req as any).user = user;
+          return next();
+        }
+      }
+      res.status(401).json({ error: 'Invalid token' });
+      return;
+    }
+
+    // Fallback to legacy session ID
     const sid = req.query.sid as string;
-    if (!sid) {
-      res.status(400).json({ error: 'Missing sid query parameter' });
-      return;
+    if (sid) {
+      const user = findUserByPlatformId(db, 'web', sid);
+      if (user) {
+        (req as any).userId = user.id;
+        (req as any).user = user;
+        return next();
+      }
     }
 
-    const user = findUserByPlatformId(db, 'web', sid);
-    if (!user) {
-      res.status(404).json({ error: 'User not found' });
-      return;
-    }
-
-    (req as any).userId = user.id;
-    (req as any).user = user;
-    next();
+    res.status(401).json({ error: 'Authentication required' });
   });
 
   router.get('/profile', (req, res) => {
     res.json((req as any).user);
+  });
+
+  router.put('/profile', (req, res) => {
+    const userId = (req as any).userId as string;
+    const body = req.body || {};
+
+    const allowed = [
+      'name', 'email', 'belt_rank', 'experience_months', 'preferred_game_style',
+      'training_days', 'typical_training_time', 'injuries_limitations',
+      'current_focus_area', 'goals', 'timezone',
+    ];
+
+    const fields: Record<string, unknown> = {};
+    for (const key of allowed) {
+      if (key in body) {
+        fields[key] = body[key];
+      }
+    }
+
+    if ('name' in fields && (typeof fields.name !== 'string' || !(fields.name as string).trim())) {
+      res.status(400).json({ error: 'Name must be a non-empty string' });
+      return;
+    }
+
+    if ('email' in fields) {
+      if (typeof fields.email !== 'string' || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fields.email as string)) {
+        res.status(400).json({ error: 'Invalid email address' });
+        return;
+      }
+    }
+
+    if (Object.keys(fields).length === 0) {
+      res.status(400).json({ error: 'No valid fields provided' });
+      return;
+    }
+
+    updateUser(db, userId, fields);
+    const updated = getUserById(db, userId);
+    res.json(updated);
   });
 
   router.get('/sessions', (req, res) => {

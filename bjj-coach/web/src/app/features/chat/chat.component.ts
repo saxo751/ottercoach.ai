@@ -79,12 +79,12 @@ import type { ChatMessage, Button } from '../../shared/models';
       display: flex;
       justify-content: center;
       padding: 24px 16px;
-      min-height: 100vh;
+      min-height: calc(100vh - 52px);
     }
     .chat-window {
       width: 100%;
       max-width: 680px;
-      height: calc(100vh - 48px);
+      height: calc(100vh - 52px - 48px);
     }
     .messages {
       flex: 1;

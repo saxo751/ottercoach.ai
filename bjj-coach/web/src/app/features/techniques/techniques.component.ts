@@ -107,36 +107,50 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
               </button>
 
               <div class="group-body" *ngIf="group.expanded">
-                <div *ngFor="let t of group.techniques" class="technique-card">
-                  <div class="technique-info">
-                    <span class="technique-position">{{ t.starting_position }}</span>
-                  </div>
-                  <div class="technique-actions">
+                <div *ngFor="let t of group.techniques" class="technique-card" [class.technique-card--expanded]="expandedTechniqueId === t.id">
+                  <div class="technique-row">
                     <button
-                      *ngIf="t.youtube_url"
-                      class="btn-video btn-video--curated"
-                      (click)="playVideo(t)"
-                      title="Watch curated tutorial"
+                      class="technique-info"
+                      (click)="toggleDescription(t)"
+                      [class.technique-info--has-desc]="!!t.description"
                     >
-                      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
-                        <path d="M6.5 4.5v7l5-3.5-5-3.5z"/>
+                      <svg *ngIf="t.description" class="desc-chevron" [class.desc-chevron--open]="expandedTechniqueId === t.id" viewBox="0 0 12 12">
+                        <polyline points="4,2 8,6 4,10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
-                      Watch
+                      <span class="technique-position">{{ t.starting_position }}</span>
                     </button>
-                    <a
-                      *ngIf="!t.youtube_url"
-                      [href]="t.youtube_search_url"
-                      target="_blank"
-                      rel="noopener"
-                      class="btn-video btn-video--search"
-                      title="Search YouTube"
-                    >
-                      <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
-                        <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1" fill="none"/>
-                        <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                      </svg>
-                      Search
-                    </a>
+                    <div class="technique-actions">
+                      <button
+                        *ngIf="t.youtube_url"
+                        class="btn-video btn-video--curated"
+                        (click)="playVideo(t)"
+                        title="Watch curated tutorial"
+                      >
+                        <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+                          <path d="M6.5 4.5v7l5-3.5-5-3.5z"/>
+                        </svg>
+                        Watch
+                      </button>
+                      <a
+                        *ngIf="!t.youtube_url"
+                        [href]="t.youtube_search_url"
+                        target="_blank"
+                        rel="noopener"
+                        class="btn-video btn-video--search"
+                        title="Search YouTube"
+                      >
+                        <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+                          <circle cx="6.5" cy="6.5" r="5" stroke="currentColor" stroke-width="1" fill="none"/>
+                          <line x1="10" y1="10" x2="14" y2="14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                        Search
+                      </a>
+                    </div>
+                  </div>
+                  <div class="technique-description" *ngIf="expandedTechniqueId === t.id && t.description">
+                    <ul class="step-list">
+                      <li *ngFor="let step of parseDescription(t.description)">{{ step }}</li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -165,12 +179,12 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
       display: flex;
       justify-content: center;
       padding: 24px 16px;
-      min-height: 100vh;
+      min-height: calc(100vh - 52px);
     }
     .techniques-window {
       width: 100%;
       max-width: 800px;
-      min-height: calc(100vh - 48px);
+      min-height: calc(100vh - 52px - 48px);
     }
 
     /* Toolbar */
@@ -364,10 +378,6 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
       padding: 4px 0 8px 20px;
     }
     .technique-card {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px 12px;
       border-left: 2px solid var(--color-desktop-darker);
       margin-left: 4px;
       transition: border-color 0.1s;
@@ -375,12 +385,61 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
     .technique-card:hover {
       border-left-color: var(--color-accent);
     }
+    .technique-card--expanded {
+      border-left-color: var(--color-accent);
+    }
+    .technique-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+    }
     .technique-info {
       flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: default;
+      font-family: var(--font-body);
+      text-align: left;
+    }
+    .technique-info--has-desc {
+      cursor: pointer;
+    }
+    .technique-info--has-desc:hover .technique-position {
+      color: var(--color-text);
+    }
+    .desc-chevron {
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+      color: var(--color-text-muted);
+      transition: transform 0.15s;
+    }
+    .desc-chevron--open {
+      transform: rotate(90deg);
     }
     .technique-position {
       font-size: var(--text-sm);
       color: var(--color-text-secondary);
+      transition: color 0.1s;
+    }
+    .technique-description {
+      padding: 0 12px 10px 28px;
+    }
+    .step-list {
+      margin: 0;
+      padding: 0 0 0 16px;
+      list-style: disc;
+    }
+    .step-list li {
+      font-size: var(--text-xs);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+      padding: 2px 0;
     }
     .technique-actions {
       flex-shrink: 0;
@@ -426,7 +485,7 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
 
     @media (max-width: 600px) {
       .window-container { padding: 8px; }
-      .techniques-window { min-height: calc(100vh - 16px); }
+      .techniques-window { min-height: calc(100vh - 52px - 16px); }
       .category-tabs { gap: 3px; }
       .tab { padding: 4px 8px; font-size: 10px; }
       .group-body { padding-left: 12px; }
@@ -442,6 +501,7 @@ export class TechniquesComponent implements OnInit {
 
   activeVideo: LibraryTechnique | null = null;
   activeVideoUrl: SafeResourceUrl | null = null;
+  expandedTechniqueId: number | null = null;
 
   filteredGroups: SubcategoryGroup[] = [];
   filteredCount = 0;
@@ -500,6 +560,18 @@ export class TechniquesComponent implements OnInit {
   closeVideo(): void {
     this.activeVideo = null;
     this.activeVideoUrl = null;
+  }
+
+  toggleDescription(t: LibraryTechnique): void {
+    if (!t.description) return;
+    this.expandedTechniqueId = this.expandedTechniqueId === t.id ? null : t.id;
+  }
+
+  parseDescription(description: string): string[] {
+    return description
+      .split('\n')
+      .map((line) => line.replace(/^-\s*/, '').trim())
+      .filter((line) => line.length > 0);
   }
 
   private extractVideoId(url: string): string | null {

@@ -4,6 +4,8 @@ import type Database from 'better-sqlite3';
 import type { ChannelAdapter, Button, MessageCallback, ButtonCallback } from './adapter.js';
 import { findOrCreateUser } from '../db/queries/channels.js';
 import { getRecentMessages } from '../db/queries/conversations.js';
+import { verifyToken } from '../utils/jwt.js';
+import { getUserById } from '../db/queries/users.js';
 
 interface WsClient {
   ws: WebSocket;
@@ -67,22 +69,51 @@ export class WebAdapter implements ChannelAdapter {
           return;
         }
 
-        if (msg.type === 'auth' && msg.sessionId) {
-          console.log(`[web] 🔑 Auth request for session: ${msg.sessionId}`);
-          const { user, isNew } = findOrCreateUser(this.db, 'web', msg.sessionId);
-          console.log(`[web] User: ${user.id} (new=${isNew}, mode=${user.conversation_mode})`);
+        if (msg.type === 'auth') {
+          let userId: string;
+          let sessionKey: string;
 
-          client = { ws, userId: user.id, sessionId: msg.sessionId };
+          if (msg.token) {
+            // JWT-based auth (new web signup flow)
+            console.log(`[web] 🔑 JWT auth request`);
+            const payload = verifyToken(msg.token);
+            if (!payload) {
+              ws.send(JSON.stringify({ type: 'auth_error', message: 'Invalid or expired token' }));
+              ws.close();
+              return;
+            }
+            const user = getUserById(this.db, payload.userId);
+            if (!user) {
+              ws.send(JSON.stringify({ type: 'auth_error', message: 'User not found' }));
+              ws.close();
+              return;
+            }
+            userId = user.id;
+            sessionKey = user.id;
+            console.log(`[web] User: ${user.id} (jwt, mode=${user.conversation_mode})`);
+          } else if (msg.sessionId) {
+            // Legacy session-based auth
+            console.log(`[web] 🔑 Legacy auth request for session: ${msg.sessionId}`);
+            const { user, isNew } = findOrCreateUser(this.db, 'web', msg.sessionId);
+            userId = user.id;
+            sessionKey = msg.sessionId;
+            console.log(`[web] User: ${user.id} (new=${isNew}, mode=${user.conversation_mode})`);
+          } else {
+            ws.send(JSON.stringify({ type: 'error', message: 'Invalid auth message' }));
+            return;
+          }
 
-          const prev = this.clients.get(msg.sessionId);
+          client = { ws, userId, sessionId: sessionKey };
+
+          const prev = this.clients.get(sessionKey);
           if (prev && prev.ws !== ws && prev.ws.readyState === WebSocket.OPEN) {
             prev.ws.close();
           }
-          this.clients.set(msg.sessionId, client);
+          this.clients.set(sessionKey, client);
 
           ws.send(JSON.stringify({ type: 'auth_ok' }));
 
-          const history = getRecentMessages(this.db, user.id, 50);
+          const history = getRecentMessages(this.db, userId, 50);
           console.log(`[web] Sending ${history.length} history messages`);
           ws.send(JSON.stringify({
             type: 'history',

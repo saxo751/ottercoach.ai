@@ -1,6 +1,6 @@
 import { Injectable, NgZone, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { SessionService } from './session.service';
+import { AuthService } from './auth.service';
 import { environment } from '../../../environments/environment';
 import type { ChatMessage, Button } from '../../shared/models';
 
@@ -20,11 +20,17 @@ export class ChatService implements OnDestroy {
   connected$ = new BehaviorSubject<boolean>(false);
   typing$ = new BehaviorSubject<boolean>(false);
 
-  constructor(private session: SessionService, private zone: NgZone) {}
+  constructor(private auth: AuthService, private zone: NgZone) {}
 
   connect(): void {
     if (this.ws && (this.ws.readyState === WebSocket.OPEN || this.ws.readyState === WebSocket.CONNECTING)) {
       console.log('[chat] Already connected/connecting, skipping');
+      return;
+    }
+
+    const token = this.auth.getToken();
+    if (!token) {
+      console.log('[chat] No auth token — cannot connect');
       return;
     }
 
@@ -34,13 +40,8 @@ export class ChatService implements OnDestroy {
     this.ws = new WebSocket(url);
 
     this.ws.onopen = () => {
-      console.log('[chat] WebSocket OPEN — sending auth');
-      const sessionId = this.session.getSessionId();
-      console.log(`[chat] Session ID: ${sessionId}`);
-      this.ws!.send(JSON.stringify({
-        type: 'auth',
-        sessionId,
-      }));
+      console.log('[chat] WebSocket OPEN — sending JWT auth');
+      this.ws!.send(JSON.stringify({ type: 'auth', token }));
     };
 
     this.ws.onmessage = (event) => {
@@ -65,9 +66,9 @@ export class ChatService implements OnDestroy {
             console.log(`[chat] History received: ${msg.messages?.length || 0} messages`);
             if (msg.messages && msg.messages.length > 0) {
               this.messages$.next(msg.messages);
-              this.session.markHasHistory();
-            } else if (this.session.isNewUser()) {
-              console.log('[chat] New user, no history — sending /start');
+            } else {
+              // New user with no history — trigger onboarding
+              console.log('[chat] No history — sending /start');
               this.doSend('/start', false);
             }
             break;
@@ -81,7 +82,6 @@ export class ChatService implements OnDestroy {
               content: msg.text,
               created_at: new Date().toISOString(),
             }]);
-            this.session.markHasHistory();
             break;
           }
 
@@ -95,9 +95,13 @@ export class ChatService implements OnDestroy {
               created_at: new Date().toISOString(),
             }]);
             this.buttons$.next({ text: msg.text, buttons: msg.buttons });
-            this.session.markHasHistory();
             break;
           }
+
+          case 'auth_error':
+            console.error('[chat] Auth error:', msg.message);
+            this.auth.logout();
+            break;
 
           case 'error':
             console.error('[chat] Server error:', msg.message);

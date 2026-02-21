@@ -51,54 +51,131 @@ import { RouterLink } from '@angular/router';
           </div>
           <span class="desktop-icon__label">techniques/</span>
         </a>
+
+        <a class="desktop-icon" routerLink="/ideas">
+          <div class="desktop-icon__image icon-ideas">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="4" width="36" height="40" rx="3" fill="#faf8f4" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="11" y="10" width="26" height="3" rx="1.5" fill="#1a1a1a" opacity="0.7"/>
+              <rect x="11" y="16" width="20" height="2" rx="1" fill="#c4bfb3"/>
+              <rect x="11" y="21" width="24" height="2" rx="1" fill="#c4bfb3"/>
+              <rect x="11" y="26" width="16" height="2" rx="1" fill="#c4bfb3"/>
+              <circle cx="35" cy="34" r="10" fill="#f5a623" stroke="#1a1a1a" stroke-width="1.5"/>
+              <path d="M35 28 L35 32 Q35 34 33 35 L33 37 L37 37 L37 35 Q35 34 35 32 Z" fill="#fff" opacity="0.85"/>
+              <rect x="32.5" y="38" width="5" height="2" rx="1" fill="#fff" opacity="0.6"/>
+            </svg>
+          </div>
+          <span class="desktop-icon__label">ideas.txt</span>
+        </a>
       </div>
 
-      <!-- Mascot scene placeholder -->
+      <!-- Mascot scene — v2 otter, thumbs up -->
       <div class="desktop-scene">
-        <svg viewBox="0 0 320 200" fill="none" xmlns="http://www.w3.org/2000/svg" class="scene-svg">
+        <svg viewBox="0 0 320 280" fill="none" xmlns="http://www.w3.org/2000/svg" class="scene-svg">
+          <defs>
+            <linearGradient id="beltShine" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="white"/>
+              <stop offset="100%" stop-color="transparent"/>
+            </linearGradient>
+          </defs>
+
           <!-- Mat / floor -->
-          <rect x="40" y="140" width="240" height="50" rx="4" fill="#e8e2d6" stroke="#c4bfb3" stroke-width="1.5"/>
-          <line x1="80" y1="140" x2="80" y2="190" stroke="#d4cfc5" stroke-width="1"/>
-          <line x1="160" y1="140" x2="160" y2="190" stroke="#d4cfc5" stroke-width="1"/>
-          <line x1="240" y1="140" x2="240" y2="190" stroke="#d4cfc5" stroke-width="1"/>
-          <!-- Otter coach body -->
-          <ellipse cx="160" cy="128" rx="28" ry="22" fill="#92400e" opacity="0.8"/>
-          <!-- Head -->
-          <circle cx="160" cy="98" r="22" fill="#b0703c"/>
-          <!-- Ears -->
-          <circle cx="143" cy="82" r="7" fill="#b0703c" stroke="#92400e" stroke-width="1.5"/>
-          <circle cx="177" cy="82" r="7" fill="#b0703c" stroke="#92400e" stroke-width="1.5"/>
-          <!-- Face -->
-          <ellipse cx="160" cy="102" rx="12" ry="9" fill="#deb887"/>
-          <!-- Eyes -->
-          <circle cx="152" cy="95" r="3" fill="#1a1a1a"/>
-          <circle cx="168" cy="95" r="3" fill="#1a1a1a"/>
-          <circle cx="153" cy="94" r="1" fill="#fff"/>
-          <circle cx="169" cy="94" r="1" fill="#fff"/>
-          <!-- Nose -->
-          <ellipse cx="160" cy="100" rx="3" ry="2" fill="#1a1a1a"/>
-          <!-- Smile -->
-          <path d="M154 105 Q160 110 166 105" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-          <!-- Gi -->
-          <path d="M140 115 L140 140 L180 140 L180 115" fill="#f0ece4" stroke="#c4bfb3" stroke-width="1.5"/>
-          <line x1="160" y1="115" x2="160" y2="140" stroke="#c4bfb3" stroke-width="1"/>
-          <!-- Belt -->
-          <rect x="138" y="128" width="44" height="5" rx="2" fill="#3b82f6"/>
-          <rect x="156" y="128" width="8" height="5" fill="#3b82f6"/>
-          <line x1="164" y1="133" x2="170" y2="140" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
-          <line x1="164" y1="133" x2="168" y2="142" stroke="#3b82f6" stroke-width="3" stroke-linecap="round"/>
-          <!-- Arms -->
-          <line x1="138" y1="120" x2="118" y2="130" stroke="#b0703c" stroke-width="6" stroke-linecap="round"/>
-          <line x1="182" y1="120" x2="202" y2="130" stroke="#b0703c" stroke-width="6" stroke-linecap="round"/>
-          <!-- "OSS!" text -->
-          <text x="210" y="105" font-family="Bricolage Grotesque, sans-serif" font-size="16" font-weight="800" fill="#f5a623" transform="rotate(-8 210 105)">OSS!</text>
+          <rect x="30" y="232" width="260" height="40" rx="4" fill="#e8e2d6" stroke="#c4bfb3" stroke-width="1.5"/>
+          <line x1="90" y1="232" x2="90" y2="272" stroke="#d4cfc5" stroke-width="1"/>
+          <line x1="160" y1="232" x2="160" y2="272" stroke="#d4cfc5" stroke-width="1"/>
+          <line x1="230" y1="232" x2="230" y2="272" stroke="#d4cfc5" stroke-width="1"/>
+
+          <!-- Speech bubble -->
+          <rect x="198" y="38" width="76" height="36" rx="12" fill="rgba(196,162,78,0.15)"/>
+          <path d="M212 74 L206 85 L222 74" fill="rgba(196,162,78,0.15)"/>
+          <text x="236" y="61" text-anchor="middle" font-family="Bricolage Grotesque, sans-serif" font-size="15" fill="#C4A24E" font-weight="600">OSS!</text>
+
+          <!-- Ground shadow -->
+          <ellipse cx="155" cy="230" rx="45" ry="9" fill="rgba(0,0,0,0.12)"/>
+
+          <!-- Thick otter tail — tapered rudder -->
+          <path d="M122 210 Q88 224 75 242 Q71 249 78 245 Q96 234 128 218" fill="#5C4120" stroke="#33250F" stroke-width="1.5"/>
+          <path d="M88 236 Q82 240 78 243" stroke="#4A3618" stroke-width="0.8" fill="none" opacity="0.4"/>
+
+          <!-- Feet — webbed -->
+          <ellipse cx="135" cy="225" rx="15" ry="7" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <ellipse cx="172" cy="225" rx="15" ry="7" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <path d="M128 225 L125 229" stroke="#33250F" stroke-width="0.6" opacity="0.4"/>
+          <path d="M132 225 L130 230" stroke="#33250F" stroke-width="0.6" opacity="0.4"/>
+          <path d="M165 225 L163 230" stroke="#33250F" stroke-width="0.6" opacity="0.4"/>
+          <path d="M169 225 L167 229" stroke="#33250F" stroke-width="0.6" opacity="0.4"/>
+
+          <!-- Gi pants -->
+          <rect x="126" y="172" width="21" height="52" rx="8" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+          <rect x="159" y="172" width="21" height="52" rx="8" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1"/>
+
+          <!-- Body / Gi top — elongated otter body -->
+          <path d="M118 108 Q115 166 126 190 L180 190 Q191 166 188 108 Z" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+          <!-- Gi lapel V -->
+          <path d="M147 108 L143 155 L153 190" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+          <path d="M159 108 L163 155 L153 190" fill="none" stroke="#D8D2C8" stroke-width="1.5"/>
+          <!-- Belly patch through gi opening -->
+          <path d="M143 116 Q153 110 163 116 L163 155 Q153 163 143 155 Z" fill="#B8A47C" opacity="0.5"/>
+
+          <!-- Purple belt -->
+          <rect x="120" y="158" width="60" height="8" rx="3" fill="#7B4BAA"/>
+          <rect x="120" y="158" width="60" height="8" rx="3" fill="url(#beltShine)" opacity="0.25"/>
+          <circle cx="160" cy="162" r="5" fill="#5E3388"/>
+          <path d="M160 167 L153 182" stroke="#7B4BAA" stroke-width="4" stroke-linecap="round"/>
+          <path d="M160 167 L167 180" stroke="#7B4BAA" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Left arm (relaxed at side) -->
+          <path d="M118 118 Q98 130 92 150 Q90 155 96 152 Q105 146 114 137" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+          <ellipse cx="93" cy="151" rx="9" ry="7" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <path d="M87 149 Q93 145 99 149" stroke="#E8E4DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Right arm (thumbs up!) -->
+          <path d="M188 118 Q208 106 214 90 Q216 85 211 88 Q203 96 194 112" fill="#F0EDE8" stroke="#D8D2C8" stroke-width="1.5"/>
+          <ellipse cx="214" cy="87" rx="9" ry="7.5" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <!-- Thumb -->
+          <path d="M212 79 Q213 69 215 65" stroke="#5C4120" stroke-width="6" stroke-linecap="round"/>
+          <path d="M212 79 Q213 69 215 65" stroke="#33250F" stroke-width="1" stroke-linecap="round" fill="none"/>
+          <path d="M208 85 Q214 81 220 85" stroke="#E8E4DC" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <!-- HEAD — wide flat otter v2, dark chocolate -->
+          <ellipse cx="153" cy="84" rx="38" ry="26" fill="#5C4120"/>
+
+          <!-- Tiny ears — LOW on sides of skull -->
+          <circle cx="120" cy="72" r="6" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <circle cx="120" cy="72" r="3" fill="#A89060"/>
+          <circle cx="186" cy="72" r="6" fill="#5C4120" stroke="#33250F" stroke-width="1"/>
+          <circle cx="186" cy="72" r="3" fill="#A89060"/>
+
+          <!-- Face patch + muzzle bump -->
+          <ellipse cx="153" cy="91" rx="24" ry="16" fill="#A89060"/>
+          <ellipse cx="153" cy="95" rx="14" ry="9" fill="#B8A47C"/>
+
+          <!-- Eyes — happy squint -->
+          <path d="M138 79 Q142 74 146 79" stroke="#1E100A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M160 79 Q164 74 168 79" stroke="#1E100A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Nose — wide, rounded -->
+          <ellipse cx="153" cy="89" rx="5" ry="3.2" fill="#1E100A"/>
+          <ellipse cx="154.5" cy="88" rx="2" ry="1" fill="white" opacity="0.25"/>
+
+          <!-- Big happy smile -->
+          <path d="M143 98 Q153 105 163 98" stroke="#33250F" stroke-width="2" fill="none" stroke-linecap="round"/>
+          <path d="M148 99 Q153 102 158 99" stroke="#F0EDE8" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+          <!-- Whiskers — 3 per side -->
+          <line x1="135" y1="92" x2="112" y2="86" stroke="#33250F" stroke-width="1" opacity="0.5"/>
+          <line x1="135" y1="95" x2="110" y2="94" stroke="#33250F" stroke-width="1" opacity="0.5"/>
+          <line x1="135" y1="98" x2="113" y2="101" stroke="#33250F" stroke-width="1" opacity="0.4"/>
+          <line x1="171" y1="92" x2="194" y2="86" stroke="#33250F" stroke-width="1" opacity="0.5"/>
+          <line x1="171" y1="95" x2="196" y2="94" stroke="#33250F" stroke-width="1" opacity="0.5"/>
+          <line x1="171" y1="98" x2="193" y2="101" stroke="#33250F" stroke-width="1" opacity="0.4"/>
         </svg>
       </div>
     </div>
   `,
   styles: [`
     .desktop-surface {
-      min-height: 100vh;
+      min-height: calc(100vh - 52px);
       padding: 32px;
       position: relative;
     }

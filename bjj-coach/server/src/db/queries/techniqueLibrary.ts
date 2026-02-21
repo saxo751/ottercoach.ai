@@ -25,3 +25,7 @@ export function getLibraryCategories(db: Database.Database): { category: string;
 export function updateLibraryVideoUrl(db: Database.Database, id: number, youtubeUrl: string): void {
   db.prepare('UPDATE technique_library SET youtube_url = ? WHERE id = ?').run(youtubeUrl, id);
 }
+
+export function updateLibraryDescription(db: Database.Database, id: number, description: string): void {
+  db.prepare('UPDATE technique_library SET description = ? WHERE id = ?').run(description, id);
+}

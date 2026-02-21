@@ -2,6 +2,8 @@ import type { ConversationMode, BeltRank, Platform, TechniqueType, SessionType, 
 
 export interface User {
   id: string;
+  email: string | null;
+  password_hash: string | null;
   name: string | null;
   belt_rank: BeltRank | null;
   experience_months: number | null;
@@ -14,8 +16,19 @@ export interface User {
   timezone: string;
   conversation_mode: ConversationMode;
   onboarding_complete: number;          // SQLite boolean: 0 or 1
+  last_scheduled_action: string | null; // 'briefing' | 'debrief' | null
+  last_scheduled_date: string | null;   // 'YYYY-MM-DD' — resets daily
   created_at: string;
   updated_at: string;
+}
+
+export interface MagicLinkToken {
+  id: number;
+  user_id: string;
+  token: string;
+  expires_at: string;
+  used: number;       // SQLite boolean: 0 or 1
+  created_at: string;
 }
 
 export interface UserChannel {
@@ -113,5 +126,31 @@ export interface LibraryTechnique {
   starting_position: string;
   youtube_url: string | null;
   youtube_search_url: string;
+  description: string | null;
+  created_at: string;
+}
+
+export interface FeatureIdea {
+  id: number;
+  user_id: string;
+  title: string;
+  description: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FeatureIdeaVote {
+  id: number;
+  idea_id: number;
+  user_id: string;
+  created_at: string;
+}
+
+export interface FeatureIdeaComment {
+  id: number;
+  idea_id: number;
+  user_id: string;
+  content: string;
   created_at: string;
 }
