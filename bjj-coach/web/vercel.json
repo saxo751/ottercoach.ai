@@ -1,0 +1,15 @@
+{
+  "buildCommand": "ng build",
+  "outputDirectory": "dist/web/browser",
+  "framework": null,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ottercoachai-production.up.railway.app/api/:path*"
+    },
+    {
+      "source": "/((?!assets/).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
