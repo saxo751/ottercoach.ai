@@ -6,7 +6,7 @@
  * "Armbar from Closed Guard" get separate, specific videos).
  *
  * Usage:
- *   npx tsx src/scripts/enrichVideos.ts [--batch-size=20] [--category=submission]
+ *   npx tsx src/scripts/enrichVideos.ts [--batch-size=20] [--category=submission] [--retry-none]
  *
  * Requires YOUTUBE_API_KEY in .env
  * YouTube quota: each search costs 100 units, daily limit is 10,000 = ~100 searches/day
@@ -109,6 +109,7 @@ Respond with ONLY the video ID (e.g., "dQw4w9WgXcQ") of the best match, or "NONE
   );
 
   const cleaned = response.trim();
+  console.log(`[DEBUG LLM response] "${cleaned}"`);
   if (cleaned === 'NONE' || cleaned.length < 5) return null;
 
   // Extract just the video ID (11 chars, alphanumeric + _ + -)
@@ -129,20 +130,22 @@ async function main() {
   const args = process.argv.slice(2);
   let batchSize = 20;
   let categoryFilter: string | null = null;
+  let retryNone = false;
 
   for (const arg of args) {
     if (arg.startsWith('--batch-size=')) batchSize = parseInt(arg.split('=')[1]);
     if (arg.startsWith('--category=')) categoryFilter = arg.split('=')[1];
+    if (arg === '--retry-none') retryNone = true;
   }
 
   const db = initDatabase();
   const ai = createAIProvider();
 
-  // Get individual techniques that don't have curated videos yet
+  // Get techniques that haven't been searched yet (NULL = never searched, 'NONE' = searched but no match)
   let query = `
     SELECT id, name, category, subcategory, starting_position
     FROM technique_library
-    WHERE youtube_url IS NULL
+    WHERE ${retryNone ? "(youtube_url IS NULL OR youtube_url = 'NONE')" : "youtube_url IS NULL"}
   `;
   const queryParams: string[] = [];
   if (categoryFilter) {
@@ -176,6 +179,7 @@ async function main() {
 
       if (results.length === 0) {
         console.log('no YouTube results');
+        updateStmt.run('NONE', technique.id);
         skipped++;
         continue;
       }
@@ -184,6 +188,7 @@ async function main() {
 
       if (!videoId) {
         console.log('LLM found no good match');
+        updateStmt.run('NONE', technique.id);
         skipped++;
       } else {
         const youtubeUrl = `https://www.youtube.com/watch?v=${videoId}`;
@@ -205,12 +210,14 @@ async function main() {
     }
   }
 
-  const totalCurated = (db.prepare('SELECT COUNT(*) as c FROM technique_library WHERE youtube_url IS NOT NULL').get() as any).c;
+  const totalCurated = (db.prepare("SELECT COUNT(*) as c FROM technique_library WHERE youtube_url IS NOT NULL AND youtube_url != 'NONE'").get() as any).c;
+  const totalNoMatch = (db.prepare("SELECT COUNT(*) as c FROM technique_library WHERE youtube_url = 'NONE'").get() as any).c;
 
   console.log(`\n--- Done ---`);
   console.log(`Enriched: ${enriched} techniques`);
   console.log(`Skipped: ${skipped}`);
   console.log(`Total techniques with curated videos: ${totalCurated}/351`);
+  console.log(`Total techniques with no match found: ${totalNoMatch}`);
 
   db.close();
 }

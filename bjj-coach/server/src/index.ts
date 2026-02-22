@@ -70,12 +70,13 @@ async function main() {
   const scheduler = new Scheduler(db, ai, channelManager);
   scheduler.start();
 
-  // 7. Start channel adapters (begins listening for messages)
-  await channelManager.startAll();
-
+  // 7. Start HTTP server first (so Railway sees a listening port)
   server.listen(PORT, () => {
     console.log(`[api] Listening on http://localhost:${PORT}`);
   });
+
+  // 8. Start channel adapters (begins listening for messages)
+  await channelManager.startAll();
 
   console.log('[boot] BJJ Coach Bot is running');
 
