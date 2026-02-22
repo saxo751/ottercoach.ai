@@ -292,5 +292,47 @@ export function createAdminRouter(db: Database.Database): Router {
     res.type('html').send(htmlPage(`Admin — ${tableName}`, body));
   });
 
+  // Import technique library data (descriptions + youtube URLs)
+  // POST /api/admin/import-technique-library?secret=...
+  // Body: [{ id: number, youtube_url: string | null, description: string | null }, ...]
+  router.post('/import-technique-library', (req, res) => {
+    const rows = req.body;
+    if (!Array.isArray(rows)) {
+      res.status(400).json({ error: 'Body must be a JSON array' });
+      return;
+    }
+
+    const updateYoutube = db.prepare('UPDATE technique_library SET youtube_url = ? WHERE id = ?');
+    const updateDescription = db.prepare('UPDATE technique_library SET description = ? WHERE id = ?');
+
+    let youtubeUpdated = 0;
+    let descriptionUpdated = 0;
+    let skipped = 0;
+
+    const runAll = db.transaction(() => {
+      for (const row of rows) {
+        if (!row.id) { skipped++; continue; }
+        if (row.youtube_url !== undefined) {
+          updateYoutube.run(row.youtube_url, row.id);
+          youtubeUpdated++;
+        }
+        if (row.description !== undefined) {
+          updateDescription.run(row.description, row.id);
+          descriptionUpdated++;
+        }
+      }
+    });
+
+    runAll();
+
+    res.json({
+      success: true,
+      total: rows.length,
+      youtubeUpdated,
+      descriptionUpdated,
+      skipped,
+    });
+  });
+
   return router;
 }
