@@ -1,10 +1,13 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-desktop',
   standalone: true,
-  imports: [RouterLink],
+  imports: [CommonModule, RouterLink],
   template: `
     <div class="desktop-surface">
       <div class="icon-grid">
@@ -66,6 +69,62 @@ import { RouterLink } from '@angular/router';
             </svg>
           </div>
           <span class="desktop-icon__label">ideas.txt</span>
+        </a>
+      </div>
+
+      <!-- Admin: DB browser (only for admin user) -->
+      <div class="icon-grid admin-grid" *ngIf="isAdmin">
+        <a class="desktop-icon" [href]="adminUrl + '/tables'" target="_blank">
+          <div class="desktop-icon__image icon-admin">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+              <rect x="8" y="12" width="32" height="4" rx="1" fill="#f5a623" opacity="0.8"/>
+              <rect x="8" y="20" width="32" height="2" rx="1" fill="#666"/>
+              <rect x="8" y="26" width="32" height="2" rx="1" fill="#666"/>
+              <rect x="8" y="32" width="32" height="2" rx="1" fill="#666"/>
+            </svg>
+          </div>
+          <span class="desktop-icon__label">db/tables</span>
+        </a>
+
+        <a class="desktop-icon" [href]="adminUrl + '/table/users'" target="_blank">
+          <div class="desktop-icon__image icon-admin">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+              <circle cx="20" cy="22" r="6" fill="#3b82f6" opacity="0.7"/>
+              <path d="M10 36 Q20 28 30 36" fill="#3b82f6" opacity="0.4"/>
+              <rect x="32" y="18" width="8" height="2" rx="1" fill="#666"/>
+              <rect x="32" y="24" width="8" height="2" rx="1" fill="#666"/>
+              <rect x="32" y="30" width="8" height="2" rx="1" fill="#666"/>
+            </svg>
+          </div>
+          <span class="desktop-icon__label">db/users</span>
+        </a>
+
+        <a class="desktop-icon" [href]="adminUrl + '/table/conversation_history'" target="_blank">
+          <div class="desktop-icon__image icon-admin">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+              <rect x="10" y="14" width="18" height="3" rx="1.5" fill="#8b5cf6" opacity="0.6"/>
+              <rect x="20" y="21" width="18" height="3" rx="1.5" fill="#f5a623" opacity="0.6"/>
+              <rect x="10" y="28" width="18" height="3" rx="1.5" fill="#8b5cf6" opacity="0.6"/>
+              <rect x="20" y="35" width="14" height="3" rx="1.5" fill="#f5a623" opacity="0.6"/>
+            </svg>
+          </div>
+          <span class="desktop-icon__label">db/chats</span>
+        </a>
+
+        <a class="desktop-icon" [href]="adminUrl + '/table/training_sessions'" target="_blank">
+          <div class="desktop-icon__image icon-admin">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
+              <rect x="10" y="30" width="6" height="6" fill="#16a34a" opacity="0.7"/>
+              <rect x="18" y="24" width="6" height="12" fill="#16a34a" opacity="0.7"/>
+              <rect x="26" y="18" width="6" height="18" fill="#16a34a" opacity="0.7"/>
+              <rect x="34" y="14" width="6" height="22" fill="#16a34a" opacity="0.7"/>
+            </svg>
+          </div>
+          <span class="desktop-icon__label">db/sessions</span>
         </a>
       </div>
 
@@ -233,6 +292,11 @@ import { RouterLink } from '@angular/router';
       width: 100%;
       height: auto;
     }
+    .admin-grid {
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px dashed var(--color-border, #ccc);
+    }
     @media (max-width: 768px) {
       .icon-grid {
         flex-direction: row;
@@ -249,4 +313,29 @@ import { RouterLink } from '@angular/router';
     }
   `],
 })
-export class DesktopComponent {}
+export class DesktopComponent {
+  isAdmin = false;
+  adminUrl = '';
+
+  constructor(private auth: AuthService) {
+    const secret = localStorage.getItem('admin_secret');
+    this.auth.user$.subscribe(user => {
+      this.isAdmin = user?.email === 'saxo@handyhand.dk' && !!secret;
+      if (this.isAdmin) {
+        this.adminUrl = `${environment.apiUrl}/admin?secret=${secret}`;
+      }
+    });
+
+    // Prompt for admin secret once if admin user and no secret stored
+    this.auth.user$.subscribe(user => {
+      if (user?.email === 'saxo@handyhand.dk' && !localStorage.getItem('admin_secret')) {
+        const s = prompt('Admin secret:');
+        if (s) {
+          localStorage.setItem('admin_secret', s);
+          this.isAdmin = true;
+          this.adminUrl = `${environment.apiUrl}/admin?secret=${s}`;
+        }
+      }
+    });
+  }
+}

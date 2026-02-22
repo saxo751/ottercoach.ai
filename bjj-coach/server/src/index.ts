@@ -5,6 +5,7 @@ import apiRouter from './api/router.js';
 import { createDashboardRouter } from './api/routes/dashboard.js';
 import { createAuthRouter } from './api/routes/auth.js';
 import { createIdeasRouter } from './api/routes/ideas.js';
+import { createAdminRouter } from './api/routes/admin.js';
 import { initDatabase } from './db/database.js';
 import { createAIProvider } from './ai/factory.js';
 import { ChannelManager } from './channels/manager.js';
@@ -46,6 +47,7 @@ async function main() {
   app.use('/api/auth', createAuthRouter(db));
   app.use('/api/dashboard', createDashboardRouter(db));
   app.use('/api/ideas', createIdeasRouter(db));
+  app.use('/api/admin', createAdminRouter(db));
 
   const server = createServer(app);
 
