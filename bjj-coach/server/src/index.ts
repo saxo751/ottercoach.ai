@@ -29,7 +29,7 @@ async function main() {
 
   // 3. Express + HTTP server (shared with WebSocket)
   const app = express();
-  app.use(express.json());
+  app.use(express.json({ limit: '2mb' }));
 
   // CORS for Angular dev server
   app.use((_req, res, next) => {
