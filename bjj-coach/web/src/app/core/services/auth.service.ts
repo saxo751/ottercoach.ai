@@ -78,7 +78,12 @@ export class AuthService {
   fetchMe(): void {
     this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (user) => this.currentUser$.next(user),
-      error: () => this.logout(),
+      error: (err) => {
+        // Only logout on auth failures, not transient network/server errors
+        if (err.status === 401 || err.status === 403) {
+          this.logout();
+        }
+      },
     });
   }
 
