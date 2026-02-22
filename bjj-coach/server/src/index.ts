@@ -52,14 +52,14 @@ async function main() {
   // 4. Channel adapters
   const channelManager = new ChannelManager();
 
-  if (process.env.TELEGRAM_ENABLED === 'true') {
-    const telegram = new TelegramAdapter(process.env.TELEGRAM_BOT_TOKEN!);
-    channelManager.registerAdapter('telegram', telegram);
-  }
-
   if (process.env.WEB_ENABLED === 'true') {
     const webAdapter = new WebAdapter(server, db);
     channelManager.registerAdapter('web', webAdapter);
+  }
+
+  if (process.env.TELEGRAM_ENABLED === 'true') {
+    const telegram = new TelegramAdapter(process.env.TELEGRAM_BOT_TOKEN!);
+    channelManager.registerAdapter('telegram', telegram);
   }
 
   // 5. Core coaching engine
