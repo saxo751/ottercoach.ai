@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, json } from 'express';
 import type Database from 'better-sqlite3';
 
 function buildUrl(path: string, secret: string, extraParams?: Record<string, string | number>): string {
@@ -295,7 +295,7 @@ export function createAdminRouter(db: Database.Database): Router {
   // Import technique library data (descriptions + youtube URLs)
   // POST /api/admin/import-technique-library?secret=...
   // Body: [{ id: number, youtube_url: string | null, description: string | null }, ...]
-  router.post('/import-technique-library', (req, res) => {
+  router.post('/import-technique-library', json({ limit: '2mb' }), (req, res) => {
     const rows = req.body;
     if (!Array.isArray(rows)) {
       res.status(400).json({ error: 'Body must be a JSON array' });
