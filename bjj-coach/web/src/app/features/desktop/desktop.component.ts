@@ -74,7 +74,7 @@ import { environment } from '../../../environments/environment';
 
       <!-- Admin: DB browser (only for admin user) -->
       <div class="icon-grid admin-grid" *ngIf="isAdmin">
-        <a class="desktop-icon" [href]="adminUrl + '/tables'" target="_blank">
+        <a class="desktop-icon" [href]="adminUrl + '/tables?secret=' + adminSecret" target="_blank">
           <div class="desktop-icon__image icon-admin">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
@@ -87,7 +87,7 @@ import { environment } from '../../../environments/environment';
           <span class="desktop-icon__label">db/tables</span>
         </a>
 
-        <a class="desktop-icon" [href]="adminUrl + '/table/users'" target="_blank">
+        <a class="desktop-icon" [href]="adminUrl + '/table/users?secret=' + adminSecret" target="_blank">
           <div class="desktop-icon__image icon-admin">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
@@ -101,7 +101,7 @@ import { environment } from '../../../environments/environment';
           <span class="desktop-icon__label">db/users</span>
         </a>
 
-        <a class="desktop-icon" [href]="adminUrl + '/table/conversation_history'" target="_blank">
+        <a class="desktop-icon" [href]="adminUrl + '/table/conversation_history?secret=' + adminSecret" target="_blank">
           <div class="desktop-icon__image icon-admin">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
@@ -114,7 +114,7 @@ import { environment } from '../../../environments/environment';
           <span class="desktop-icon__label">db/chats</span>
         </a>
 
-        <a class="desktop-icon" [href]="adminUrl + '/table/training_sessions'" target="_blank">
+        <a class="desktop-icon" [href]="adminUrl + '/table/training_sessions?secret=' + adminSecret" target="_blank">
           <div class="desktop-icon__image icon-admin">
             <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect x="4" y="8" width="40" height="32" rx="4" fill="#1a1a1a" stroke="#333" stroke-width="2"/>
@@ -316,25 +316,23 @@ import { environment } from '../../../environments/environment';
 export class DesktopComponent {
   isAdmin = false;
   adminUrl = '';
+  adminSecret = '';
 
   constructor(private auth: AuthService) {
     const secret = localStorage.getItem('admin_secret');
     this.auth.user$.subscribe(user => {
-      this.isAdmin = user?.email === 'saxo@handyhand.dk' && !!secret;
-      if (this.isAdmin) {
-        this.adminUrl = `${environment.apiUrl}/admin?secret=${secret}`;
-      }
-    });
-
-    // Prompt for admin secret once if admin user and no secret stored
-    this.auth.user$.subscribe(user => {
-      if (user?.email === 'saxo@handyhand.dk' && !localStorage.getItem('admin_secret')) {
-        const s = prompt('Admin secret:');
-        if (s) {
-          localStorage.setItem('admin_secret', s);
-          this.isAdmin = true;
-          this.adminUrl = `${environment.apiUrl}/admin?secret=${s}`;
+      const s = localStorage.getItem('admin_secret');
+      if (user?.email === 'saxo@handyhand.dk' && !s) {
+        const input = prompt('Admin secret:');
+        if (input) {
+          localStorage.setItem('admin_secret', input);
         }
+      }
+      const currentSecret = localStorage.getItem('admin_secret');
+      this.isAdmin = user?.email === 'saxo@handyhand.dk' && !!currentSecret;
+      if (this.isAdmin) {
+        this.adminUrl = `${environment.apiUrl}/admin`;
+        this.adminSecret = currentSecret!;
       }
     });
   }
