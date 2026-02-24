@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, tap } from 'rxjs';
+import { BehaviorSubject, Observable, tap, firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface AuthUser {
@@ -36,14 +36,22 @@ interface AuthTokenResponse {
 export class AuthService {
   private readonly TOKEN_KEY = 'bjj_coach_jwt';
   private currentUser$ = new BehaviorSubject<AuthUser | null>(null);
+  private _initialized: Promise<void>;
 
   user$ = this.currentUser$.asObservable();
 
   constructor(private http: HttpClient) {
     const token = this.getToken();
     if (token) {
-      this.fetchMe();
+      this._initialized = this.fetchMe();
+    } else {
+      this._initialized = Promise.resolve();
     }
+  }
+
+  /** Resolves once the initial auth check (fetchMe) has completed. */
+  get initialized(): Promise<void> {
+    return this._initialized;
   }
 
   getToken(): string | null {
@@ -76,16 +84,16 @@ export class AuthService {
     );
   }
 
-  fetchMe(): void {
-    this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`).subscribe({
-      next: (user) => this.currentUser$.next(user),
-      error: (err) => {
+  fetchMe(): Promise<void> {
+    return firstValueFrom(this.http.get<AuthUser>(`${environment.apiUrl}/auth/me`)).then(
+      (user) => { this.currentUser$.next(user); },
+      (err) => {
         // Only logout on auth failures, not transient network/server errors
         if (err.status === 401 || err.status === 403) {
           this.logout();
         }
       },
-    });
+    );
   }
 
   logout(): void {

@@ -109,7 +109,12 @@ export function createDashboardRouter(db: Database.Database, telegramManager?: T
     }
 
     updateUser(db, userId, fields);
-    const updated = getUserById(db, userId);
+    const updated = { ...getUserById(db, userId) } as any;
+    // Mask telegram bot token and add has_telegram_bot (same as GET /profile)
+    updated.has_telegram_bot = !!updated.telegram_bot_token;
+    if (updated.telegram_bot_token) {
+      updated.telegram_bot_token = '...' + updated.telegram_bot_token.slice(-4);
+    }
     res.json(updated);
   });
 
