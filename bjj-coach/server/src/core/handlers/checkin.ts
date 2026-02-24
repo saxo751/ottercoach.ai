@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { AIProvider, ConversationMessage } from '../../ai/provider.js';
+import type { AIProvider, ConversationMessage, TokenUsage } from '../../ai/provider.js';
 import type { User } from '../../db/types.js';
 import { buildCheckInPrompt } from '../../ai/prompts.js';
 import { parseAIResponse } from '../../ai/parser.js';
@@ -10,6 +10,9 @@ import { getAllGoals } from '../../db/queries/goals.js';
 import { setConversationMode } from '../../db/queries/users.js';
 import { CONVERSATION_MODES } from '../../utils/constants.js';
 import { prepareMessagesForAI } from './messageUtils.js';
+import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
+import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
+import { logTokenUsage } from '../../db/queries/tokenUsage.js';
 
 /**
  * Morning check-in handler.
@@ -30,23 +33,31 @@ export async function handleCheckIn(
   const recentSessions = getRecentSessionsByUserId(db, user.id, 5);
   const activeFocus = getActiveFocusPeriod(db, user.id);
   const goals = getAllGoals(db, user.id);
+  const memories = getMemoriesForPrompt(db, user.id);
+  const dailyLogs = getRecentDailyLogs(db, user.id, 3);
 
   const systemPrompt = buildCheckInPrompt({
     user,
     recentSessions,
     activeFocus,
     goals,
+    memories,
+    dailyLogs,
   });
 
   // Get conversation history and prepare for AI
   const history = getRecentMessages(db, user.id, 30);
   const messages = prepareMessagesForAI(history, userMessage);
 
-  const raw = await ai.sendMessage(systemPrompt, messages);
+  const { text: raw, usage } = await ai.sendMessage(systemPrompt, messages);
+  if (usage) logTokenUsage(db, user.id, 'check_in', usage);
   const { text, data } = parseAIResponse(raw);
 
   // Process extracted check-in data
   if (data) {
+    // Process memory extraction
+    processMemoryExtraction(db, user.id, data, 'check_in');
+
     if (data.checkin_complete === true) {
       console.log(`[checkin] Complete for user ${user.id} (${user.name}) — training: ${data.training_confirmed}, rest: ${data.rest_day}`);
 

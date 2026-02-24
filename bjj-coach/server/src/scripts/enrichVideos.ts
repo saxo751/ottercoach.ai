@@ -102,7 +102,7 @@ ${resultsList}
 
 Respond with ONLY the video ID (e.g., "dQw4w9WgXcQ") of the best match, or "NONE" if nothing fits.`;
 
-  const response = await ai.sendMessage(
+  const { text: response } = await ai.sendMessage(
     systemPrompt,
     [{ role: 'user', content: userMessage }],
     { temperature: 0, maxTokens: 50 }

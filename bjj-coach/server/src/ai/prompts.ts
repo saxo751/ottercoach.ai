@@ -1,4 +1,4 @@
-import type { User, Position, Technique, TrainingSession, FocusPeriod, Goal } from '../db/types.js';
+import type { User, Position, Technique, TrainingSession, FocusPeriod, Goal, UserMemory, UserDailyLog } from '../db/types.js';
 
 // ── Shared coach persona (constant across all modes) ────────────────────────
 
@@ -113,14 +113,88 @@ function buildFocusPeriodSection(focus: FocusPeriod | undefined): string {
   return `\n## Active Focus Period\n"${focus.name}" — ${focus.description || 'no description'}\nStarted: ${focus.start_date}`;
 }
 
+// ── Memory section builders ─────────────────────────────────────────────────
+
+export function buildMemorySection(memories: UserMemory[], dailyLogs: UserDailyLog[]): string {
+  if (memories.length === 0 && dailyLogs.length === 0) return '';
+
+  const sections: string[] = ['\n## Coach\'s Memory'];
+
+  const byCategory: Record<string, UserMemory[]> = {};
+  for (const m of memories) {
+    if (!byCategory[m.category]) byCategory[m.category] = [];
+    byCategory[m.category].push(m);
+  }
+
+  const categoryLabels: Record<string, string> = {
+    identity: 'Who They Are',
+    preference: 'Preferences',
+    fact: 'Key Facts',
+    coaching_insight: 'Coaching Insights',
+    session_observation: 'Recent Observations',
+    pattern: 'Patterns',
+  };
+
+  const categoryOrder = ['identity', 'preference', 'fact', 'coaching_insight', 'session_observation', 'pattern'];
+
+  for (const cat of categoryOrder) {
+    const mems = byCategory[cat];
+    if (!mems || mems.length === 0) continue;
+    sections.push(`\n### ${categoryLabels[cat] || cat}`);
+    for (const m of mems) {
+      sections.push(`- ${m.content}`);
+    }
+  }
+
+  if (dailyLogs.length > 0) {
+    sections.push('\n### Recent Daily Notes');
+    for (const log of dailyLogs) {
+      sections.push(`[${log.log_date}] ${log.content}`);
+    }
+  }
+
+  return sections.join('\n');
+}
+
+export function buildMemoryExtractionInstructions(existingMemories: UserMemory[]): string {
+  let existingList = '';
+  if (existingMemories.length > 0) {
+    const lines = existingMemories.map(m => `- [${m.category}] "${m.content}" (confidence: ${m.confidence})`);
+    existingList = `\nYour existing notebook entries:\n${lines.join('\n')}\n`;
+  }
+
+  return `
+## Coach's Notebook
+
+You keep a notebook of important observations. In the ---DATA--- block, optionally include:
+
+"memories": [{ "action": "create" or "supersede", "category": "preference/coaching_insight/pattern/fact/identity/session_observation", "content": "1-2 sentence observation", "confidence": 1-5, "supersedes_content": "substring of old memory to replace (only for supersede)" }]
+"daily_log": "Brief summary of this interaction"
+${existingList}
+Rules:
+- Only save genuinely important/persistent observations
+- Don't duplicate existing memories — use "supersede" action if updating an existing one
+- Keep content to 1-2 sentences
+- 0 memories is fine if nothing notable emerged
+- IMPORTANT: Your conversation history is limited. If they share something important, SAVE IT NOW — you won't remember it later.
+- "identity" = core personality, motivation, who they are as a person
+- "preference" = how they like to train, communicate, what they enjoy
+- "fact" = objective facts (competition dates, job, gym name, training partners)
+- "coaching_insight" = your observations about their game, tendencies, areas to develop
+- "session_observation" = specific things from a single session (ephemeral)
+- "pattern" = recurring behaviors you've noticed across multiple interactions`;
+}
+
 // ── Onboarding prompt ───────────────────────────────────────────────────────
 
 export interface OnboardingContext {
   user: User;
+  memories?: UserMemory[];
+  dailyLogs?: UserDailyLog[];
 }
 
 export function buildOnboardingPrompt(ctx: OnboardingContext): string {
-  const { user } = ctx;
+  const { user, memories = [], dailyLogs = [] } = ctx;
 
   const knownFields: string[] = [];
   const missingFields: string[] = [];
@@ -157,6 +231,7 @@ Rules:
 - If they volunteer info about something you haven't asked yet, accept it naturally
 
 ${buildProfileSection(user)}
+${buildMemorySection(memories, dailyLogs)}
 
 ## IMPORTANT: Data Extraction
 
@@ -181,7 +256,9 @@ Field rules:
 
 Set onboarding_complete to true ONLY when you have AT MINIMUM: name, experience (months or approximate), and training schedule (at least which days). Other fields are nice to have but not required to complete onboarding.
 
-Only include fields you learned NEW information about in this exchange. Use null for fields with no new info. Always include onboarding_complete.`;
+Only include fields you learned NEW information about in this exchange. Use null for fields with no new info. Always include onboarding_complete.
+
+${buildMemoryExtractionInstructions(memories)}`;
 }
 
 // ── Morning Check-In prompt ─────────────────────────────────────────────────
@@ -191,10 +268,12 @@ export interface CheckInContext {
   recentSessions: TrainingSession[];
   activeFocus: FocusPeriod | undefined;
   goals: Goal[];
+  memories?: UserMemory[];
+  dailyLogs?: UserDailyLog[];
 }
 
 export function buildCheckInPrompt(ctx: CheckInContext): string {
-  const { user, recentSessions, activeFocus, goals } = ctx;
+  const { user, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -215,6 +294,7 @@ Rules:
 - If they respond with details about their day or ask questions, handle it naturally
 
 ${buildProfileSection(user)}
+${buildMemorySection(memories, dailyLogs)}
 ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildSessionsSection(recentSessions)}
@@ -237,7 +317,9 @@ Set checkin_complete to true when:
 - They give a clear answer about today's plans
 
 Keep checkin_complete false if the conversation is still ambiguous or ongoing.
-Only include fields you learned NEW information about. Use null for unknown fields. Always include checkin_complete.`;
+Only include fields you learned NEW information about. Use null for unknown fields. Always include checkin_complete.
+
+${buildMemoryExtractionInstructions(memories)}`;
 }
 
 // ── Free Chat prompt ────────────────────────────────────────────────────────
@@ -249,10 +331,12 @@ export interface FreeChatContext {
   recentSessions: TrainingSession[];
   activeFocus: FocusPeriod | undefined;
   goals: Goal[];
+  memories?: UserMemory[];
+  dailyLogs?: UserDailyLog[];
 }
 
 export function buildFreeChatPrompt(ctx: FreeChatContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -273,11 +357,63 @@ If they report on training, ask follow-up questions and note key takeaways.
 If they ask about technique, connect it to positions and techniques they already know.
 
 ${buildProfileSection(user)}
+${buildMemorySection(memories, dailyLogs)}
 ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}
 ${buildTechniquesSection(techniques)}
-${buildSessionsSection(recentSessions)}`;
+${buildSessionsSection(recentSessions)}
+
+## Data Extraction
+
+After your conversational response, you MAY append a data block if you observed something worth remembering OR if the user shared training/profile information. Write your response first, then add:
+
+---DATA---
+{
+  "memories": [],
+  "daily_log": "Brief summary or null",
+  "session": null,
+  "profile_updates": null
+}
+
+### Session Logging (IMPORTANT)
+
+If the user mentions they trained, finished training, drilled something, rolled, competed, or otherwise did a BJJ session — even casually — log it in the "session" field:
+
+"session": {
+  "session_type": "gi/nogi/open_mat/competition/private or null",
+  "duration_minutes": number or null,
+  "positions_worked": "description or null",
+  "techniques_worked": "description or null",
+  "wins": "what went well or null",
+  "struggles": "what was hard or null",
+  "new_techniques_learned": "any new moves or null"
+}
+
+Triggers for session logging:
+- "training done", "just trained", "back from class", "we drilled X", "rolled today", etc.
+- Any past-tense description of training activity
+- Even partial info is valuable — log what you have (e.g. just techniques_worked is fine)
+
+Set "session" to null if no training was reported.
+
+### Profile Updates
+
+If the user shares new or changed information about their profile, include it in "profile_updates":
+
+"profile_updates": {
+  "training_schedule": {"monday": "06:00", "wednesday": "20:00"} or null,
+  "goals": "new goal description or null",
+  "injuries_limitations": "updated info or null",
+  "preferred_game_style": "updated style or null",
+  "current_focus_area": "updated focus or null"
+}
+
+Only include fields that changed. Set "profile_updates" to null if nothing changed.
+
+${buildMemoryExtractionInstructions(memories)}
+
+If nothing notable came up, you can skip the ---DATA--- block entirely.`;
 }
 
 // ── Pre-Session Briefing prompt ────────────────────────────────────────────
@@ -289,10 +425,12 @@ export interface BriefingContext {
   recentSessions: TrainingSession[];
   activeFocus: FocusPeriod | undefined;
   goals: Goal[];
+  memories?: UserMemory[];
+  dailyLogs?: UserDailyLog[];
 }
 
 export function buildBriefingPrompt(ctx: BriefingContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -310,6 +448,7 @@ If they respond saying they're not training today, be supportive — rest days m
 If they respond with questions or want to discuss the plan, help them naturally.
 
 ${buildProfileSection(user)}
+${buildMemorySection(memories, dailyLogs)}
 ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}
@@ -326,10 +465,12 @@ export interface DebriefContext {
   recentSessions: TrainingSession[];
   activeFocus: FocusPeriod | undefined;
   goals: Goal[];
+  memories?: UserMemory[];
+  dailyLogs?: UserDailyLog[];
 }
 
 export function buildDebriefPrompt(ctx: DebriefContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -369,7 +510,10 @@ Set debrief_complete to true when you have AT MINIMUM what they worked on and a 
 
 Only include fields you learned NEW information about. Use null for unknown fields. Always include debrief_complete.
 
+${buildMemoryExtractionInstructions(memories)}
+
 ${buildProfileSection(user)}
+${buildMemorySection(memories, dailyLogs)}
 ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}

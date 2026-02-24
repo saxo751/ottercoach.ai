@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { AIProvider } from '../../ai/provider.js';
+import type { AIProvider, TokenUsage } from '../../ai/provider.js';
 import type { User } from '../../db/types.js';
 import { buildDebriefPrompt } from '../../ai/prompts.js';
 import { parseAIResponse } from '../../ai/parser.js';
@@ -14,6 +14,9 @@ import { getUserLocalDate } from '../../utils/time.js';
 import { CONVERSATION_MODES, SESSION_TYPES } from '../../utils/constants.js';
 import type { SessionType } from '../../utils/constants.js';
 import { prepareMessagesForAI } from './messageUtils.js';
+import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
+import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
+import { logTokenUsage } from '../../db/queries/tokenUsage.js';
 
 /**
  * Post-session debrief handler.
@@ -36,6 +39,8 @@ export async function handleDebrief(
   const recentSessions = getRecentSessionsByUserId(db, user.id, 10);
   const activeFocus = getActiveFocusPeriod(db, user.id);
   const goals = getAllGoals(db, user.id);
+  const memories = getMemoriesForPrompt(db, user.id);
+  const dailyLogs = getRecentDailyLogs(db, user.id, 3);
 
   const systemPrompt = buildDebriefPrompt({
     user,
@@ -44,19 +49,25 @@ export async function handleDebrief(
     recentSessions,
     activeFocus,
     goals,
+    memories,
+    dailyLogs,
   });
 
   // Get conversation history and prepare for AI
   const history = getRecentMessages(db, user.id, 30);
   const messages = prepareMessagesForAI(history, userMessage);
 
-  const raw = await ai.sendMessage(systemPrompt, messages);
+  const { text: raw, usage } = await ai.sendMessage(systemPrompt, messages);
+  if (usage) logTokenUsage(db, user.id, 'debrief', usage);
   const { text, data } = parseAIResponse(raw);
 
   console.log(`[debrief] AI response for ${user.name}: text=${text.length} chars, data=${data ? JSON.stringify(data) : 'null'}`);
 
   // Process extracted session data
   if (data) {
+    // Process memory extraction
+    processMemoryExtraction(db, user.id, data, 'debrief');
+
     if (data.debrief_complete === true) {
       // Create training session record
       const today = getUserLocalDate(user.timezone || 'America/New_York');

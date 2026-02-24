@@ -154,3 +154,37 @@ export interface FeatureIdeaComment {
   content: string;
   created_at: string;
 }
+
+export interface UserMemory {
+  id: number;
+  user_id: string;
+  category: string;
+  content: string;
+  source_mode: string | null;
+  confidence: number;
+  status: string;
+  superseded_by: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UserDailyLog {
+  id: number;
+  user_id: string;
+  log_date: string;
+  entry_type: string;
+  content: string;
+  source_mode: string | null;
+  created_at: string;
+}
+
+export interface TokenUsageRecord {
+  id: number;
+  user_id: string;
+  mode: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens: number | null;
+  cache_read_input_tokens: number | null;
+  created_at: string;
+}

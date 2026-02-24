@@ -244,6 +244,62 @@ const migrations: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_feature_idea_comments_idea ON feature_idea_comments(idea_id);
     `,
   },
+  {
+    version: 9,
+    description: 'Create user_memories and user_daily_logs tables for LLM memory system',
+    up: `
+      CREATE TABLE IF NOT EXISTS user_memories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        category TEXT NOT NULL,
+        content TEXT NOT NULL,
+        source_mode TEXT,
+        confidence INTEGER NOT NULL DEFAULT 3,
+        status TEXT NOT NULL DEFAULT 'active',
+        superseded_by INTEGER,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id),
+        FOREIGN KEY (superseded_by) REFERENCES user_memories(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_user_memories_user_status ON user_memories(user_id, status);
+      CREATE INDEX IF NOT EXISTS idx_user_memories_user_cat_status ON user_memories(user_id, category, status);
+
+      CREATE TABLE IF NOT EXISTS user_daily_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        log_date TEXT NOT NULL,
+        entry_type TEXT NOT NULL,
+        content TEXT NOT NULL,
+        source_mode TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_user_daily_logs_user_date ON user_daily_logs(user_id, log_date DESC);
+    `,
+  },
+  {
+    version: 10,
+    description: 'Create token_usage table for per-user AI token tracking',
+    up: `
+      CREATE TABLE IF NOT EXISTS token_usage (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id TEXT NOT NULL,
+        mode TEXT NOT NULL,
+        input_tokens INTEGER NOT NULL,
+        output_tokens INTEGER NOT NULL,
+        cache_creation_input_tokens INTEGER,
+        cache_read_input_tokens INTEGER,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id)
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_token_usage_user ON token_usage(user_id, created_at);
+      CREATE INDEX IF NOT EXISTS idx_token_usage_created ON token_usage(created_at);
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

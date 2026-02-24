@@ -8,10 +8,22 @@ export interface AIProviderOptions {
   maxTokens?: number;
 }
 
+export interface TokenUsage {
+  input_tokens: number;
+  output_tokens: number;
+  cache_creation_input_tokens?: number;
+  cache_read_input_tokens?: number;
+}
+
+export interface AIResponse {
+  text: string;
+  usage?: TokenUsage;
+}
+
 export interface AIProvider {
   sendMessage(
     systemPrompt: string,
     messages: ConversationMessage[],
     options?: AIProviderOptions
-  ): Promise<string>;
+  ): Promise<AIResponse>;
 }

@@ -20,6 +20,7 @@ import { buildCheckInPrompt } from '../../ai/prompts.js';
 import { buildBriefingPrompt } from '../../ai/prompts.js';
 import { buildDebriefPrompt } from '../../ai/prompts.js';
 import { getUserLocalDate, getUserLocalTime, parseTrainingSchedule, parseTime } from '../../utils/time.js';
+import { getTokenUsageSummary } from '../../db/queries/tokenUsage.js';
 
 function buildUrl(path: string, secret: string, extraParams?: Record<string, string | number>): string {
   const params = new URLSearchParams({ secret });
@@ -1156,7 +1157,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
     let resultHtml: string;
     try {
       const start = Date.now();
-      const raw = await ai.sendMessage(systemPrompt, messages);
+      const { text: raw } = await ai.sendMessage(systemPrompt, messages);
       const elapsed = Date.now() - start;
 
       // Parse but don't act on data
@@ -1360,7 +1361,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
 
       try {
         const start = Date.now();
-        const raw = await ai.sendMessage(systemPrompt, messages);
+        const { text: raw } = await ai.sendMessage(systemPrompt, messages);
         const elapsed = Date.now() - start;
 
         const dataDelim = '---DATA---';
@@ -1411,6 +1412,12 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
   // Import technique library data (descriptions + youtube URLs)
   // POST /api/admin/import-technique-library?secret=...
   // Body: [{ id: number, youtube_url: string | null, description: string | null }, ...]
+  router.get('/token-usage', (req, res) => {
+    const days = req.query.days ? parseInt(req.query.days as string, 10) : undefined;
+    const rows = getTokenUsageSummary(db, days);
+    res.json(rows);
+  });
+
   router.post('/import-technique-library', (req, res) => {
     const rows = req.body;
     if (!Array.isArray(rows)) {

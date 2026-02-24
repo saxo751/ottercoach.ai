@@ -6,6 +6,8 @@ import type { Platform } from '../utils/constants.js';
 import type { User } from '../db/types.js';
 import { CONVERSATION_MODES } from '../utils/constants.js';
 import { getOnboardedUsers, setScheduledAction, setConversationMode } from '../db/queries/users.js';
+import { pruneOldDailyLogs } from '../db/queries/dailyLogs.js';
+import { archiveStaleObservations } from '../db/queries/memories.js';
 import { getPrimaryChannel } from '../db/queries/channels.js';
 import { addMessage, getLastMessage } from '../db/queries/conversations.js';
 import { getUserLocalTime, getUserLocalDate, parseTrainingSchedule, parseTime } from '../utils/time.js';
@@ -23,6 +25,7 @@ import { handleDebrief } from '../core/handlers/debrief.js';
  */
 export class Scheduler {
   private task: cron.ScheduledTask | null = null;
+  private lastCleanupDate: string | null = null;
 
   constructor(
     private db: Database.Database,
@@ -50,6 +53,21 @@ export class Scheduler {
   }
 
   private async tick(): Promise<void> {
+    // Daily memory cleanup (runs once per day)
+    const today = new Date().toISOString().split('T')[0];
+    if (this.lastCleanupDate !== today) {
+      this.lastCleanupDate = today;
+      try {
+        const prunedLogs = pruneOldDailyLogs(this.db, 30);
+        const archivedMems = archiveStaleObservations(this.db, 30);
+        if (prunedLogs > 0 || archivedMems > 0) {
+          console.log(`[scheduler] Daily cleanup: pruned ${prunedLogs} old daily logs, archived ${archivedMems} stale observations`);
+        }
+      } catch (err) {
+        console.error('[scheduler] Memory cleanup error:', err);
+      }
+    }
+
     const users = getOnboardedUsers(this.db);
     if (users.length === 0) return;
 

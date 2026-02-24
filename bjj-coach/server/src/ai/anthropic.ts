@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import type { AIProvider, ConversationMessage, AIProviderOptions } from './provider.js';
+import type { AIProvider, ConversationMessage, AIProviderOptions, AIResponse } from './provider.js';
 
 export class AnthropicProvider implements AIProvider {
   private client: Anthropic;
@@ -14,7 +14,7 @@ export class AnthropicProvider implements AIProvider {
     systemPrompt: string,
     messages: ConversationMessage[],
     options: AIProviderOptions = {}
-  ): Promise<string> {
+  ): Promise<AIResponse> {
     const response = await this.client.messages.create({
       model: this.model,
       max_tokens: options.maxTokens || 1024,
@@ -27,7 +27,16 @@ export class AnthropicProvider implements AIProvider {
     });
 
     const block = response.content[0];
-    if (block.type === 'text') return block.text;
-    return '';
+    const text = block.type === 'text' ? block.text : '';
+
+    return {
+      text,
+      usage: {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+        cache_creation_input_tokens: (response.usage as any).cache_creation_input_tokens ?? undefined,
+        cache_read_input_tokens: (response.usage as any).cache_read_input_tokens ?? undefined,
+      },
+    };
   }
 }

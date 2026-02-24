@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { AIProvider, ConversationMessage } from '../../ai/provider.js';
+import type { AIProvider, ConversationMessage, TokenUsage } from '../../ai/provider.js';
 import type { User } from '../../db/types.js';
 import { buildOnboardingPrompt } from '../../ai/prompts.js';
 import { parseAIResponse } from '../../ai/parser.js';
@@ -7,6 +7,9 @@ import { getUserById, updateUser } from '../../db/queries/users.js';
 import { getRecentMessages } from '../../db/queries/conversations.js';
 import { createGoal } from '../../db/queries/goals.js';
 import { CONVERSATION_MODES } from '../../utils/constants.js';
+import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
+import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
+import { logTokenUsage } from '../../db/queries/tokenUsage.js';
 
 export async function handleOnboarding(
   db: Database.Database,
@@ -14,8 +17,12 @@ export async function handleOnboarding(
   user: User,
   userMessage: string
 ): Promise<string> {
+  // Load memories for context
+  const memories = getMemoriesForPrompt(db, user.id);
+  const dailyLogs = getRecentDailyLogs(db, user.id, 3);
+
   // Build system prompt with current profile state
-  const systemPrompt = buildOnboardingPrompt({ user });
+  const systemPrompt = buildOnboardingPrompt({ user, memories, dailyLogs });
 
   // Get conversation history
   const history = getRecentMessages(db, user.id, 30);
@@ -28,11 +35,15 @@ export async function handleOnboarding(
   messages.push({ role: 'user', content: userMessage });
 
   // Get AI response
-  const raw = await ai.sendMessage(systemPrompt, messages);
+  const { text: raw, usage } = await ai.sendMessage(systemPrompt, messages);
+  if (usage) logTokenUsage(db, user.id, 'onboarding', usage);
   const { text, data } = parseAIResponse(raw);
 
   // Apply extracted data to user profile
   if (data) {
+    // Process memory extraction
+    processMemoryExtraction(db, user.id, data, 'onboarding');
+
     const updates: Partial<User> = {};
 
     if (data.name && typeof data.name === 'string') updates.name = data.name;

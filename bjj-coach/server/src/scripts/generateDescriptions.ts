@@ -65,7 +65,7 @@ Example response format:
 
   const userMessage = `Generate step-by-step descriptions for these ${techniques.length} BJJ techniques:\n\n${techniqueList}`;
 
-  const response = await ai.sendMessage(
+  const { text: response } = await ai.sendMessage(
     systemPrompt,
     [{ role: 'user', content: userMessage }],
     { temperature: 0.3, maxTokens: 4096 }

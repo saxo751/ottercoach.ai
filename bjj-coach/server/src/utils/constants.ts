@@ -27,3 +27,6 @@ export const POSITION_CATEGORIES = ['guard', 'top_control', 'bottom', 'transitio
 export type PositionCategory = typeof POSITION_CATEGORIES[number];
 
 export const DATA_DELIMITER = '---DATA---';
+
+export const MEMORY_CATEGORIES = ['preference', 'coaching_insight', 'pattern', 'fact', 'identity', 'session_observation'] as const;
+export type MemoryCategory = typeof MEMORY_CATEGORIES[number];
