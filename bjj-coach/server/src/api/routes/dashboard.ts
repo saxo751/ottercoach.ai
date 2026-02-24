@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { Telegraf } from 'telegraf';
 import type Database from 'better-sqlite3';
 import { findUserByPlatformId } from '../../db/queries/channels.js';
 import { verifyToken } from '../../utils/jwt.js';
@@ -9,8 +10,9 @@ import { getRecentSessionsByUserId } from '../../db/queries/sessions.js';
 import { getActiveFocusPeriod } from '../../db/queries/focusPeriods.js';
 import { getAllGoals } from '../../db/queries/goals.js';
 import { getAllLibraryTechniques, getLibraryByCategory, searchLibrary } from '../../db/queries/techniqueLibrary.js';
+import type { TelegramBotManager } from '../../channels/telegram.js';
 
-export function createDashboardRouter(db: Database.Database): Router {
+export function createDashboardRouter(db: Database.Database, telegramManager?: TelegramBotManager): Router {
   const router = Router();
 
   // --- Public routes (no auth required) ---
@@ -63,7 +65,13 @@ export function createDashboardRouter(db: Database.Database): Router {
   });
 
   router.get('/profile', (req, res) => {
-    res.json((req as any).user);
+    const user = { ...(req as any).user };
+    // Mask telegram bot token — only expose last 4 chars
+    if (user.telegram_bot_token) {
+      user.telegram_bot_token = '...' + user.telegram_bot_token.slice(-4);
+    }
+    user.has_telegram_bot = !!(req as any).user.telegram_bot_token;
+    res.json(user);
   });
 
   router.put('/profile', (req, res) => {
@@ -129,6 +137,59 @@ export function createDashboardRouter(db: Database.Database): Router {
   router.get('/goals', (req, res) => {
     const goals = getAllGoals(db, (req as any).userId);
     res.json(goals);
+  });
+
+  // --- Telegram bot management ---
+
+  router.post('/telegram/validate', async (req, res) => {
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') {
+      res.status(400).json({ valid: false, error: 'Token is required' });
+      return;
+    }
+
+    try {
+      const tempBot = new Telegraf(token.trim());
+      const me = await tempBot.telegram.getMe();
+      res.json({ valid: true, bot_username: me.username });
+    } catch (err: any) {
+      res.json({ valid: false, error: 'Invalid bot token' });
+    }
+  });
+
+  router.put('/telegram/token', async (req, res) => {
+    const userId = (req as any).userId as string;
+    const { token } = req.body;
+
+    if (token === null || token === '') {
+      // Disconnect: clear token and stop bot
+      updateUser(db, userId, { telegram_bot_token: null } as any);
+      if (telegramManager) {
+        await telegramManager.stopBotForUser(userId);
+      }
+      res.json({ success: true });
+      return;
+    }
+
+    if (typeof token !== 'string') {
+      res.status(400).json({ error: 'Token must be a string' });
+      return;
+    }
+
+    try {
+      const tempBot = new Telegraf(token.trim());
+      const me = await tempBot.telegram.getMe();
+
+      updateUser(db, userId, { telegram_bot_token: token.trim() } as any);
+
+      if (telegramManager) {
+        await telegramManager.startBotForUser(userId, token.trim());
+      }
+
+      res.json({ success: true, bot_username: me.username });
+    } catch (err: any) {
+      res.status(400).json({ error: 'Invalid bot token' });
+    }
   });
 
   return router;

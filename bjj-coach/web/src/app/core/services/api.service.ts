@@ -47,6 +47,20 @@ export class ApiService {
     return this.http.get<LibraryTechnique[]>(`${this.baseUrl}/library`, { params });
   }
 
+  // --- Telegram ---
+
+  validateTelegramToken(token: string): Observable<{ valid: boolean; bot_username?: string; error?: string }> {
+    return this.http.post<{ valid: boolean; bot_username?: string; error?: string }>(
+      `${this.baseUrl}/telegram/validate`, { token }
+    );
+  }
+
+  setTelegramToken(token: string | null): Observable<{ success: boolean; bot_username?: string }> {
+    return this.http.put<{ success: boolean; bot_username?: string }>(
+      `${this.baseUrl}/telegram/token`, { token }
+    );
+  }
+
   // --- Feature Ideas ---
   private ideasUrl = environment.apiUrl + '/ideas';
 

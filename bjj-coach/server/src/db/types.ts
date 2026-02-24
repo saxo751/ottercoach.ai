@@ -18,6 +18,7 @@ export interface User {
   onboarding_complete: number;          // SQLite boolean: 0 or 1
   last_scheduled_action: string | null; // 'briefing' | 'debrief' | null
   last_scheduled_date: string | null;   // 'YYYY-MM-DD' — resets daily
+  telegram_bot_token: string | null;
   created_at: string;
   updated_at: string;
 }

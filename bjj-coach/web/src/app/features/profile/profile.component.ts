@@ -6,6 +6,7 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import type { User } from '../../shared/models';
 
+
 const BELT_OPTIONS = [
   { value: 'white', label: 'White', color: '#f0ece4', textColor: '#1a1a1a', border: true },
   { value: 'blue', label: 'Blue', color: '#3b82f6', textColor: '#fff', border: false },
@@ -127,6 +128,44 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                 <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
               </select>
             </div>
+
+            <!-- Telegram Bot -->
+            <h2 class="section-title section-title--spaced">Telegram Bot</h2>
+
+            <div *ngIf="hasTelegramBot" class="telegram-status">
+              <div class="telegram-connected">
+                <span class="telegram-badge">Connected</span>
+                <span class="telegram-token-masked">Token: {{ maskedTelegramToken }}</span>
+              </div>
+              <button class="btn-disconnect" (click)="disconnectTelegram()" [disabled]="telegramSaving">
+                {{ telegramSaving ? 'Disconnecting...' : 'Disconnect' }}
+              </button>
+            </div>
+
+            <div *ngIf="!hasTelegramBot">
+              <div class="botfather-guide">
+                <p class="guide-title">Connect your Telegram bot:</p>
+                <ol class="guide-steps">
+                  <li>Open Telegram and search for <strong>&#64;BotFather</strong></li>
+                  <li>Send <code>/newbot</code> and follow the prompts</li>
+                  <li>Paste the API token below</li>
+                </ol>
+              </div>
+
+              <div class="field">
+                <label class="field-label">Bot token</label>
+                <div class="token-input-row">
+                  <input type="text" class="field-input" [(ngModel)]="telegramToken"
+                         placeholder="123456:ABC-DEF..." autocomplete="off" />
+                  <button class="btn-validate" (click)="connectTelegram()" [disabled]="!telegramToken.trim() || telegramSaving">
+                    {{ telegramSaving ? 'Connecting...' : 'Validate & Connect' }}
+                  </button>
+                </div>
+                <p class="field-hint telegram-error" *ngIf="telegramError">{{ telegramError }}</p>
+              </div>
+            </div>
+
+            <p class="telegram-success-msg" *ngIf="telegramSuccess">{{ telegramSuccess }}</p>
 
             <!-- Messages -->
             <p class="success-msg" *ngIf="successMsg">{{ successMsg }}</p>
@@ -359,6 +398,127 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       font-weight: 600;
     }
 
+    /* Telegram section */
+    .section-title--spaced {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: var(--border-subtle);
+    }
+
+    .telegram-status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--color-surface);
+      border: var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .telegram-connected {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .telegram-badge {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      color: var(--color-success, #16a34a);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .telegram-token-masked {
+      font-family: var(--font-mono, monospace);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .btn-disconnect {
+      background: transparent;
+      border: 1px solid var(--color-danger, #dc2626);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      color: var(--color-danger, #dc2626);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-disconnect:hover:not(:disabled) {
+      background: var(--color-danger, #dc2626);
+      color: #fff;
+    }
+    .btn-disconnect:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .botfather-guide {
+      background: var(--color-surface);
+      border: var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .guide-title {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    .guide-steps {
+      margin: 0;
+      padding-left: 20px;
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    .guide-steps code {
+      background: var(--color-surface-muted);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: var(--text-xs);
+    }
+    .token-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .token-input-row .field-input {
+      flex: 1;
+    }
+    .btn-validate {
+      background: var(--color-surface);
+      border: var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s;
+    }
+    .btn-validate:hover:not(:disabled) {
+      border-color: var(--color-accent);
+    }
+    .btn-validate:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+    .telegram-error {
+      color: var(--color-danger) !important;
+    }
+    .telegram-success-msg {
+      color: var(--color-success, #16a34a);
+      font-size: var(--text-sm);
+      margin-bottom: 12px;
+      padding: 8px 12px;
+      background: #f0fdf4;
+      border-radius: 6px;
+      border: 1px solid #bbf7d0;
+    }
+
     @media (max-width: 480px) {
       .profile-body { padding: 20px 16px; }
     }
@@ -389,6 +549,14 @@ export class ProfileComponent implements OnInit {
       .map((day, i) => ({ day, label: this.dayLabels[i] }))
       .filter(entry => this.daySchedule[entry.day]);
   }
+
+  // Telegram
+  hasTelegramBot = false;
+  maskedTelegramToken = '';
+  telegramToken = '';
+  telegramSaving = false;
+  telegramError = '';
+  telegramSuccess = '';
 
   // State
   loading = true;
@@ -482,6 +650,49 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  connectTelegram(): void {
+    this.telegramError = '';
+    this.telegramSuccess = '';
+    this.telegramSaving = true;
+
+    this.api.setTelegramToken(this.telegramToken.trim()).subscribe({
+      next: (res) => {
+        this.telegramSaving = false;
+        if (res.success) {
+          this.hasTelegramBot = true;
+          this.maskedTelegramToken = '...' + this.telegramToken.trim().slice(-4);
+          this.telegramToken = '';
+          this.telegramSuccess = `Bot connected${res.bot_username ? ` (@${res.bot_username})` : ''}! Open Telegram and send /start to your bot.`;
+        }
+      },
+      error: (err) => {
+        this.telegramSaving = false;
+        this.telegramError = err.error?.error || 'Failed to connect bot. Check your token.';
+      },
+    });
+  }
+
+  disconnectTelegram(): void {
+    if (!confirm('Disconnect your Telegram bot? You can reconnect later.')) return;
+
+    this.telegramError = '';
+    this.telegramSuccess = '';
+    this.telegramSaving = true;
+
+    this.api.setTelegramToken(null).subscribe({
+      next: () => {
+        this.telegramSaving = false;
+        this.hasTelegramBot = false;
+        this.maskedTelegramToken = '';
+        this.telegramSuccess = 'Telegram bot disconnected.';
+      },
+      error: () => {
+        this.telegramSaving = false;
+        this.telegramError = 'Failed to disconnect. Please try again.';
+      },
+    });
+  }
+
   private populateForm(user: User): void {
     this.name = user.name || '';
     this.email = user.email || '';
@@ -493,6 +704,10 @@ export class ProfileComponent implements OnInit {
     this.goals = user.goals || '';
     this.timezone = user.timezone || '';
     this.updatedAt = user.updated_at ? new Date(user.updated_at).toLocaleDateString() : '';
+
+    // Telegram
+    this.hasTelegramBot = !!user.has_telegram_bot;
+    this.maskedTelegramToken = user.telegram_bot_token || '';
 
     // Parse training_days — JSON object {"monday":"19:00"} or legacy array ["monday","wednesday"]
     this.daySchedule = {};

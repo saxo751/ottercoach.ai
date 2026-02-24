@@ -19,6 +19,7 @@ export interface SignupData {
   experience_months: number;
   training_days: string;
   goals: string;
+  telegram_bot_token?: string;
 }
 
 interface LoginData {

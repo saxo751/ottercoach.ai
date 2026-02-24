@@ -24,6 +24,7 @@ export function createUser(db: Database.Database, overrides: Partial<User> = {})
     onboarding_complete: overrides.onboarding_complete ?? 0,
     last_scheduled_action: overrides.last_scheduled_action || null,
     last_scheduled_date: overrides.last_scheduled_date || null,
+    telegram_bot_token: overrides.telegram_bot_token || null,
     created_at: now,
     updated_at: now,
   };
@@ -31,10 +32,10 @@ export function createUser(db: Database.Database, overrides: Partial<User> = {})
   db.prepare(`
     INSERT INTO users (id, email, password_hash, name, belt_rank, experience_months, preferred_game_style,
       training_days, typical_training_time, injuries_limitations, current_focus_area,
-      goals, timezone, conversation_mode, onboarding_complete, created_at, updated_at)
+      goals, timezone, conversation_mode, onboarding_complete, telegram_bot_token, created_at, updated_at)
     VALUES (@id, @email, @password_hash, @name, @belt_rank, @experience_months, @preferred_game_style,
       @training_days, @typical_training_time, @injuries_limitations, @current_focus_area,
-      @goals, @timezone, @conversation_mode, @onboarding_complete, @created_at, @updated_at)
+      @goals, @timezone, @conversation_mode, @onboarding_complete, @telegram_bot_token, @created_at, @updated_at)
   `).run(user);
 
   return user;
@@ -49,7 +50,7 @@ export function updateUser(db: Database.Database, id: string, fields: Partial<Us
     'email', 'password_hash', 'name', 'belt_rank', 'experience_months', 'preferred_game_style',
     'training_days', 'typical_training_time', 'injuries_limitations',
     'current_focus_area', 'goals', 'timezone', 'conversation_mode',
-    'onboarding_complete', 'last_scheduled_action', 'last_scheduled_date',
+    'onboarding_complete', 'last_scheduled_action', 'last_scheduled_date', 'telegram_bot_token',
   ];
 
   const updates: string[] = [];

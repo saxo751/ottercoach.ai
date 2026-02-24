@@ -300,6 +300,13 @@ const migrations: Migration[] = [
       CREATE INDEX IF NOT EXISTS idx_token_usage_created ON token_usage(created_at);
     `,
   },
+  {
+    version: 11,
+    description: 'Add telegram_bot_token column to users for per-user Telegram bots',
+    up: `
+      ALTER TABLE users ADD COLUMN telegram_bot_token TEXT;
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

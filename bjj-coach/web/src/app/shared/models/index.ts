@@ -13,6 +13,8 @@ export interface User {
   timezone: string;
   conversation_mode: string;
   onboarding_complete: number;
+  telegram_bot_token?: string | null;
+  has_telegram_bot?: boolean;
   created_at: string;
   updated_at: string;
 }

@@ -2,7 +2,9 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService, type SignupData } from '../../core/services/auth.service';
+import { environment } from '../../../environments/environment';
 
 const BELT_OPTIONS = [
   { value: 'white', label: 'White', color: '#f0ece4', textColor: '#1a1a1a', border: true },
@@ -44,7 +46,7 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
         <div class="retro-window__body signup-body">
           <!-- Step indicator -->
           <div class="steps">
-            <div class="step" *ngFor="let s of [1,2,3]; let i = index"
+            <div class="step" *ngFor="let s of [1,2,3,4]; let i = index"
                  [class.step--active]="step === s"
                  [class.step--done]="step > s">
               <div class="step__circle">{{ step > s ? '✓' : s }}</div>
@@ -141,6 +143,35 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             </div>
           </div>
 
+          <!-- Step 4: Telegram (optional) -->
+          <div class="step-content" *ngIf="step === 4">
+            <h2 class="step-title">Connect Telegram</h2>
+            <p class="step-desc">Get coaching messages right in Telegram. This is optional — you can set it up later from your profile.</p>
+
+            <div class="botfather-guide">
+              <p class="guide-title">Quick setup:</p>
+              <ol class="guide-steps">
+                <li>Open Telegram and search for <strong>&#64;BotFather</strong></li>
+                <li>Send <code>/newbot</code> and follow the prompts</li>
+                <li>Copy the API token BotFather gives you</li>
+                <li>Paste it below</li>
+              </ol>
+            </div>
+
+            <div class="field">
+              <label class="field-label">Bot token</label>
+              <div class="token-input-row">
+                <input type="text" class="field-input" [(ngModel)]="telegramToken"
+                       placeholder="123456:ABC-DEF..." autocomplete="off" />
+                <button class="btn-validate" (click)="validateTelegram()" [disabled]="!telegramToken.trim() || validatingToken">
+                  {{ validatingToken ? 'Checking...' : 'Validate' }}
+                </button>
+              </div>
+              <p class="field-hint telegram-success" *ngIf="telegramValid">Bot verified: &#64;{{ telegramBotUsername }}</p>
+              <p class="field-hint telegram-error" *ngIf="telegramError">{{ telegramError }}</p>
+            </div>
+          </div>
+
           <!-- Error message -->
           <p class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</p>
 
@@ -148,11 +179,11 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
           <div class="nav-buttons">
             <button class="btn-back" *ngIf="step > 1" (click)="step = step - 1">&larr; Back</button>
             <span class="nav-spacer"></span>
-            <button class="btn-next" *ngIf="step < 3" (click)="nextStep()" [disabled]="!canAdvance()">
+            <button class="btn-next" *ngIf="step < 4" (click)="nextStep()" [disabled]="!canAdvance()">
               Next &rarr;
             </button>
-            <button class="btn-submit" *ngIf="step === 3" (click)="submit()" [disabled]="submitting">
-              {{ submitting ? 'Creating account...' : 'Create account' }}
+            <button class="btn-submit" *ngIf="step === 4" (click)="submit()" [disabled]="submitting">
+              {{ submitting ? 'Creating account...' : (telegramValid ? 'Create account' : 'Skip & create account') }}
             </button>
           </div>
 
@@ -418,6 +449,70 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       text-decoration: underline;
     }
 
+    /* BotFather guide */
+    .botfather-guide {
+      background: var(--color-surface);
+      border: var(--border-subtle);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+    }
+    .guide-title {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      margin: 0 0 8px;
+    }
+    .guide-steps {
+      margin: 0;
+      padding-left: 20px;
+      font-size: var(--text-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.6;
+    }
+    .guide-steps code {
+      background: var(--color-surface-muted);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: var(--text-xs);
+    }
+
+    /* Token input row */
+    .token-input-row {
+      display: flex;
+      gap: 8px;
+    }
+    .token-input-row .field-input {
+      flex: 1;
+    }
+    .btn-validate {
+      background: var(--color-surface);
+      border: var(--border-subtle);
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.15s;
+    }
+    .btn-validate:hover:not(:disabled) {
+      border-color: var(--color-accent);
+    }
+    .btn-validate:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
+    .telegram-success {
+      color: var(--color-success, #16a34a) !important;
+      font-weight: 600;
+    }
+    .telegram-error {
+      color: var(--color-danger) !important;
+    }
+
     @media (max-width: 480px) {
       .signup-body { padding: 20px 16px; }
       .steps { gap: 24px; }
@@ -427,7 +522,7 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 })
 export class SignupComponent {
   step = 1;
-  stepLabels = ['Basics', 'Background', 'Schedule'];
+  stepLabels = ['Basics', 'Background', 'Schedule', 'Telegram'];
 
   // Step 1
   name = '';
@@ -446,11 +541,18 @@ export class SignupComponent {
   days = DAYS;
   dayLabels = DAY_LABELS;
 
+  // Step 4: Telegram
+  telegramToken = '';
+  telegramValid = false;
+  telegramBotUsername = '';
+  validatingToken = false;
+  telegramError = '';
+
   // State
   submitting = false;
   errorMsg = '';
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, private http: HttpClient) {}
 
   get selectedDaysList(): { day: string; label: string }[] {
     return this.days
@@ -487,6 +589,31 @@ export class SignupComponent {
     }
   }
 
+  validateTelegram(): void {
+    this.telegramError = '';
+    this.telegramValid = false;
+    this.validatingToken = true;
+
+    this.http.post<{ valid: boolean; bot_username?: string; error?: string }>(
+      `${environment.apiUrl}/auth/validate-telegram`,
+      { token: this.telegramToken.trim() }
+    ).subscribe({
+      next: (res) => {
+        this.validatingToken = false;
+        if (res.valid) {
+          this.telegramValid = true;
+          this.telegramBotUsername = res.bot_username || '';
+        } else {
+          this.telegramError = res.error || 'Invalid token';
+        }
+      },
+      error: () => {
+        this.validatingToken = false;
+        this.telegramError = 'Failed to validate token. Please try again.';
+      },
+    });
+  }
+
   submit(): void {
     this.errorMsg = '';
     this.submitting = true;
@@ -500,6 +627,10 @@ export class SignupComponent {
       training_days: JSON.stringify(this.daySchedule),
       goals: this.goals.trim(),
     };
+
+    if (this.telegramValid && this.telegramToken.trim()) {
+      data.telegram_bot_token = this.telegramToken.trim();
+    }
 
     this.auth.signup(data).subscribe({
       next: () => {
