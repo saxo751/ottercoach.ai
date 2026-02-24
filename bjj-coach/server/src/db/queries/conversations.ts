@@ -28,3 +28,16 @@ export function getRecentMessages(
     LIMIT ?
   `).all(userId, limit).reverse() as ConversationEntry[];
 }
+
+/** Returns the most recent message (any role) for a user, or undefined. */
+export function getLastMessage(
+  db: Database.Database,
+  userId: string
+): ConversationEntry | undefined {
+  return db.prepare(`
+    SELECT * FROM conversation_history
+    WHERE user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `).get(userId) as ConversationEntry | undefined;
+}

@@ -184,6 +184,62 @@ Set onboarding_complete to true ONLY when you have AT MINIMUM: name, experience 
 Only include fields you learned NEW information about in this exchange. Use null for fields with no new info. Always include onboarding_complete.`;
 }
 
+// ── Morning Check-In prompt ─────────────────────────────────────────────────
+
+export interface CheckInContext {
+  user: User;
+  recentSessions: TrainingSession[];
+  activeFocus: FocusPeriod | undefined;
+  goals: Goal[];
+}
+
+export function buildCheckInPrompt(ctx: CheckInContext): string {
+  const { user, recentSessions, activeFocus, goals } = ctx;
+
+  return `${COACH_PERSONA}
+
+## Current Mode: MORNING CHECK-IN
+
+You're checking in with your student in the morning. This is a proactive message — they didn't text you first.
+
+Your message should:
+1. Greet them naturally (keep it short — "Hey!", "Morning!", etc.)
+2. Ask if they're training today
+3. If they confirm, ask what time (unless you already know their schedule)
+4. If they say no / rest day, be supportive — rest is part of the game
+
+Rules:
+- Keep it to 1-2 sentences. This is a quick morning text, not a conversation.
+- Be warm but brief — they're probably just waking up
+- Don't give training advice yet — save that for the briefing
+- If they respond with details about their day or ask questions, handle it naturally
+
+${buildProfileSection(user)}
+${buildGoalsSection(goals)}
+${buildFocusPeriodSection(activeFocus)}
+${buildSessionsSection(recentSessions)}
+
+## IMPORTANT: Data Extraction
+
+After EVERY response, you MUST append a data block. Write your conversational response first, then add:
+
+---DATA---
+{
+  "training_confirmed": true/false/null,
+  "training_time": "HH:MM or null",
+  "rest_day": true/false/null,
+  "checkin_complete": false
+}
+
+Set checkin_complete to true when:
+- They confirm they're training (training_confirmed: true) — with or without a time
+- They say it's a rest day (rest_day: true)
+- They give a clear answer about today's plans
+
+Keep checkin_complete false if the conversation is still ambiguous or ongoing.
+Only include fields you learned NEW information about. Use null for unknown fields. Always include checkin_complete.`;
+}
+
 // ── Free Chat prompt ────────────────────────────────────────────────────────
 
 export interface FreeChatContext {
@@ -287,7 +343,13 @@ Your job:
 3. If they mention new things they learned, take note
 4. Be encouraging but also honest — if they mention struggles, help them see the path forward
 
-This is a multi-turn conversation. Keep asking follow-up questions until you have a clear picture of their session. Don't try to extract everything in one message.
+This is a SHORT multi-turn conversation — 2-3 exchanges max. Ask one good follow-up, then wrap up. Don't interrogate them.
+
+Completion rules:
+- After 2 exchanges (user answered twice), you MUST set debrief_complete to true with your next response
+- If the user gives a one-line answer like "it was good" or "just drilled", accept it and complete
+- If the user says "that's it" or anything that signals they're done, complete immediately
+- Better to log a short session than to keep asking and get no response
 
 After EVERY response, you MUST append a data block. Write your conversational response first, then add:
 
@@ -303,7 +365,7 @@ After EVERY response, you MUST append a data block. Write your conversational re
   "debrief_complete": false
 }
 
-Set debrief_complete to true ONLY when you feel you have a reasonable picture of their session (at minimum: what they worked on and how it went). Don't rush — it's okay to chat for a few messages.
+Set debrief_complete to true when you have AT MINIMUM what they worked on and a general sense of how it went. Don't wait for perfect data — something logged is better than nothing.
 
 Only include fields you learned NEW information about. Use null for unknown fields. Always include debrief_complete.
 

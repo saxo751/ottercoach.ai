@@ -8,6 +8,7 @@ import { getUserById, setConversationMode } from '../db/queries/users.js';
 import { addMessage } from '../db/queries/conversations.js';
 import { handleOnboarding } from './handlers/onboarding.js';
 import { handleFreeChat } from './handlers/freeChat.js';
+import { handleCheckIn } from './handlers/checkin.js';
 import { handleBriefing } from './handlers/briefing.js';
 import { handleDebrief } from './handlers/debrief.js';
 
@@ -68,7 +69,7 @@ export class CoachingEngine {
           break;
 
         case CONVERSATION_MODES.CHECK_IN:
-          response = await handleFreeChat(this.db, this.ai, currentUser, text);
+          response = await handleCheckIn(this.db, this.ai, currentUser, text);
           break;
 
         case CONVERSATION_MODES.BRIEFING:

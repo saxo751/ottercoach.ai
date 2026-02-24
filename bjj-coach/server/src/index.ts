@@ -47,7 +47,6 @@ async function main() {
   app.use('/api/auth', createAuthRouter(db));
   app.use('/api/dashboard', createDashboardRouter(db));
   app.use('/api/ideas', createIdeasRouter(db));
-  app.use('/api/admin', createAdminRouter(db));
 
   const server = createServer(app);
 
@@ -63,6 +62,9 @@ async function main() {
     const telegram = new TelegramAdapter(process.env.TELEGRAM_BOT_TOKEN!);
     channelManager.registerAdapter('telegram', telegram);
   }
+
+  // Admin router (needs ai + channelManager, so mounted after adapters)
+  app.use('/api/admin', createAdminRouter(db, ai, channelManager));
 
   // 5. Core coaching engine
   const engine = new CoachingEngine(db, ai, channelManager);

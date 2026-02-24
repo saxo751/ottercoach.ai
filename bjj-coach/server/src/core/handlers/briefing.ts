@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { AIProvider, ConversationMessage } from '../../ai/provider.js';
+import type { AIProvider } from '../../ai/provider.js';
 import type { User } from '../../db/types.js';
 import { buildBriefingPrompt } from '../../ai/prompts.js';
 import { getRecentMessages } from '../../db/queries/conversations.js';
@@ -8,6 +8,7 @@ import { getTechniquesByUserId } from '../../db/queries/techniques.js';
 import { getRecentSessionsByUserId } from '../../db/queries/sessions.js';
 import { getActiveFocusPeriod } from '../../db/queries/focusPeriods.js';
 import { getAllGoals } from '../../db/queries/goals.js';
+import { prepareMessagesForAI } from './messageUtils.js';
 
 /**
  * Pre-session briefing handler.
@@ -37,17 +38,9 @@ export async function handleBriefing(
     goals,
   });
 
-  // Get conversation history
+  // Get conversation history and prepare for AI
   const history = getRecentMessages(db, user.id, 30);
-  const messages: ConversationMessage[] = history.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }));
-
-  // Only add user message if non-empty (system-triggered has no user input)
-  if (userMessage) {
-    messages.push({ role: 'user', content: userMessage });
-  }
+  const messages = prepareMessagesForAI(history, userMessage);
 
   const response = await ai.sendMessage(systemPrompt, messages);
   return response.trim();

@@ -7,8 +7,9 @@ import type { User } from '../db/types.js';
 import { CONVERSATION_MODES } from '../utils/constants.js';
 import { getOnboardedUsers, setScheduledAction, setConversationMode } from '../db/queries/users.js';
 import { getPrimaryChannel } from '../db/queries/channels.js';
-import { addMessage } from '../db/queries/conversations.js';
-import { getUserLocalTime, getUserLocalDate } from '../utils/time.js';
+import { addMessage, getLastMessage } from '../db/queries/conversations.js';
+import { getUserLocalTime, getUserLocalDate, parseTrainingSchedule, parseTime } from '../utils/time.js';
+import { handleCheckIn } from '../core/handlers/checkin.js';
 import { handleBriefing } from '../core/handlers/briefing.js';
 import { handleDebrief } from '../core/handlers/debrief.js';
 
@@ -54,6 +55,8 @@ export class Scheduler {
 
     for (const user of users) {
       try {
+        // Auto-complete stale debriefs (and check-ins) before processing schedule
+        await this.timeoutStaleConversation(user);
         await this.processUser(user);
       } catch (err) {
         console.error(`[scheduler] Error processing user ${user.id}:`, err);
@@ -61,9 +64,44 @@ export class Scheduler {
     }
   }
 
+  /**
+   * If a user has been stuck in debrief or check-in mode with no new messages
+   * for 30+ minutes, auto-wrap it by sending a final AI call that forces completion.
+   */
+  private async timeoutStaleConversation(user: User): Promise<void> {
+    const mode = user.conversation_mode;
+    if (mode !== CONVERSATION_MODES.DEBRIEF && mode !== CONVERSATION_MODES.CHECK_IN) return;
+
+    const lastMsg = getLastMessage(this.db, user.id);
+    if (!lastMsg) return;
+
+    const ageMs = Date.now() - new Date(lastMsg.created_at).getTime();
+    const TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+
+    if (ageMs < TIMEOUT_MS) return;
+
+    console.log(`[scheduler] Timing out stale ${mode} for ${user.name || user.id} (${Math.round(ageMs / 60000)} min idle)`);
+
+    const channel = getPrimaryChannel(this.db, user.id);
+
+    if (mode === CONVERSATION_MODES.DEBRIEF) {
+      // Send a wrap-up message through the debrief handler
+      const wrapUpMessage = '[The user stopped responding. Wrap up the debrief now. Give a brief encouraging closing message and set debrief_complete to true with whatever information you have so far.]';
+      const response = await handleDebrief(this.db, this.ai, user, wrapUpMessage);
+
+      if (channel) {
+        addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
+        await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+      }
+    } else {
+      // Check-in timed out — just go back to idle
+      setConversationMode(this.db, user.id, CONVERSATION_MODES.IDLE);
+    }
+  }
+
   private async processUser(user: User): Promise<void> {
     // Parse training schedule
-    const schedule = this.parseTrainingSchedule(user.training_days);
+    const schedule = parseTrainingSchedule(user.training_days);
     if (!schedule) return;
 
     const timezone = user.timezone || 'America/New_York';
@@ -75,7 +113,7 @@ export class Scheduler {
     if (!todayTime) return; // Not a training day
 
     // Parse the training time (e.g. "19:00" → { hour: 19, minute: 0 })
-    const trainingTime = this.parseTime(todayTime);
+    const trainingTime = parseTime(todayTime);
     if (!trainingTime) return;
 
     // Current time in minutes since midnight
@@ -86,12 +124,23 @@ export class Scheduler {
     const alreadySentToday = user.last_scheduled_date === localDate;
     const lastAction = alreadySentToday ? user.last_scheduled_action : null;
 
+    // MORNING CHECK-IN WINDOW: 7:50am–8:10am user local time
+    // Skip if training is before 9am (go straight to briefing instead)
+    const checkinLow = 7 * 60 + 50;   // 7:50am
+    const checkinHigh = 8 * 60 + 10;   // 8:10am
+    const earlyTraining = trainingMinutes < 9 * 60; // before 9am
+
+    if (!lastAction && !earlyTraining && nowMinutes >= checkinLow && nowMinutes <= checkinHigh) {
+      await this.sendCheckIn(user, localDate);
+      return;
+    }
+
     // PRE-SESSION WINDOW: 20–40 min before training time
-    // Sends if nothing has been sent today yet
+    // Sends if check-in was sent or nothing was sent today
     const preLow = trainingMinutes - 40;
     const preHigh = trainingMinutes - 20;
 
-    if (!lastAction && nowMinutes >= preLow && nowMinutes <= preHigh) {
+    if ((!lastAction || lastAction === 'checkin') && nowMinutes >= preLow && nowMinutes <= preHigh) {
       await this.sendBriefing(user, localDate);
       return;
     }
@@ -105,6 +154,29 @@ export class Scheduler {
       await this.sendDebrief(user, localDate);
       return;
     }
+  }
+
+  private async sendCheckIn(user: User, localDate: string): Promise<void> {
+    const channel = getPrimaryChannel(this.db, user.id);
+    if (!channel) {
+      console.warn(`[scheduler] No channel for user ${user.id}, skipping check-in`);
+      return;
+    }
+
+    console.log(`[scheduler] Sending check-in to ${user.name || user.id}`);
+
+    // Set mode to CHECK_IN
+    setConversationMode(this.db, user.id, CONVERSATION_MODES.CHECK_IN);
+
+    // Generate the proactive message (empty user message = system-triggered)
+    const response = await handleCheckIn(this.db, this.ai, user, '');
+
+    // Store in conversation history and send
+    addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
+    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+
+    // Track that check-in was sent today
+    setScheduledAction(this.db, user.id, 'checkin', localDate);
   }
 
   private async sendBriefing(user: User, localDate: string): Promise<void> {
@@ -153,34 +225,4 @@ export class Scheduler {
     setScheduledAction(this.db, user.id, 'debrief', localDate);
   }
 
-  private parseTrainingSchedule(trainingDays: string | null): Record<string, string> | null {
-    if (!trainingDays) return null;
-
-    try {
-      const parsed = JSON.parse(trainingDays);
-
-      // New format: {"monday":"19:00","wednesday":"20:00"}
-      if (typeof parsed === 'object' && !Array.isArray(parsed)) {
-        return parsed as Record<string, string>;
-      }
-
-      // Legacy format: ["monday","wednesday"] — can't schedule without times
-      return null;
-    } catch {
-      return null;
-    }
-  }
-
-  private parseTime(time: string): { hour: number; minute: number } | null {
-    if (!time || time === 'unknown') return null;
-
-    const parts = time.split(':');
-    if (parts.length < 2) return null;
-
-    const hour = parseInt(parts[0], 10);
-    const minute = parseInt(parts[1], 10);
-
-    if (isNaN(hour) || isNaN(minute)) return null;
-    return { hour, minute };
-  }
 }

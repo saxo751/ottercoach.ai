@@ -1,5 +1,5 @@
 import type Database from 'better-sqlite3';
-import type { AIProvider, ConversationMessage } from '../../ai/provider.js';
+import type { AIProvider } from '../../ai/provider.js';
 import type { User } from '../../db/types.js';
 import { buildDebriefPrompt } from '../../ai/prompts.js';
 import { parseAIResponse } from '../../ai/parser.js';
@@ -13,6 +13,7 @@ import { setConversationMode } from '../../db/queries/users.js';
 import { getUserLocalDate } from '../../utils/time.js';
 import { CONVERSATION_MODES, SESSION_TYPES } from '../../utils/constants.js';
 import type { SessionType } from '../../utils/constants.js';
+import { prepareMessagesForAI } from './messageUtils.js';
 
 /**
  * Post-session debrief handler.
@@ -45,20 +46,14 @@ export async function handleDebrief(
     goals,
   });
 
-  // Get conversation history
+  // Get conversation history and prepare for AI
   const history = getRecentMessages(db, user.id, 30);
-  const messages: ConversationMessage[] = history.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }));
-
-  // Only add user message if non-empty (system-triggered has no user input)
-  if (userMessage) {
-    messages.push({ role: 'user', content: userMessage });
-  }
+  const messages = prepareMessagesForAI(history, userMessage);
 
   const raw = await ai.sendMessage(systemPrompt, messages);
   const { text, data } = parseAIResponse(raw);
+
+  console.log(`[debrief] AI response for ${user.name}: text=${text.length} chars, data=${data ? JSON.stringify(data) : 'null'}`);
 
   // Process extracted session data
   if (data) {

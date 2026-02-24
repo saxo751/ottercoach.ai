@@ -56,3 +56,43 @@ export function getUserLocalDate(timezone: string): string {
     return new Date().toISOString().split('T')[0];
   }
 }
+
+/**
+ * Parse a training_days JSON string into a day→time map.
+ * Supports new format {"monday":"19:00"} only — legacy array format returns null
+ * since scheduling requires specific times.
+ */
+export function parseTrainingSchedule(trainingDays: string | null): Record<string, string> | null {
+  if (!trainingDays) return null;
+
+  try {
+    const parsed = JSON.parse(trainingDays);
+
+    // New format: {"monday":"19:00","wednesday":"20:00"}
+    if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as Record<string, string>;
+    }
+
+    // Legacy format: ["monday","wednesday"] — can't schedule without times
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Parse a "HH:MM" time string into hour and minute components.
+ * Returns null for invalid or "unknown" values.
+ */
+export function parseTime(time: string): { hour: number; minute: number } | null {
+  if (!time || time === 'unknown') return null;
+
+  const parts = time.split(':');
+  if (parts.length < 2) return null;
+
+  const hour = parseInt(parts[0], 10);
+  const minute = parseInt(parts[1], 10);
+
+  if (isNaN(hour) || isNaN(minute)) return null;
+  return { hour, minute };
+}
