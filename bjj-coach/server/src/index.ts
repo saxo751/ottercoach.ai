@@ -48,7 +48,7 @@ async function main() {
   const telegramManager = new TelegramBotManager(db);
 
   app.use('/api/auth', createAuthRouter(db, telegramManager));
-  app.use('/api/dashboard', createDashboardRouter(db, telegramManager));
+  app.use('/api/dashboard', createDashboardRouter(db, telegramManager, ai));
   app.use('/api/ideas', createIdeasRouter(db));
 
   const server = createServer(app);

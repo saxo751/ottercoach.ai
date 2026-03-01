@@ -177,6 +177,7 @@ export function createAuthRouter(db: Database.Database, telegramManager?: Telegr
       email: user.email,
       belt_rank: user.belt_rank,
       onboarding_complete: user.onboarding_complete,
+      profile_picture: user.profile_picture || null,
     });
   });
 

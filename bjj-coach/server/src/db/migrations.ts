@@ -307,6 +307,68 @@ const migrations: Migration[] = [
       ALTER TABLE users ADD COLUMN telegram_bot_token TEXT;
     `,
   },
+  {
+    version: 12,
+    description: 'Add focus_period_id to training_sessions',
+    up: `
+      ALTER TABLE training_sessions ADD COLUMN focus_period_id INTEGER REFERENCES focus_periods(id);
+    `,
+  },
+  {
+    version: 13,
+    description: 'Add profile_picture column to users',
+    up: `
+      ALTER TABLE users ADD COLUMN profile_picture TEXT;
+    `,
+  },
+  {
+    version: 14,
+    description: 'Add Octopus Guard Sweep to technique library (superseded by v15)',
+    up: `
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Octopus Guard Sweep from Half Guard', 'sweep', 'Octopus Guard Sweep', 'Half Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Octopus+Guard+Sweep+from+Half+Guard+tutorial',
+        datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Octopus Guard Sweep' AND starting_position = 'Half Guard');
+    `,
+  },
+  {
+    version: 15,
+    description: 'Replace generic Octopus Guard Sweep with specific Octopus Guard techniques',
+    up: `
+      DELETE FROM technique_library WHERE subcategory = 'Octopus Guard Sweep' AND starting_position = 'Half Guard';
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Hip Bump Sweep from Octopus Guard', 'sweep', 'Hip Bump Sweep', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Hip+Bump+Sweep+from+Octopus+Guard+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Hip Bump Sweep' AND starting_position = 'Octopus Guard');
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Wrestle-Up from Octopus Guard', 'sweep', 'Wrestle-Up', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Wrestle-Up+from+Octopus+Guard+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Wrestle-Up' AND starting_position = 'Octopus Guard');
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Back Roll Sweep from Octopus Guard', 'sweep', 'Back Roll Sweep', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Back+Roll+Sweep+from+Octopus+Guard+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Back Roll Sweep' AND starting_position = 'Octopus Guard');
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Outside Hook (Kosoto) Sweep from Octopus Guard', 'sweep', 'Outside Hook (Kosoto) Sweep', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Outside+Hook+Kosoto+Sweep+from+Octopus+Guard+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Outside Hook (Kosoto) Sweep' AND starting_position = 'Octopus Guard');
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Octopus Guard Back Take from Octopus Guard', 'back_take', 'Octopus Guard Back Take', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Octopus+Guard+Back+Take+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Octopus Guard Back Take' AND starting_position = 'Octopus Guard');
+
+      INSERT INTO technique_library (name, category, subcategory, starting_position, youtube_url, youtube_search_url, created_at)
+      SELECT 'Guillotine Choke from Octopus Guard', 'submission', 'Guillotine Choke', 'Octopus Guard', NULL,
+        'https://www.youtube.com/results?search_query=bjj+Guillotine+Choke+from+Octopus+Guard+tutorial', datetime('now')
+      WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Guillotine Choke' AND starting_position = 'Octopus Guard');
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

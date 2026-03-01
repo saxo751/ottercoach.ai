@@ -72,10 +72,11 @@ export async function handleFreeChat(
         session_type: SESSION_TYPES.includes(s.session_type as SessionType) ? (s.session_type as SessionType) : null,
         duration_minutes: typeof s.duration_minutes === 'number' ? s.duration_minutes : null,
         positions_worked: (s.positions_worked as string) || null,
-        techniques_worked: (s.techniques_worked as string) || null,
+        techniques_worked: s.techniques_worked && typeof s.techniques_worked === 'object' ? JSON.stringify(s.techniques_worked) : (s.techniques_worked as string) || null,
         wins: (s.wins as string) || null,
         struggles: (s.struggles as string) || null,
         new_techniques_learned: (s.new_techniques_learned as string) || null,
+        focus_period_id: activeFocus?.id ?? null,
       });
       console.log(`[free_chat] Session logged for user ${user.id} (${user.name}) on ${today}`);
     }

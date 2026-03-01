@@ -20,6 +20,12 @@ export const routes: Routes = [
     canActivate: [authGuard],
   },
   {
+    path: 'focus',
+    loadComponent: () =>
+      import('./features/focus-timeline/focus-timeline.component').then((m) => m.FocusTimelineComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: 'techniques',
     loadComponent: () =>
       import('./features/techniques/techniques.component').then((m) => m.TechniquesComponent),

@@ -10,10 +10,21 @@ export function getLibraryByCategory(db: Database.Database, category: string): L
 }
 
 export function searchLibrary(db: Database.Database, query: string): LibraryTechnique[] {
-  const pattern = `%${query}%`;
+  const words = query.trim().split(/\s+/).filter(w => w.length > 0);
+  if (words.length === 0) return [];
+
+  // Each word must match somewhere in name, subcategory, or starting_position
+  const conditions = words.map(() =>
+    "(name LIKE ? OR subcategory LIKE ? OR starting_position LIKE ?)"
+  );
+  const params = words.flatMap(w => {
+    const p = `%${w}%`;
+    return [p, p, p];
+  });
+
   return db.prepare(
-    'SELECT * FROM technique_library WHERE name LIKE ? OR subcategory LIKE ? OR starting_position LIKE ? ORDER BY category, subcategory'
-  ).all(pattern, pattern, pattern) as LibraryTechnique[];
+    `SELECT * FROM technique_library WHERE ${conditions.join(' AND ')} ORDER BY category, subcategory`
+  ).all(...params) as LibraryTechnique[];
 }
 
 export function getLibraryCategories(db: Database.Database): { category: string; count: number }[] {
@@ -28,4 +39,9 @@ export function updateLibraryVideoUrl(db: Database.Database, id: number, youtube
 
 export function updateLibraryDescription(db: Database.Database, id: number, description: string): void {
   db.prepare('UPDATE technique_library SET description = ? WHERE id = ?').run(description, id);
+}
+
+export function getLibraryTechniqueNames(db: Database.Database): string[] {
+  const rows = db.prepare('SELECT name FROM technique_library ORDER BY name').all() as { name: string }[];
+  return rows.map(r => r.name);
 }

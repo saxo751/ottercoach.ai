@@ -9,6 +9,7 @@ export interface AuthUser {
   email: string;
   belt_rank: string | null;
   onboarding_complete: number;
+  profile_picture?: string | null;
 }
 
 export interface SignupData {

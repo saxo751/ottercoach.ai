@@ -25,6 +25,7 @@ export function createUser(db: Database.Database, overrides: Partial<User> = {})
     last_scheduled_action: overrides.last_scheduled_action || null,
     last_scheduled_date: overrides.last_scheduled_date || null,
     telegram_bot_token: overrides.telegram_bot_token || null,
+    profile_picture: overrides.profile_picture || null,
     created_at: now,
     updated_at: now,
   };
@@ -50,7 +51,7 @@ export function updateUser(db: Database.Database, id: string, fields: Partial<Us
     'email', 'password_hash', 'name', 'belt_rank', 'experience_months', 'preferred_game_style',
     'training_days', 'typical_training_time', 'injuries_limitations',
     'current_focus_area', 'goals', 'timezone', 'conversation_mode',
-    'onboarding_complete', 'last_scheduled_action', 'last_scheduled_date', 'telegram_bot_token',
+    'onboarding_complete', 'last_scheduled_action', 'last_scheduled_date', 'telegram_bot_token', 'profile_picture',
   ];
 
   const updates: string[] = [];

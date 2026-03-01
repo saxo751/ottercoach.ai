@@ -76,10 +76,26 @@ function buildTechniquesSection(techniques: Technique[]): string {
   return `\n## Known Techniques\n${lines.join('\n')}`;
 }
 
+function formatTechniquesWorked(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && (parsed.drilled || parsed.sparring)) {
+      const parts: string[] = [];
+      if (parsed.drilled?.length) parts.push(`Drilled: ${parsed.drilled.join(', ')}`);
+      if (parsed.sparring?.length) parts.push(`Sparring: ${parsed.sparring.join(', ')}`);
+      return parts.join(' | ');
+    }
+  } catch {}
+  return raw;
+}
+
 function buildSessionsSection(sessions: TrainingSession[]): string {
   if (sessions.length === 0) return '';
   const lines = sessions.map((s) => {
     const parts = [`${s.date} (${s.session_type || 'training'})`];
+    const techs = formatTechniquesWorked(s.techniques_worked ?? null);
+    if (techs) parts.push(`Techniques: ${techs}`);
     if (s.wins) parts.push(`Wins: ${s.wins}`);
     if (s.struggles) parts.push(`Struggles: ${s.struggles}`);
     if (s.rolling_notes) parts.push(`Notes: ${s.rolling_notes}`);
@@ -384,11 +400,13 @@ If the user mentions they trained, finished training, drilled something, rolled,
   "session_type": "gi/nogi/open_mat/competition/private or null",
   "duration_minutes": number or null,
   "positions_worked": "description or null",
-  "techniques_worked": "description or null",
+  "techniques_worked": {"drilled": ["technique name", ...], "sparring": ["technique name", ...]} or null,
   "wins": "what went well or null",
   "struggles": "what was hard or null",
   "new_techniques_learned": "any new moves or null"
 }
+
+For techniques_worked: Use an object with "drilled" (techniques they practiced/repped) and "sparring" (techniques they hit or attempted in live rolling). Match technique names from the user's Known Techniques list when possible. Either array can be empty.
 
 Triggers for session logging:
 - "training done", "just trained", "back from class", "we drilled X", "rolled today", etc.
@@ -499,12 +517,14 @@ After EVERY response, you MUST append a data block. Write your conversational re
   "session_type": "gi/nogi/open_mat/competition/private or null",
   "duration_minutes": number or null,
   "positions_worked": "description or null",
-  "techniques_worked": "description or null",
+  "techniques_worked": {"drilled": ["technique name", ...], "sparring": ["technique name", ...]} or null,
   "wins": "what went well or null",
   "struggles": "what was hard or null",
   "new_techniques_learned": "any new moves or null",
   "debrief_complete": false
 }
+
+For techniques_worked: Use an object with "drilled" (techniques they practiced/repped) and "sparring" (techniques they hit or attempted in live rolling). Match technique names from the user's Known Techniques list when possible. Either array can be empty.
 
 Set debrief_complete to true when you have AT MINIMUM what they worked on and a general sense of how it went. Don't wait for perfect data — something logged is better than nothing.
 

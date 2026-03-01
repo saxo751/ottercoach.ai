@@ -19,6 +19,7 @@ export interface User {
   last_scheduled_action: string | null; // 'briefing' | 'debrief' | null
   last_scheduled_date: string | null;   // 'YYYY-MM-DD' — resets daily
   telegram_bot_token: string | null;
+  profile_picture: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -84,6 +85,7 @@ export interface TrainingSession {
   new_techniques_learned: string | null;
   energy_level: number | null;        // 1-5
   raw_conversation: string | null;
+  focus_period_id: number | null;
   created_at: string;
 }
 

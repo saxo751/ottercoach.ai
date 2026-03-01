@@ -4,12 +4,13 @@ import { RouterLink } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { SkillSnapshotComponent } from './skill-snapshot.component';
 import { SessionHistoryComponent } from './session-history.component';
-import type { User, Position, Technique, TrainingSession, FocusPeriod } from '../../shared/models';
+import { SessionFormComponent } from './session-form.component';
+import type { User, Position, Technique, TrainingSession, FocusPeriod, SessionStats, FocusPeriodWithDays } from '../../shared/models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, SkillSnapshotComponent, SessionHistoryComponent],
+  imports: [CommonModule, RouterLink, SkillSnapshotComponent, SessionHistoryComponent, SessionFormComponent],
   template: `
     <div class="window-container">
       <div class="retro-window dashboard-window">
@@ -53,6 +54,44 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod } from '..
             </div>
           </div>
 
+          <!-- Training Stats -->
+          <div class="panel stats-panel" *ngIf="stats">
+            <h3 class="panel-subtitle">Training Stats</h3>
+            <div class="stats-grid">
+              <div class="stat-item">
+                <span class="stat-value">{{ stats.this_week }}</span>
+                <span class="stat-label">This Week</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ stats.this_month }}</span>
+                <span class="stat-label">This Month</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value">{{ stats.all_time }}</span>
+                <span class="stat-label">All Time</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Focus History -->
+          <div class="panel" *ngIf="focusHistory.length > 0">
+            <h3 class="panel-subtitle">Focus History</h3>
+            <div class="focus-history-list">
+              <div class="focus-history-item" *ngFor="let fp of focusHistory"
+                   [class.focus-history-item--active]="fp.status === 'active'">
+                <div class="focus-history-header">
+                  <span class="focus-history-name">{{ fp.name }}</span>
+                  <span class="focus-history-days">{{ fp.days_active }}d</span>
+                </div>
+                <div class="focus-history-dates">
+                  {{ fp.start_date }}
+                  <span *ngIf="fp.end_date"> &rarr; {{ fp.end_date }}</span>
+                  <span *ngIf="!fp.end_date && fp.status === 'active'" class="active-tag">active</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Empty state -->
           <div *ngIf="!profile" class="panel empty-state">
             <h2 class="panel-title">Welcome</h2>
@@ -61,7 +100,20 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod } from '..
           </div>
 
           <app-skill-snapshot [positions]="positions" [techniques]="techniques"></app-skill-snapshot>
-          <app-session-history [sessions]="sessions"></app-session-history>
+          <app-session-history
+            [sessions]="sessions"
+            (addSession)="openAddSession()"
+            (editSession)="openEditSession($event)"
+            (deleteSession)="onDeleteSession($event)"
+          ></app-session-history>
+
+          <app-session-form
+            *ngIf="showSessionForm"
+            [session]="editingSession"
+            [userTechniques]="techniques"
+            (save)="onSaveSession($event)"
+            (cancel)="closeSessionForm()"
+          ></app-session-form>
         </div>
 
         <!-- Status bar -->
@@ -149,6 +201,74 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod } from '..
     }
     .btn-primary:hover { background: var(--color-accent-hover); }
     .meta-item { font-family: var(--font-mono); font-size: var(--text-xs); }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      text-align: center;
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: var(--text-2xl, 1.5rem);
+      font-weight: 800;
+      color: var(--color-text);
+    }
+    .stat-label {
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .focus-history-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .focus-history-item {
+      padding: 10px 12px;
+      border: var(--border-subtle);
+      border-radius: 6px;
+      background: var(--color-surface-muted);
+    }
+    .focus-history-item--active {
+      border-left: 3px solid var(--color-accent);
+    }
+    .focus-history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .focus-history-name {
+      font-weight: 600;
+      font-size: var(--text-sm);
+    }
+    .focus-history-days {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .focus-history-dates {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+    }
+    .active-tag {
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 3px;
+      margin-left: 6px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      text-transform: uppercase;
+    }
   `],
 })
 export class DashboardComponent implements OnInit {
@@ -157,6 +277,11 @@ export class DashboardComponent implements OnInit {
   techniques: Technique[] = [];
   sessions: TrainingSession[] = [];
   focus: FocusPeriod | null = null;
+  stats: SessionStats | null = null;
+  focusHistory: FocusPeriodWithDays[] = [];
+
+  showSessionForm = false;
+  editingSession: TrainingSession | null = null;
 
   constructor(private api: ApiService) {}
 
@@ -179,6 +304,62 @@ export class DashboardComponent implements OnInit {
     });
     this.api.getActiveFocus().subscribe({
       next: (f) => this.focus = f,
+      error: () => {},
+    });
+    this.api.getSessionStats().subscribe({
+      next: (s) => this.stats = s,
+      error: () => {},
+    });
+    this.api.getFocusHistory().subscribe({
+      next: (h) => this.focusHistory = h,
+      error: () => {},
+    });
+  }
+
+  openAddSession(): void {
+    this.editingSession = null;
+    this.showSessionForm = true;
+  }
+
+  openEditSession(session: TrainingSession): void {
+    this.editingSession = session;
+    this.showSessionForm = true;
+  }
+
+  closeSessionForm(): void {
+    this.showSessionForm = false;
+    this.editingSession = null;
+  }
+
+  onSaveSession(data: Partial<TrainingSession>): void {
+    if (this.editingSession) {
+      this.api.updateSession(this.editingSession.id, data).subscribe({
+        next: () => this.refreshSessions(),
+        error: () => {},
+      });
+    } else {
+      this.api.createSession(data).subscribe({
+        next: () => this.refreshSessions(),
+        error: () => {},
+      });
+    }
+    this.closeSessionForm();
+  }
+
+  onDeleteSession(session: TrainingSession): void {
+    this.api.deleteSession(session.id).subscribe({
+      next: () => this.refreshSessions(),
+      error: () => {},
+    });
+  }
+
+  private refreshSessions(): void {
+    this.api.getSessions().subscribe({
+      next: (s) => this.sessions = s,
+      error: () => {},
+    });
+    this.api.getSessionStats().subscribe({
+      next: (s) => this.stats = s,
       error: () => {},
     });
   }

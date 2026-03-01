@@ -75,10 +75,11 @@ export async function handleDebrief(
         session_type: SESSION_TYPES.includes(data.session_type as SessionType) ? (data.session_type as SessionType) : null,
         duration_minutes: typeof data.duration_minutes === 'number' ? data.duration_minutes : null,
         positions_worked: (data.positions_worked as string) || null,
-        techniques_worked: (data.techniques_worked as string) || null,
+        techniques_worked: data.techniques_worked && typeof data.techniques_worked === 'object' ? JSON.stringify(data.techniques_worked) : (data.techniques_worked as string) || null,
         wins: (data.wins as string) || null,
         struggles: (data.struggles as string) || null,
         new_techniques_learned: (data.new_techniques_learned as string) || null,
+        focus_period_id: activeFocus?.id ?? null,
       });
 
       console.log(`[debrief] Session logged for user ${user.id} (${user.name}) on ${today}`);

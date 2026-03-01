@@ -42,6 +42,19 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
           <div *ngIf="!loading && !loadError">
             <h2 class="section-title">Profile Settings</h2>
 
+            <!-- Avatar -->
+            <div class="avatar-section">
+              <div class="avatar-circle" (click)="fileInput.click()">
+                <img *ngIf="profilePicturePreview" [src]="profilePicturePreview" class="avatar-img" alt="Profile" />
+                <span *ngIf="!profilePicturePreview" class="avatar-initial">{{ avatarInitial }}</span>
+                <div class="avatar-overlay">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M15 11v4H3v-4H1v4a2 2 0 002 2h12a2 2 0 002-2v-4h-2zM9 2L4.5 6.5l1.41 1.41L8 5.83V13h2V5.83l2.09 2.08L13.5 6.5 9 2z" fill="currentColor"/></svg>
+                </div>
+              </div>
+              <input #fileInput type="file" accept="image/*" (change)="onFileSelected($event)" class="file-hidden" />
+              <button *ngIf="profilePicturePreview" class="btn-remove-photo" (click)="removePhoto()">Remove photo</button>
+            </div>
+
             <!-- Name -->
             <div class="field">
               <label class="field-label">Name</label>
@@ -519,12 +532,84 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       border: 1px solid #bbf7d0;
     }
 
+    /* Avatar */
+    .avatar-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .avatar-circle {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      border: 3px solid var(--color-text);
+      background: var(--color-accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: opacity 0.15s;
+    }
+    .avatar-circle:hover {
+      opacity: 0.85;
+    }
+    .avatar-circle:hover .avatar-overlay {
+      opacity: 1;
+    }
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .avatar-initial {
+      font-family: var(--font-display);
+      font-size: 36px;
+      font-weight: 800;
+      color: var(--color-accent-text);
+      user-select: none;
+    }
+    .avatar-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+    .file-hidden {
+      display: none;
+    }
+    .btn-remove-photo {
+      margin-top: 8px;
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      color: var(--color-danger, #dc2626);
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+    .btn-remove-photo:hover {
+      text-decoration: underline;
+    }
+
     @media (max-width: 480px) {
       .profile-body { padding: 20px 16px; }
     }
   `],
 })
 export class ProfileComponent implements OnInit {
+  // Profile picture
+  profilePicturePreview: string | null = null;
+  profilePictureData: string | null = null;  // tracks pending change (null = remove, undefined-like = no change)
+  profilePictureDirty = false;
+
   // Form fields
   name = '';
   email = '';
@@ -595,6 +680,50 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  get avatarInitial(): string {
+    if (this.name) return this.name.charAt(0).toUpperCase();
+    if (this.email) return this.email.charAt(0).toUpperCase();
+    return '?';
+  }
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxDim = 256;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          if (w > h) { h = Math.round(h * maxDim / w); w = maxDim; }
+          else { w = Math.round(w * maxDim / h); h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        this.profilePicturePreview = dataUrl;
+        this.profilePictureData = dataUrl;
+        this.profilePictureDirty = true;
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
+    // Reset so re-selecting the same file triggers change
+    (event.target as HTMLInputElement).value = '';
+  }
+
+  removePhoto(): void {
+    this.profilePicturePreview = null;
+    this.profilePictureData = null;
+    this.profilePictureDirty = true;
+  }
+
   trackByDay(_index: number, entry: { day: string }): string {
     return entry.day;
   }
@@ -634,6 +763,10 @@ export class ProfileComponent implements OnInit {
       goals: this.goals.trim() || null,
       timezone: this.timezone.trim() || 'America/New_York',
     };
+
+    if (this.profilePictureDirty) {
+      updates.profile_picture = this.profilePictureData;
+    }
 
     this.api.updateProfile(updates).subscribe({
       next: (user) => {
@@ -694,6 +827,9 @@ export class ProfileComponent implements OnInit {
   }
 
   private populateForm(user: User): void {
+    this.profilePicturePreview = user.profile_picture || null;
+    this.profilePictureData = user.profile_picture || null;
+    this.profilePictureDirty = false;
     this.name = user.name || '';
     this.email = user.email || '';
     this.beltRank = user.belt_rank || '';

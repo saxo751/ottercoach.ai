@@ -15,6 +15,7 @@ export interface User {
   onboarding_complete: number;
   telegram_bot_token?: string | null;
   has_telegram_bot?: boolean;
+  profile_picture?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -57,7 +58,20 @@ export interface TrainingSession {
   struggles: string | null;
   new_techniques_learned: string | null;
   energy_level: number | null;
+  focus_period_id: number | null;
+  focus_name: string | null;
   created_at: string;
+}
+
+export interface SessionStats {
+  this_week: number;
+  this_month: number;
+  all_time: number;
+}
+
+export interface FocusPeriodWithDays extends FocusPeriod {
+  days_active: number;
+  session_count: number;
 }
 
 export interface FocusPeriod {

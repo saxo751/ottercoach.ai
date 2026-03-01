@@ -13,7 +13,8 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(sqlite3 data/bjj-coach.db \"UPDATE technique_library SET youtube_url = NULL; SELECT ''Cleared '' || changes\\(\\) || '' rows'';\")",
-      "Bash(find /Users/SaxoM/Desktop/martial\\\\ arts\\\\ pocket\\\\ coach -name \".cursor*\" -o -name \"cursor.rules\" -o -name \".cursorrules\" 2>/dev/null | grep -v node_modules)"
+      "Bash(find /Users/SaxoM/Desktop/martial\\\\ arts\\\\ pocket\\\\ coach -name \".cursor*\" -o -name \"cursor.rules\" -o -name \".cursorrules\" 2>/dev/null | grep -v node_modules)",
+      "Bash(cd \"/Users/SaxoM/Desktop/martial arts pocket coach/bjj-coach/server\" && npm run generate-descriptions 2>&1)"
     ]
   }
 }
