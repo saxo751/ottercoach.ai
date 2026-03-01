@@ -11,6 +11,7 @@ import { handleFreeChat } from './handlers/freeChat.js';
 import { handleCheckIn } from './handlers/checkin.js';
 import { handleBriefing } from './handlers/briefing.js';
 import { handleDebrief } from './handlers/debrief.js';
+import type { HandlerResult } from './handlers/types.js';
 
 export class CoachingEngine {
   constructor(
@@ -45,50 +46,58 @@ export class CoachingEngine {
     const currentUser = getUserById(this.db, user.id)!;
 
     // 4. Route by conversation mode
-    let response: string;
+    let result: HandlerResult;
 
     // Handle /start — always go to onboarding if not complete
     if (text === '/start' && !currentUser.onboarding_complete) {
       setConversationMode(this.db, user.id, CONVERSATION_MODES.ONBOARDING);
       const freshUser = getUserById(this.db, user.id)!;
-      response = await handleOnboarding(this.db, this.ai, freshUser, text);
+      result = await handleOnboarding(this.db, this.ai, freshUser, text);
     } else {
       switch (currentUser.conversation_mode) {
         case CONVERSATION_MODES.ONBOARDING:
-          response = await handleOnboarding(this.db, this.ai, currentUser, text);
+          result = await handleOnboarding(this.db, this.ai, currentUser, text);
           break;
 
         case CONVERSATION_MODES.IDLE:
           // Transition to free chat
           setConversationMode(this.db, user.id, CONVERSATION_MODES.FREE_CHAT);
-          response = await handleFreeChat(this.db, this.ai, getUserById(this.db, user.id)!, text);
+          result = await handleFreeChat(this.db, this.ai, getUserById(this.db, user.id)!, text);
           break;
 
         case CONVERSATION_MODES.FREE_CHAT:
-          response = await handleFreeChat(this.db, this.ai, currentUser, text);
+          result = await handleFreeChat(this.db, this.ai, currentUser, text);
           break;
 
         case CONVERSATION_MODES.CHECK_IN:
-          response = await handleCheckIn(this.db, this.ai, currentUser, text);
+          result = await handleCheckIn(this.db, this.ai, currentUser, text);
           break;
 
         case CONVERSATION_MODES.BRIEFING:
-          response = await handleBriefing(this.db, this.ai, currentUser, text);
+          result = await handleBriefing(this.db, this.ai, currentUser, text);
           break;
 
         case CONVERSATION_MODES.DEBRIEF:
-          response = await handleDebrief(this.db, this.ai, currentUser, text);
+          result = await handleDebrief(this.db, this.ai, currentUser, text);
           break;
 
         default:
-          response = await handleFreeChat(this.db, this.ai, currentUser, text);
+          result = await handleFreeChat(this.db, this.ai, currentUser, text);
       }
     }
 
     // 5. Store AI response
-    addMessage(this.db, user.id, 'assistant', response, platform);
+    addMessage(this.db, user.id, 'assistant', result.text, platform);
 
     // 6. Send response back through channel
-    await this.channels.sendMessage(platform, platformUserId, response);
+    await this.channels.sendMessage(platform, platformUserId, result.text);
+
+    // 7. Send system confirmation messages
+    if (result.systemMessages?.length) {
+      for (const sysMsg of result.systemMessages) {
+        addMessage(this.db, user.id, 'system', sysMsg.text, platform);
+        await this.channels.sendSystemMessage(platform, platformUserId, sysMsg.text, sysMsg.link);
+      }
+    }
   }
 }

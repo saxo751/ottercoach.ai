@@ -32,6 +32,13 @@ export class ChannelManager {
     await adapter.sendMessage(userId, text);
   }
 
+  /** Send a system confirmation message through a specific platform adapter. */
+  async sendSystemMessage(platform: Platform, userId: string, text: string, link?: string): Promise<void> {
+    const adapter = this.adapters.get(platform);
+    if (!adapter) return;
+    await adapter.sendSystemMessage(userId, text, link);
+  }
+
   /** Send a message with buttons through a specific platform adapter. */
   async sendButtons(platform: Platform, userId: string, text: string, buttons: Button[]): Promise<void> {
     const adapter = this.adapters.get(platform);

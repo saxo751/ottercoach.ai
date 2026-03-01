@@ -26,7 +26,9 @@ export function prepareMessagesForAI(
   const messages: ConversationMessage[] = [];
 
   // Build from history, merging consecutive same-role messages
+  // Filter out system messages — the AI API only accepts user/assistant
   for (const m of history) {
+    if (m.role === 'system') continue;
     const last = messages[messages.length - 1];
     if (last && last.role === m.role) {
       last.content += '\n\n' + m.content;

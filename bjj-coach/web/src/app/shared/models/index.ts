@@ -109,8 +109,9 @@ export interface LibraryTechnique {
 }
 
 export interface ChatMessage {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
+  link?: string;
   created_at?: string;
 }
 

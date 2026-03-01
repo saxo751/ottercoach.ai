@@ -1,15 +1,26 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import type { ChatMessage } from '../../shared/models';
 
 @Component({
   selector: 'app-message-bubble',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
-    <div class="bubble" [class.user]="message.role === 'user'" [class.coach]="message.role === 'assistant'">
+    <div
+      class="bubble"
+      [class.user]="message.role === 'user'"
+      [class.coach]="message.role === 'assistant'"
+      [class.system]="message.role === 'system'"
+    >
       <div class="label" *ngIf="message.role === 'assistant'">Coach</div>
-      <div class="text">{{ message.content }}</div>
+      <ng-container *ngIf="message.role === 'system' && message.link; else plainText">
+        <a class="system-link" [routerLink]="message.link">{{ message.content }}</a>
+      </ng-container>
+      <ng-template #plainText>
+        <div class="text">{{ message.content }}</div>
+      </ng-template>
     </div>
   `,
   styles: [`
@@ -43,6 +54,25 @@ import type { ChatMessage } from '../../shared/models';
       margin-bottom: 2px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+    .system {
+      max-width: 100%;
+      background: none;
+      border: none;
+      padding: 4px 0;
+      margin: 4px auto 8px;
+      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-style: italic;
+    }
+    .system-link {
+      color: var(--color-accent);
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .system-link:hover {
+      text-decoration: underline;
     }
   `],
 })

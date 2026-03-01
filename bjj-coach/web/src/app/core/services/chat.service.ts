@@ -65,7 +65,9 @@ export class ChatService implements OnDestroy {
           case 'history':
             console.log(`[chat] History received: ${msg.messages?.length || 0} messages`);
             if (msg.messages && msg.messages.length > 0) {
-              this.messages$.next(msg.messages);
+              this.messages$.next(msg.messages.map((m: any) =>
+                m.role === 'system' ? { ...m, link: this.deriveSystemLink(m.content) } : m
+              ));
             } else {
               // New user with no history — trigger onboarding
               console.log('[chat] No history — sending /start');
@@ -95,6 +97,18 @@ export class ChatService implements OnDestroy {
               created_at: new Date().toISOString(),
             }]);
             this.buttons$.next({ text: msg.text, buttons: msg.buttons });
+            break;
+          }
+
+          case 'system': {
+            console.log(`[chat] System message: "${msg.text}"`);
+            const sysMsgs = this.messages$.value;
+            this.messages$.next([...sysMsgs, {
+              role: 'system',
+              content: msg.text,
+              link: msg.link,
+              created_at: new Date().toISOString(),
+            }]);
             break;
           }
 
@@ -172,6 +186,14 @@ export class ChatService implements OnDestroy {
         this.pendingMessages.push(text);
       }
     }
+  }
+
+  private deriveSystemLink(content: string): string | undefined {
+    if (content.startsWith('Session logged')) return '/dashboard';
+    if (content.startsWith('Profile updated')) return '/profile';
+    if (content.startsWith('Onboarding complete')) return '/dashboard';
+    if (content.startsWith('Check-in noted')) return '/dashboard';
+    return undefined;
   }
 
   private scheduleReconnect(): void {

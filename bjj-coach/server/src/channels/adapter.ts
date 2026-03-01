@@ -10,6 +10,7 @@ export type ButtonCallback = (userId: string, data: string, platform: Platform) 
 
 export interface ChannelAdapter {
   sendMessage(userId: string, text: string): Promise<void>;
+  sendSystemMessage(userId: string, text: string, link?: string): Promise<void>;
   sendButtons(userId: string, text: string, buttons: Button[]): Promise<void>;
   onMessage(callback: MessageCallback): void;
   onButtonPress(callback: ButtonCallback): void;

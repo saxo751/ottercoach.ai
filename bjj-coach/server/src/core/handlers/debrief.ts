@@ -14,6 +14,7 @@ import { getUserLocalDate } from '../../utils/time.js';
 import { CONVERSATION_MODES, SESSION_TYPES } from '../../utils/constants.js';
 import type { SessionType } from '../../utils/constants.js';
 import { prepareMessagesForAI } from './messageUtils.js';
+import type { HandlerResult, SystemMessage } from './types.js';
 import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
@@ -32,7 +33,7 @@ export async function handleDebrief(
   ai: AIProvider,
   user: User,
   userMessage: string
-): Promise<string> {
+): Promise<HandlerResult> {
   // Gather full context
   const positions = getPositionsByUserId(db, user.id);
   const techniques = getTechniquesByUserId(db, user.id);
@@ -64,6 +65,8 @@ export async function handleDebrief(
   console.log(`[debrief] AI response for ${user.name}: text=${text.length} chars, data=${data ? JSON.stringify(data) : 'null'}`);
 
   // Process extracted session data
+  const systemMessages: SystemMessage[] = [];
+
   if (data) {
     // Process memory extraction
     processMemoryExtraction(db, user.id, data, 'debrief');
@@ -71,9 +74,12 @@ export async function handleDebrief(
     if (data.debrief_complete === true) {
       // Create training session record
       const today = getUserLocalDate(user.timezone || 'America/New_York');
+      const sessionType = SESSION_TYPES.includes(data.session_type as SessionType) ? (data.session_type as SessionType) : null;
+      const durationMin = typeof data.duration_minutes === 'number' ? data.duration_minutes : null;
+
       createSession(db, user.id, today, {
-        session_type: SESSION_TYPES.includes(data.session_type as SessionType) ? (data.session_type as SessionType) : null,
-        duration_minutes: typeof data.duration_minutes === 'number' ? data.duration_minutes : null,
+        session_type: sessionType,
+        duration_minutes: durationMin,
         positions_worked: (data.positions_worked as string) || null,
         techniques_worked: data.techniques_worked && typeof data.techniques_worked === 'object' ? JSON.stringify(data.techniques_worked) : (data.techniques_worked as string) || null,
         wins: (data.wins as string) || null,
@@ -84,10 +90,23 @@ export async function handleDebrief(
 
       console.log(`[debrief] Session logged for user ${user.id} (${user.name}) on ${today}`);
 
+      // Build system confirmation message
+      const parts: string[] = [];
+      if (sessionType) parts.push(sessionType);
+      if (durationMin) parts.push(`${durationMin}min`);
+      let sysMsg = `Session logged${parts.length ? ' — ' + parts.join(', ') : ''}`;
+
+      const drilled = data.techniques_worked;
+      if (drilled) {
+        const drilledStr = typeof drilled === 'object' ? JSON.stringify(drilled) : String(drilled);
+        if (drilledStr && drilledStr !== 'null') sysMsg += `. Techniques: ${drilledStr}`;
+      }
+      systemMessages.push({ text: sysMsg, link: '/dashboard' });
+
       // Transition back to idle
       setConversationMode(db, user.id, CONVERSATION_MODES.IDLE);
     }
   }
 
-  return text;
+  return { text, systemMessages };
 }

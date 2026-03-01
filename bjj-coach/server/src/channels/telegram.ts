@@ -47,6 +47,16 @@ export class TelegramBotManager implements ChannelAdapter {
     }
   }
 
+  async sendSystemMessage(telegramUserId: string, text: string, _link?: string): Promise<void> {
+    const managed = this.telegramIdToBot.get(telegramUserId);
+    if (!managed) return;
+    try {
+      await managed.bot.telegram.sendMessage(telegramUserId, `ℹ️ ${text}`);
+    } catch (err) {
+      console.error(`[telegram] Failed to send system message:`, (err as Error).message);
+    }
+  }
+
   async sendButtons(telegramUserId: string, text: string, buttons: Button[]): Promise<void> {
     console.log(`[telegram] sendButtons to ${telegramUserId}: "${text.substring(0, 80)}..."`);
     const managed = this.telegramIdToBot.get(telegramUserId);

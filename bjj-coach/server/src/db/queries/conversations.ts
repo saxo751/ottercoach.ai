@@ -6,7 +6,7 @@ import { nowISO } from '../../utils/time.js';
 export function addMessage(
   db: Database.Database,
   userId: string,
-  role: 'user' | 'assistant',
+  role: 'user' | 'assistant' | 'system',
   content: string,
   platform: Platform
 ): void {

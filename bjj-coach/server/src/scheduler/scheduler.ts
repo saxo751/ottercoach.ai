@@ -105,11 +105,17 @@ export class Scheduler {
     if (mode === CONVERSATION_MODES.DEBRIEF) {
       // Send a wrap-up message through the debrief handler
       const wrapUpMessage = '[The user stopped responding. Wrap up the debrief now. Give a brief encouraging closing message and set debrief_complete to true with whatever information you have so far.]';
-      const response = await handleDebrief(this.db, this.ai, user, wrapUpMessage);
+      const result = await handleDebrief(this.db, this.ai, user, wrapUpMessage);
 
       if (channel) {
-        addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
-        await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+        addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
+        await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
+        if (result.systemMessages?.length) {
+          for (const sysMsg of result.systemMessages) {
+            addMessage(this.db, user.id, 'system', sysMsg.text, channel.platform as Platform);
+            await this.channels.sendSystemMessage(channel.platform as Platform, channel.platform_user_id, sysMsg.text, sysMsg.link);
+          }
+        }
       }
     } else {
       // Check-in timed out — just go back to idle
@@ -187,11 +193,11 @@ export class Scheduler {
     setConversationMode(this.db, user.id, CONVERSATION_MODES.CHECK_IN);
 
     // Generate the proactive message (empty user message = system-triggered)
-    const response = await handleCheckIn(this.db, this.ai, user, '');
+    const result = await handleCheckIn(this.db, this.ai, user, '');
 
     // Store in conversation history and send
-    addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
-    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+    addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
+    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
 
     // Track that check-in was sent today
     setScheduledAction(this.db, user.id, 'checkin', localDate);
@@ -210,11 +216,11 @@ export class Scheduler {
     setConversationMode(this.db, user.id, CONVERSATION_MODES.BRIEFING);
 
     // Generate the proactive message (empty user message = system-triggered)
-    const response = await handleBriefing(this.db, this.ai, user, '');
+    const result = await handleBriefing(this.db, this.ai, user, '');
 
     // Store in conversation history and send
-    addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
-    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+    addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
+    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
 
     // Track that briefing was sent today
     setScheduledAction(this.db, user.id, 'briefing', localDate);
@@ -233,11 +239,11 @@ export class Scheduler {
     setConversationMode(this.db, user.id, CONVERSATION_MODES.DEBRIEF);
 
     // Generate the proactive message (empty user message = system-triggered)
-    const response = await handleDebrief(this.db, this.ai, user, '');
+    const result = await handleDebrief(this.db, this.ai, user, '');
 
     // Store in conversation history and send
-    addMessage(this.db, user.id, 'assistant', response, channel.platform as Platform);
-    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+    addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
+    await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
 
     // Track that debrief was sent today
     setScheduledAction(this.db, user.id, 'debrief', localDate);

@@ -16,13 +16,14 @@ import { logTokenUsage } from '../../db/queries/tokenUsage.js';
 import { getUserLocalDate } from '../../utils/time.js';
 import type { SessionType } from '../../utils/constants.js';
 import { SESSION_TYPES } from '../../utils/constants.js';
+import type { HandlerResult, SystemMessage } from './types.js';
 
 export async function handleFreeChat(
   db: Database.Database,
   ai: AIProvider,
   user: User,
   userMessage: string
-): Promise<string> {
+): Promise<HandlerResult> {
   // Gather full context
   const positions = getPositionsByUserId(db, user.id);
   const techniques = getTechniquesByUserId(db, user.id);
@@ -44,12 +45,14 @@ export async function handleFreeChat(
     dailyLogs,
   });
 
-  // Get conversation history
+  // Get conversation history (filter out system messages for the AI)
   const history = getRecentMessages(db, user.id, 30);
-  const messages: ConversationMessage[] = history.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }));
+  const messages: ConversationMessage[] = history
+    .filter((m) => m.role !== 'system')
+    .map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }));
 
   // Add current message
   messages.push({ role: 'user', content: userMessage });
@@ -60,6 +63,8 @@ export async function handleFreeChat(
   const { text, data } = parseAIResponse(raw);
 
   // Process extracted data
+  const systemMessages: SystemMessage[] = [];
+
   if (data) {
     // Memory extraction
     processMemoryExtraction(db, user.id, data, 'free_chat');
@@ -68,9 +73,12 @@ export async function handleFreeChat(
     if (data.session && typeof data.session === 'object') {
       const s = data.session as Record<string, unknown>;
       const today = getUserLocalDate(user.timezone || 'America/New_York');
+      const sessionType = SESSION_TYPES.includes(s.session_type as SessionType) ? (s.session_type as SessionType) : null;
+      const durationMin = typeof s.duration_minutes === 'number' ? s.duration_minutes : null;
+
       createSession(db, user.id, today, {
-        session_type: SESSION_TYPES.includes(s.session_type as SessionType) ? (s.session_type as SessionType) : null,
-        duration_minutes: typeof s.duration_minutes === 'number' ? s.duration_minutes : null,
+        session_type: sessionType,
+        duration_minutes: durationMin,
         positions_worked: (s.positions_worked as string) || null,
         techniques_worked: s.techniques_worked && typeof s.techniques_worked === 'object' ? JSON.stringify(s.techniques_worked) : (s.techniques_worked as string) || null,
         wins: (s.wins as string) || null,
@@ -79,6 +87,11 @@ export async function handleFreeChat(
         focus_period_id: activeFocus?.id ?? null,
       });
       console.log(`[free_chat] Session logged for user ${user.id} (${user.name}) on ${today}`);
+
+      const parts: string[] = [];
+      if (sessionType) parts.push(sessionType);
+      if (durationMin) parts.push(`${durationMin}min`);
+      systemMessages.push({ text: `Session logged${parts.length ? ' — ' + parts.join(', ') : ''}`, link: '/dashboard' });
     }
 
     // Profile updates — capture schedule changes, goal updates, etc.
@@ -96,10 +109,12 @@ export async function handleFreeChat(
 
       if (Object.keys(updates).length > 0) {
         updateUser(db, user.id, updates);
+        const fieldNames = Object.keys(updates).map(k => k.replace(/_/g, ' '));
+        systemMessages.push({ text: `Profile updated — ${fieldNames.join(', ')}`, link: '/profile' });
         console.log(`[free_chat] Profile updated for user ${user.id} (${user.name}):`, Object.keys(updates));
       }
     }
   }
 
-  return text.trim();
+  return { text: text.trim(), systemMessages };
 }

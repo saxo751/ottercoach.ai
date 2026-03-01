@@ -10,13 +10,14 @@ import { CONVERSATION_MODES } from '../../utils/constants.js';
 import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
+import type { HandlerResult, SystemMessage } from './types.js';
 
 export async function handleOnboarding(
   db: Database.Database,
   ai: AIProvider,
   user: User,
   userMessage: string
-): Promise<string> {
+): Promise<HandlerResult> {
   // Load memories for context
   const memories = getMemoriesForPrompt(db, user.id);
   const dailyLogs = getRecentDailyLogs(db, user.id, 3);
@@ -24,12 +25,14 @@ export async function handleOnboarding(
   // Build system prompt with current profile state
   const systemPrompt = buildOnboardingPrompt({ user, memories, dailyLogs });
 
-  // Get conversation history
+  // Get conversation history (filter out system messages for the AI)
   const history = getRecentMessages(db, user.id, 30);
-  const messages: ConversationMessage[] = history.map((m) => ({
-    role: m.role,
-    content: m.content,
-  }));
+  const messages: ConversationMessage[] = history
+    .filter((m) => m.role !== 'system')
+    .map((m) => ({
+      role: m.role as 'user' | 'assistant',
+      content: m.content,
+    }));
 
   // Add current message
   messages.push({ role: 'user', content: userMessage });
@@ -40,6 +43,8 @@ export async function handleOnboarding(
   const { text, data } = parseAIResponse(raw);
 
   // Apply extracted data to user profile
+  const systemMessages: SystemMessage[] = [];
+
   if (data) {
     // Process memory extraction
     processMemoryExtraction(db, user.id, data, 'onboarding');
@@ -75,7 +80,8 @@ export async function handleOnboarding(
     }
 
     // Check if onboarding is complete
-    if (data.onboarding_complete === true) {
+    const isComplete = data.onboarding_complete === true;
+    if (isComplete) {
       updates.onboarding_complete = 1;
       updates.conversation_mode = CONVERSATION_MODES.IDLE;
       console.log(`[onboarding] Complete for user ${user.id} (${updates.name || user.name})`);
@@ -83,8 +89,20 @@ export async function handleOnboarding(
 
     if (Object.keys(updates).length > 0) {
       updateUser(db, user.id, updates);
+
+      // Build profile update system message (exclude internal fields)
+      const displayFields = Object.keys(updates)
+        .filter(k => k !== 'onboarding_complete' && k !== 'conversation_mode')
+        .map(k => k.replace(/_/g, ' '));
+      if (displayFields.length > 0) {
+        systemMessages.push({ text: `Profile updated — ${displayFields.join(', ')}`, link: '/profile' });
+      }
+    }
+
+    if (isComplete) {
+      systemMessages.push({ text: "Onboarding complete — let's train!", link: '/dashboard' });
     }
   }
 
-  return text;
+  return { text, systemMessages };
 }

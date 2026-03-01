@@ -43,6 +43,12 @@ export class WebAdapter implements ChannelAdapter {
     console.log(`[web] ✓ Message sent`);
   }
 
+  async sendSystemMessage(sessionId: string, text: string, link?: string): Promise<void> {
+    const client = this.clients.get(sessionId);
+    if (!client || client.ws.readyState !== WebSocket.OPEN) return;
+    client.ws.send(JSON.stringify({ type: 'system', text, link }));
+  }
+
   async sendButtons(sessionId: string, text: string, buttons: Button[]): Promise<void> {
     console.log(`[web] sendButtons to ${sessionId}: "${text.substring(0, 80)}..."`);
     const client = this.clients.get(sessionId);

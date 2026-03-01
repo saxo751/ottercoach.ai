@@ -115,7 +115,7 @@ export interface Goal {
 export interface ConversationEntry {
   id: number;
   user_id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   platform: Platform;
   created_at: string;

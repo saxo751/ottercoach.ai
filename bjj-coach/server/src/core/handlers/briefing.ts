@@ -9,6 +9,7 @@ import { getRecentSessionsByUserId } from '../../db/queries/sessions.js';
 import { getActiveFocusPeriod } from '../../db/queries/focusPeriods.js';
 import { getAllGoals } from '../../db/queries/goals.js';
 import { prepareMessagesForAI } from './messageUtils.js';
+import type { HandlerResult } from './types.js';
 import { getMemoriesForPrompt } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
@@ -24,7 +25,7 @@ export async function handleBriefing(
   ai: AIProvider,
   user: User,
   userMessage: string
-): Promise<string> {
+): Promise<HandlerResult> {
   // Gather full context
   const positions = getPositionsByUserId(db, user.id);
   const techniques = getTechniquesByUserId(db, user.id);
@@ -51,5 +52,5 @@ export async function handleBriefing(
 
   const { text, usage } = await ai.sendMessage(systemPrompt, messages);
   if (usage) logTokenUsage(db, user.id, 'briefing', usage);
-  return text.trim();
+  return { text: text.trim() };
 }

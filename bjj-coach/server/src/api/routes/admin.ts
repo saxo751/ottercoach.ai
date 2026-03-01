@@ -797,11 +797,11 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
 
       // Replicate exact Scheduler.sendBriefing() flow
       setConversationMode(db, user.id, CONVERSATION_MODES.BRIEFING);
-      const response = await handleBriefing(db, ai, user, '');
+      const result = await handleBriefing(db, ai, user, '');
 
       // Store in conversation history
       const platform = channel ? channel.platform as Platform : 'web';
-      addMessage(db, user.id, 'assistant', response, platform);
+      addMessage(db, user.id, 'assistant', result.text, platform);
 
       // Track that briefing was sent today
       setScheduledAction(db, user.id, 'briefing', localDate);
@@ -810,7 +810,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       let deliveryStatus = 'No channel — message stored but not delivered';
       if (channel) {
         try {
-          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
           deliveryStatus = `Delivered via ${channel.platform}`;
         } catch (sendErr) {
           deliveryStatus = `Delivery failed (${channel.platform}): ${(sendErr as Error).message}`;
@@ -820,7 +820,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       resultHtml = `
         <div class="result-box result-success">
           <div class="result-title">Briefing Sent</div>
-          <div class="result-body">${escapeHtml(response)}</div>
+          <div class="result-body">${escapeHtml(result.text)}</div>
           <div class="result-meta">
             ${escapeHtml(deliveryStatus)} &middot; Mode set to <span class="badge badge-briefing">briefing</span> &middot; ${escapeHtml(localDate)}
           </div>
@@ -866,11 +866,11 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
 
       // Replicate exact Scheduler.sendDebrief() flow
       setConversationMode(db, user.id, CONVERSATION_MODES.DEBRIEF);
-      const response = await handleDebrief(db, ai, user, '');
+      const result = await handleDebrief(db, ai, user, '');
 
       // Store in conversation history
       const platform = channel ? channel.platform as Platform : 'web';
-      addMessage(db, user.id, 'assistant', response, platform);
+      addMessage(db, user.id, 'assistant', result.text, platform);
 
       // Track that debrief was sent today
       setScheduledAction(db, user.id, 'debrief', localDate);
@@ -879,7 +879,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       let deliveryStatus = 'No channel — message stored but not delivered';
       if (channel) {
         try {
-          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
           deliveryStatus = `Delivered via ${channel.platform}`;
         } catch (sendErr) {
           deliveryStatus = `Delivery failed (${channel.platform}): ${(sendErr as Error).message}`;
@@ -889,7 +889,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       resultHtml = `
         <div class="result-box result-success">
           <div class="result-title">Debrief Sent</div>
-          <div class="result-body">${escapeHtml(response)}</div>
+          <div class="result-body">${escapeHtml(result.text)}</div>
           <div class="result-meta">
             ${escapeHtml(deliveryStatus)} &middot; Mode set to <span class="badge badge-debrief">debrief</span> &middot; ${escapeHtml(localDate)}
           </div>
@@ -996,11 +996,11 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
 
       // Replicate exact Scheduler.sendCheckIn() flow
       setConversationMode(db, user.id, CONVERSATION_MODES.CHECK_IN);
-      const response = await handleCheckIn(db, ai, user, '');
+      const result = await handleCheckIn(db, ai, user, '');
 
       // Store in conversation history
       const platform = channel ? channel.platform as Platform : 'web';
-      addMessage(db, user.id, 'assistant', response, platform);
+      addMessage(db, user.id, 'assistant', result.text, platform);
 
       // Track that check-in was sent today
       setScheduledAction(db, user.id, 'checkin', localDate);
@@ -1009,7 +1009,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       let deliveryStatus = 'No channel — message stored but not delivered';
       if (channel) {
         try {
-          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, response);
+          await channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
           deliveryStatus = `Delivered via ${channel.platform}`;
         } catch (sendErr) {
           deliveryStatus = `Delivery failed (${channel.platform}): ${(sendErr as Error).message}`;
@@ -1019,7 +1019,7 @@ export function createAdminRouter(db: Database.Database, ai: AIProvider, channel
       resultHtml = `
         <div class="result-box result-success">
           <div class="result-title">Check-In Sent</div>
-          <div class="result-body">${escapeHtml(response)}</div>
+          <div class="result-body">${escapeHtml(result.text)}</div>
           <div class="result-meta">
             ${escapeHtml(deliveryStatus)} &middot; Mode set to <span class="badge badge-check_in">check_in</span> &middot; ${escapeHtml(localDate)}
           </div>

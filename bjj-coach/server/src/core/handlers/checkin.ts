@@ -10,6 +10,7 @@ import { getAllGoals } from '../../db/queries/goals.js';
 import { setConversationMode } from '../../db/queries/users.js';
 import { CONVERSATION_MODES } from '../../utils/constants.js';
 import { prepareMessagesForAI } from './messageUtils.js';
+import type { HandlerResult, SystemMessage } from './types.js';
 import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
@@ -28,7 +29,7 @@ export async function handleCheckIn(
   ai: AIProvider,
   user: User,
   userMessage: string
-): Promise<string> {
+): Promise<HandlerResult> {
   // Gather context (lighter than briefing — no positions/techniques needed)
   const recentSessions = getRecentSessionsByUserId(db, user.id, 5);
   const activeFocus = getActiveFocusPeriod(db, user.id);
@@ -54,6 +55,8 @@ export async function handleCheckIn(
   const { text, data } = parseAIResponse(raw);
 
   // Process extracted check-in data
+  const systemMessages: SystemMessage[] = [];
+
   if (data) {
     // Process memory extraction
     processMemoryExtraction(db, user.id, data, 'check_in');
@@ -61,10 +64,12 @@ export async function handleCheckIn(
     if (data.checkin_complete === true) {
       console.log(`[checkin] Complete for user ${user.id} (${user.name}) — training: ${data.training_confirmed}, rest: ${data.rest_day}`);
 
+      systemMessages.push({ text: 'Check-in noted', link: '/dashboard' });
+
       // Transition back to idle so briefing can fire
       setConversationMode(db, user.id, CONVERSATION_MODES.IDLE);
     }
   }
 
-  return text;
+  return { text, systemMessages };
 }
