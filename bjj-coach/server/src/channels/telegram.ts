@@ -164,6 +164,8 @@ export class TelegramBotManager implements ChannelAdapter {
       }
     });
 
+    // Clear any stale webhook before launching polling
+    await bot.telegram.deleteWebhook({ drop_pending_updates: false });
     // Launch polling
     await bot.launch();
     this.bots.set(userId, managed);
