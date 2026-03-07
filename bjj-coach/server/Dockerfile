@@ -10,8 +10,9 @@ RUN npm ci
 
 COPY tsconfig.json ./
 COPY src ./src
+COPY technique-library-data.json ./
 RUN npm run build
 
 EXPOSE 3000
 
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "node dist/scripts/migrateTechniqueLibrary.js import technique-library-data.json && node dist/index.js"]
