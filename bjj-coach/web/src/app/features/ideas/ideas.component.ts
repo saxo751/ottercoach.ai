@@ -21,6 +21,7 @@ import type { FeatureIdea, FeatureIdeaComment } from '../../shared/models';
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">ideas.txt — Feature Ideas</span>
+          <img src="assets/otters/Otter-with-finger-in-air.svg" alt="" class="titlebar-otter" />
         </div>
 
         <!-- Toolbar -->
@@ -73,9 +74,13 @@ import type { FeatureIdea, FeatureIdeaComment } from '../../shared/models';
         <!-- Body -->
         <div class="retro-window__body ideas-body">
           @if (loading) {
-            <div class="empty-state">Loading ideas...</div>
+            <div class="empty-state">
+              <img src="assets/otters/Otter-meditating.svg" alt="" class="empty-otter" />
+              <p>Loading ideas...</p>
+            </div>
           } @else if (ideas.length === 0) {
             <div class="empty-state">
+              <img src="assets/otters/Otter-with-finger-in-air.svg" alt="" class="empty-otter" />
               <p>No ideas yet. Be the first to suggest a feature!</p>
             </div>
           } @else {
@@ -156,6 +161,7 @@ import type { FeatureIdea, FeatureIdeaComment } from '../../shared/models';
 
         <!-- Status bar -->
         <div class="retro-window__statusbar">
+
           {{ ideas.length }} {{ ideas.length === 1 ? 'idea' : 'ideas' }} · sorted by {{ sort === 'top' ? 'most voted' : 'newest' }}
         </div>
       </div>
@@ -470,6 +476,11 @@ import type { FeatureIdea, FeatureIdeaComment } from '../../shared/models';
       padding: 48px 20px;
       color: var(--color-text-muted);
       font-size: var(--text-sm);
+    }
+    .empty-otter {
+      height: 80px;
+      opacity: 0.6;
+      margin-bottom: 12px;
     }
 
     @media (max-width: 600px) {

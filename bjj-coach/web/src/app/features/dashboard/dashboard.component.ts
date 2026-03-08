@@ -22,6 +22,7 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod, SessionSt
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">stats.dashboard</span>
+          <img src="assets/otters/Otter-ready-fight-stance.svg" alt="" class="titlebar-otter" />
         </div>
 
         <!-- Body -->
@@ -94,6 +95,7 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod, SessionSt
 
           <!-- Empty state -->
           <div *ngIf="!profile" class="panel empty-state">
+            <img src="assets/otters/Otter-approving-with-thumbs-up.svg" alt="" class="empty-otter" />
             <h2 class="panel-title">Welcome</h2>
             <p>Start chatting with your coach to build your training profile.</p>
             <a routerLink="/chat" class="btn-primary">Open coach.chat</a>
@@ -187,6 +189,7 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod, SessionSt
     .focus-dates { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-text-muted); }
     .empty-state { text-align: center; padding: 32px; }
     .empty-state p { color: var(--color-text-muted); margin-bottom: 16px; }
+    .empty-otter { height: 80px; opacity: 0.6; margin-bottom: 12px; }
     .btn-primary {
       display: inline-block;
       background: var(--color-accent);

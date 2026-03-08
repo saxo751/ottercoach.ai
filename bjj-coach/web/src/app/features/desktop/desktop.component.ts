@@ -283,14 +283,6 @@ import { environment } from '../../../environments/environment';
         </a>
       </div>
 
-      <!-- Mascot scene — otter base SVG -->
-      <div class="desktop-scene">
-        <img
-          src="assets/otters/otter_base.svg"
-          alt="BJJ Coach Otter"
-          class="scene-img"
-        />
-      </div>
     </div>
   `,
   styles: [
@@ -345,21 +337,6 @@ import { environment } from '../../../environments/environment';
         text-align: center;
         line-height: 1.2;
       }
-      .desktop-scene {
-        position: fixed;
-        bottom: 0;
-        right: 0;
-        max-height: 200px;
-        max-width: 320px;
-        pointer-events: none;
-        z-index: 1;
-        opacity: 0.7;
-      }
-      .scene-img {
-        width: auto;
-        height: 100%;
-        max-height: 200px;
-      }
       @media (max-width: 768px) {
         .desktop-surface {
           flex-direction: column;
@@ -372,15 +349,6 @@ import { environment } from '../../../environments/environment';
         }
         .icon-column--right {
           align-items: center;
-        }
-        .desktop-scene {
-          position: fixed;
-          bottom: 0;
-          right: 0;
-          max-height: 160px;
-          max-width: 160px;
-          margin-top: 0;
-          opacity: 0.8;
         }
       }
     `,

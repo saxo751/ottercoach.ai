@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import type { LibraryTechnique } from '../../shared/models';
 
 interface SubcategoryGroup {
@@ -38,6 +39,7 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">techniques/ — BJJ Video Library</span>
+          <img src="assets/otters/Otter-armbar-turtle.svg" alt="" class="titlebar-otter" />
         </div>
 
         <!-- Toolbar -->
@@ -121,6 +123,16 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
                     </button>
                     <div class="technique-actions">
                       <button
+                        *ngIf="isAdmin"
+                        class="btn-edit"
+                        (click)="startEditing(t)"
+                        title="Edit technique"
+                      >
+                        <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                          <path d="M11.5 1.5l3 3-9 9H2.5v-3l9-9z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+                        </svg>
+                      </button>
+                      <button
                         *ngIf="t.youtube_url"
                         class="btn-video btn-video--curated"
                         (click)="playVideo(t)"
@@ -147,22 +159,51 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
                       </a>
                     </div>
                   </div>
-                  <div class="technique-description" *ngIf="expandedTechniqueId === t.id && t.description">
+                  <div class="technique-description" *ngIf="expandedTechniqueId === t.id && t.description && editingTechniqueId !== t.id">
                     <ul class="step-list">
                       <li *ngFor="let step of parseDescription(t.description)">{{ step }}</li>
                     </ul>
+                  </div>
+                  <!-- Inline edit form -->
+                  <div class="edit-form" *ngIf="editingTechniqueId === t.id">
+                    <label class="edit-label">
+                      YouTube URL
+                      <input
+                        type="text"
+                        class="edit-input"
+                        [(ngModel)]="editYoutubeUrl"
+                        placeholder="https://www.youtube.com/watch?v=..."
+                      />
+                    </label>
+                    <label class="edit-label">
+                      Description (one step per line, start with -)
+                      <textarea
+                        class="edit-textarea"
+                        [(ngModel)]="editDescription"
+                        rows="5"
+                        placeholder="- Step one&#10;- Step two&#10;- Step three"
+                      ></textarea>
+                    </label>
+                    <div class="edit-actions">
+                      <button class="btn-save" (click)="saveEdit(t)" [disabled]="saving">
+                        {{ saving ? 'Saving...' : 'Save' }}
+                      </button>
+                      <button class="btn-cancel" (click)="cancelEdit()">Cancel</button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
             <div *ngIf="filteredGroups.length === 0" class="empty-state">
+              <img src="assets/otters/Otter-confused.svg" alt="" class="empty-otter" />
               <p>No techniques found{{ searchQuery ? ' for "' + searchQuery + '"' : '' }}.</p>
             </div>
           </div>
 
           <!-- Loading -->
           <div *ngIf="loading" class="loading-state">
+            <img src="assets/otters/Otter-meditating.svg" alt="" class="empty-otter" />
             <p>Loading technique library...</p>
           </div>
         </div>
@@ -475,12 +516,107 @@ const CATEGORY_ORDER = ['submission', 'guard_pass', 'sweep', 'takedown', 'back_t
       color: var(--color-text);
     }
 
+    /* Edit button */
+    .btn-edit {
+      background: none;
+      border: none;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-edit:hover {
+      color: var(--color-accent);
+      background: var(--color-desktop);
+    }
+
+    /* Edit form */
+    .edit-form {
+      padding: 10px 12px 12px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      border-top: 1px dashed var(--color-desktop-darker);
+    }
+    .edit-label {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      color: var(--color-text-muted);
+      font-weight: 500;
+    }
+    .edit-input, .edit-textarea {
+      padding: 6px 10px;
+      border: var(--border-subtle);
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      background: var(--color-surface);
+      color: var(--color-text);
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .edit-input:focus, .edit-textarea:focus {
+      border-color: var(--color-accent);
+    }
+    .edit-textarea {
+      resize: vertical;
+      min-height: 80px;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      line-height: 1.5;
+    }
+    .edit-actions {
+      display: flex;
+      gap: 8px;
+    }
+    .btn-save, .btn-cancel {
+      padding: 5px 14px;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-save {
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+    }
+    .btn-save:hover:not(:disabled) {
+      background: var(--color-accent-hover);
+    }
+    .btn-save:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+    .btn-cancel {
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      border: var(--border-subtle);
+    }
+    .btn-cancel:hover {
+      background: var(--color-desktop);
+    }
+
     /* States */
     .empty-state, .loading-state {
       text-align: center;
       padding: 48px 20px;
       color: var(--color-text-muted);
       font-size: var(--text-sm);
+    }
+    .empty-otter {
+      height: 80px;
+      opacity: 0.6;
+      margin-bottom: 12px;
     }
 
     @media (max-width: 600px) {
@@ -503,11 +639,18 @@ export class TechniquesComponent implements OnInit {
   activeVideoUrl: SafeResourceUrl | null = null;
   expandedTechniqueId: number | null = null;
 
+  // Edit state
+  editingTechniqueId: number | null = null;
+  editYoutubeUrl = '';
+  editDescription = '';
+  saving = false;
+  isAdmin = false;
+
   filteredGroups: SubcategoryGroup[] = [];
   filteredCount = 0;
   curatedCount = 0;
 
-  constructor(private api: ApiService, private sanitizer: DomSanitizer) {}
+  constructor(private api: ApiService, private sanitizer: DomSanitizer, private auth: AuthService) {}
 
   ngOnInit(): void {
     this.api.getLibrary().subscribe({
@@ -521,6 +664,15 @@ export class TechniquesComponent implements OnInit {
         this.loading = false;
       },
     });
+
+    // Check admin status
+    if (this.auth.isAuthenticated()) {
+      this.api.getProfile().subscribe({
+        next: (profile) => {
+          this.isAdmin = !!profile.is_admin;
+        },
+      });
+    }
   }
 
   categoryLabel(cat: string): string {
@@ -572,6 +724,45 @@ export class TechniquesComponent implements OnInit {
       .split('\n')
       .map((line) => line.replace(/^-\s*/, '').trim())
       .filter((line) => line.length > 0);
+  }
+
+  startEditing(t: LibraryTechnique): void {
+    this.editingTechniqueId = t.id;
+    this.editYoutubeUrl = (t.youtube_url && t.youtube_url !== 'NONE') ? t.youtube_url : '';
+    this.editDescription = t.description || '';
+    this.expandedTechniqueId = t.id;
+  }
+
+  cancelEdit(): void {
+    this.editingTechniqueId = null;
+    this.editYoutubeUrl = '';
+    this.editDescription = '';
+    this.saving = false;
+  }
+
+  saveEdit(t: LibraryTechnique): void {
+    if (this.saving) return;
+    this.saving = true;
+
+    const updates: { youtube_url?: string | null; description?: string | null } = {};
+    const newUrl = this.editYoutubeUrl.trim();
+    const newDesc = this.editDescription.trim();
+
+    updates.youtube_url = newUrl || null;
+    updates.description = newDesc || null;
+
+    this.api.updateLibraryTechnique(t.id, updates).subscribe({
+      next: () => {
+        // Update local data
+        t.youtube_url = updates.youtube_url ?? null;
+        t.description = updates.description ?? null;
+        this.curatedCount = this.allTechniques.filter((tech) => tech.youtube_url && tech.youtube_url !== 'NONE').length;
+        this.cancelEdit();
+      },
+      error: () => {
+        this.saving = false;
+      },
+    });
   }
 
   private extractVideoId(url: string): string | null {

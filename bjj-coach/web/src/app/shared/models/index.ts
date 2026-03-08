@@ -16,6 +16,7 @@ export interface User {
   telegram_bot_token?: string | null;
   has_telegram_bot?: boolean;
   profile_picture?: string | null;
+  is_admin?: number;
   created_at: string;
   updated_at: string;
 }

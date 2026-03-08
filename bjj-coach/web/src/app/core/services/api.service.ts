@@ -79,8 +79,22 @@ export class ApiService {
     return this.http.get<LibraryTechnique[]>(`${this.baseUrl}/library`, { params });
   }
 
+  updateLibraryTechnique(id: number, updates: { youtube_url?: string | null; description?: string | null }): Observable<{ success: boolean }> {
+    return this.http.put<{ success: boolean }>(`${this.baseUrl}/library/${id}`, updates);
+  }
+
   identifyTechniques(description: string): Observable<{ suggestions: string[] }> {
     return this.http.post<{ suggestions: string[] }>(`${this.baseUrl}/techniques/identify`, { description });
+  }
+
+  // --- Admin ---
+
+  getAdminUsers(): Observable<{ id: string; email: string | null; name: string | null; is_admin: number; created_at: string }[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/admin/users`);
+  }
+
+  toggleAdmin(userId: string): Observable<{ success: boolean; id: string; is_admin: number }> {
+    return this.http.put<any>(`${this.baseUrl}/admin/users/${userId}/toggle-admin`, {});
   }
 
   // --- Telegram ---

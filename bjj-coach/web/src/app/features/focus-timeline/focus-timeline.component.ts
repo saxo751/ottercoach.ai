@@ -21,6 +21,7 @@ import type { FocusPeriodWithDays, Technique } from '../../shared/models';
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">focus_periods.log &mdash; Timeline</span>
+          <img src="assets/otters/Otter-meditating.svg" alt="" class="titlebar-otter" />
         </div>
 
         <div class="retro-window__body focus-body">
@@ -54,15 +55,13 @@ import type { FocusPeriodWithDays, Technique } from '../../shared/models';
             </div>
           </div>
 
-          <div *ngIf="loading" class="loading-state">Loading focus periods...</div>
+          <div *ngIf="loading" class="loading-state">
+            <img src="assets/otters/Otter-meditating.svg" alt="" class="empty-otter" />
+            Loading focus periods...
+          </div>
 
           <div *ngIf="!loading && !loadError && periods.length === 0 && !showCreateForm" class="empty-state">
-            <div class="empty-icon">
-              <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="24" cy="24" r="20" stroke="currentColor" stroke-width="2" stroke-dasharray="4 4" />
-                <path d="M24 14v10l7 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </div>
+            <img src="assets/otters/Otter-with-finger-in-air.svg" alt="" class="empty-otter" />
             <p class="empty-title">No focus periods yet</p>
             <p class="empty-desc">Create your first focused training block above, or chat with your coach.</p>
             <a class="empty-cta" routerLink="/chat">Open Coach Chat</a>
@@ -152,6 +151,7 @@ import type { FocusPeriodWithDays, Technique } from '../../shared/models';
 
         <!-- Status bar -->
         <div class="retro-window__statusbar">
+
           {{ periods.length }} focus {{ periods.length === 1 ? 'period' : 'periods' }} &middot; {{ totalSessions }} total sessions
         </div>
       </div>
@@ -274,6 +274,11 @@ import type { FocusPeriodWithDays, Technique } from '../../shared/models';
     .empty-state {
       text-align: center;
       padding: 48px 20px;
+    }
+    .empty-otter {
+      height: 80px;
+      opacity: 0.6;
+      margin-bottom: 12px;
     }
     .empty-icon {
       color: var(--color-text-muted);

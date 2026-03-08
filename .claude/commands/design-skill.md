@@ -311,8 +311,46 @@ The otter mascot in an isometric illustrated scene — positioned in the lower-r
 
 ---
 
+## Otter Mascot Library
+
+The project has a library of SVG otter illustrations at `bjj-coach/web/src/assets/otters/`. **Every new screen/window MUST include a relevant otter** in the titlebar using the `.titlebar-otter` class (defined in `styles.css`). Choose the most thematically appropriate otter for each screen.
+
+### Available Otters
+
+| File | Mood / Context | Currently Used On |
+|------|---------------|-------------------|
+| `Otter-relaxed-with-arms-crossed.svg` | Confident, chill (has belt) | Landing page desktop scene |
+| `Otter-relaxed-with-arms-crossed-no-belt.svg` | Confident, chill (no belt) | Chat titlebar |
+| `Otter-ready-fight-stance.svg` | Ready, energized (no gi) | Dashboard titlebar |
+| `Otter-ready-fight-stance-gi.svg` | Ready, energized (with gi) | Login page hero |
+| `Otter-meditating.svg` | Calm, focused, patient | Focus Timeline titlebar, loading states, typing indicator |
+| `Otter-armbar-turtle.svg` | Playful, technical | Techniques titlebar |
+| `Otter-with-finger-in-air.svg` | Idea, eureka moment | Ideas titlebar |
+| `Otter-approving-with-thumbs-up.svg` | Positive, encouraging | Profile titlebar, signup hero, empty states |
+| `Otter-confused.svg` | Lost, searching | Empty search results |
+| `Otter-trippin-turtle.svg` | Silly, unexpected | Error states, 404 |
+| `otter_base.svg` | Neutral base pose | Fallback |
+
+### How to Use
+
+**Titlebar otter (every window):** Add an `<img>` with class `titlebar-otter` inside the `.retro-window__titlebar`, after the `__title` span. The `margin-left: auto` on the class pushes it to the right side of the titlebar.
+
+```html
+<div class="retro-window__titlebar">
+  <div class="retro-window__controls">...</div>
+  <span class="retro-window__title">window.title</span>
+  <img src="assets/otters/Otter-meditating.svg" alt="" class="titlebar-otter" />
+</div>
+```
+
+**Empty/loading states:** Use a larger otter (class `empty-otter`, 80px height) centered in the empty state area.
+
+**New screens:** When creating any new screen or window, always pick a relevant otter from the library above and add it to the titlebar. If none fits, use `Otter-relaxed-with-arms-crossed-no-belt.svg` as a safe default. If the project needs a new pose, use the `/mascot` skill to generate one.
+
+---
+
 ## Do's and Don'ts
 
-**DO:** Use warm parchment background with paper grain texture. Make desktop icons detailed, colorful, and charming with file-extension labels. Use orange as primary accent. Use modern soft shadows on windows. Keep body text clean with DM Sans. Place mascot scene in lower-right. Use macOS-style colored dots for window controls.
+**DO:** Use warm parchment background with paper grain texture. Make desktop icons detailed, colorful, and charming with file-extension labels. Use orange as primary accent. Use modern soft shadows on windows. Keep body text clean with DM Sans. Place mascot scene in lower-right. Use macOS-style colored dots for window controls. **Include a relevant otter in every window titlebar.**
 
-**DON'T:** Use classic teal Win95 desktop. Apply hard 3D beveled borders. Use pixel fonts for body text. Use a taskbar at the bottom. Use blue gradient title bars. Put emoji as desktop icons. Use sharp Win95 corners (use border-radius 4-8px).
+**DON'T:** Use classic teal Win95 desktop. Apply hard 3D beveled borders. Use pixel fonts for body text. Use a taskbar at the bottom. Use blue gradient title bars. Put emoji as desktop icons. Use sharp Win95 corners (use border-radius 4-8px). **Don't create a new window without an otter.**

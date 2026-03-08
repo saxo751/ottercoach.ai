@@ -1,4 +1,4 @@
-import type { User, Position, Technique, TrainingSession, FocusPeriod, Goal, UserMemory, UserDailyLog } from '../db/types.js';
+import type { User, Position, Technique, TrainingSession, FocusPeriod, Goal, UserMemory, UserDailyLog, LibraryTechnique } from '../db/types.js';
 
 // ── Shared coach persona (constant across all modes) ────────────────────────
 
@@ -127,6 +127,17 @@ function buildGoalsSection(goals: Goal[]): string {
 function buildFocusPeriodSection(focus: FocusPeriod | undefined): string {
   if (!focus) return '';
   return `\n## Active Focus Period\n"${focus.name}" — ${focus.description || 'no description'}\nStarted: ${focus.start_date}`;
+}
+
+function buildTechniqueReferencesSection(libraryMatches: LibraryTechnique[]): string {
+  if (libraryMatches.length === 0) return '';
+  const lines = libraryMatches.map((t) => {
+    const parts = [`- **${t.subcategory}** (from ${t.starting_position})`];
+    if (t.description) parts.push(`  ${t.description}`);
+    if (t.youtube_url && t.youtube_url !== 'NONE') parts.push(`  Video: ${t.youtube_url}`);
+    return parts.join('\n');
+  });
+  return `\n## Technique Reference Library\nWhen you mention any of these techniques, include the YouTube link (if available) so the user can review it. Share the short description too if it helps remind them how to execute.\n${lines.join('\n')}`;
 }
 
 // ── Memory section builders ─────────────────────────────────────────────────
@@ -286,6 +297,7 @@ export interface CheckInContext {
   goals: Goal[];
   memories?: UserMemory[];
   dailyLogs?: UserDailyLog[];
+  libraryMatches?: LibraryTechnique[];
 }
 
 export function buildCheckInPrompt(ctx: CheckInContext): string {
@@ -349,10 +361,11 @@ export interface FreeChatContext {
   goals: Goal[];
   memories?: UserMemory[];
   dailyLogs?: UserDailyLog[];
+  libraryMatches?: LibraryTechnique[];
 }
 
 export function buildFreeChatPrompt(ctx: FreeChatContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [], libraryMatches = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -371,6 +384,7 @@ Respond naturally as their coach. Use everything you know about them to give per
 If they share a video link, acknowledge it and note what technique it relates to.
 If they report on training, ask follow-up questions and note key takeaways.
 If they ask about technique, connect it to positions and techniques they already know.
+When discussing specific techniques, share the YouTube video link and a brief description if available in the Technique Reference Videos section below.
 
 ${buildProfileSection(user)}
 ${buildMemorySection(memories, dailyLogs)}
@@ -379,6 +393,7 @@ ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}
 ${buildTechniquesSection(techniques)}
 ${buildSessionsSection(recentSessions)}
+${buildTechniqueReferencesSection(libraryMatches)}
 
 ## Data Extraction
 
@@ -445,10 +460,11 @@ export interface BriefingContext {
   goals: Goal[];
   memories?: UserMemory[];
   dailyLogs?: UserDailyLog[];
+  libraryMatches?: LibraryTechnique[];
 }
 
 export function buildBriefingPrompt(ctx: BriefingContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [], libraryMatches = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -460,10 +476,12 @@ Your message should:
 1. Ask if they're training today (keep it natural, not robotic)
 2. Tell them what to focus on based on their current focus area, goals, and skill gaps
 3. Briefly remind them of their last session — what went well or what they were struggling with
-4. Keep it to 2-4 sentences total. This is a quick text before training, not a lecture.
+4. If you have a reference video for a technique they should focus on, share the YouTube link so they can review it before class
+5. Keep it to 2-4 sentences total. This is a quick text before training, not a lecture.
 
 If they respond saying they're not training today, be supportive — rest days matter too.
 If they respond with questions or want to discuss the plan, help them naturally.
+When discussing specific techniques, share the YouTube video link and a brief reminder of how to execute if you have one in the Technique Reference Videos section.
 
 ${buildProfileSection(user)}
 ${buildMemorySection(memories, dailyLogs)}
@@ -471,7 +489,8 @@ ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}
 ${buildTechniquesSection(techniques)}
-${buildSessionsSection(recentSessions)}`;
+${buildSessionsSection(recentSessions)}
+${buildTechniqueReferencesSection(libraryMatches)}`;
 }
 
 // ── Post-Session Debrief prompt ────────────────────────────────────────────
@@ -485,10 +504,11 @@ export interface DebriefContext {
   goals: Goal[];
   memories?: UserMemory[];
   dailyLogs?: UserDailyLog[];
+  libraryMatches?: LibraryTechnique[];
 }
 
 export function buildDebriefPrompt(ctx: DebriefContext): string {
-  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [] } = ctx;
+  const { user, positions, techniques, recentSessions, activeFocus, goals, memories = [], dailyLogs = [], libraryMatches = [] } = ctx;
 
   return `${COACH_PERSONA}
 
@@ -503,17 +523,20 @@ Your job:
 4. Be encouraging but also honest — if they mention struggles, help them see the path forward
 
 This is a SHORT multi-turn conversation — 2-3 exchanges max. Ask one good follow-up, then wrap up. Don't interrogate them.
+When wrapping up or when they mention a technique they worked on, share a relevant YouTube video link if one is available in the Technique Reference Videos section — it reinforces the learning.
 
 Completion rules:
 - After 2 exchanges (user answered twice), you MUST set debrief_complete to true with your next response
 - If the user gives a one-line answer like "it was good" or "just drilled", accept it and complete
 - If the user says "that's it" or anything that signals they're done, complete immediately
 - Better to log a short session than to keep asking and get no response
+- If the user says they DIDN'T train (rest day, sick, injured, skipped, etc.), be supportive, set debrief_complete to true and session_occurred to false. Do NOT keep asking about training.
 
 After EVERY response, you MUST append a data block. Write your conversational response first, then add:
 
 ---DATA---
 {
+  "session_occurred": true/false,
   "session_type": "gi/nogi/open_mat/competition/private or null",
   "duration_minutes": number or null,
   "positions_worked": "description or null",
@@ -526,7 +549,8 @@ After EVERY response, you MUST append a data block. Write your conversational re
 
 For techniques_worked: Use an object with "drilled" (techniques they practiced/repped) and "sparring" (techniques they hit or attempted in live rolling). Match technique names from the user's Known Techniques list when possible. Either array can be empty.
 
-Set debrief_complete to true when you have AT MINIMUM what they worked on and a general sense of how it went. Don't wait for perfect data — something logged is better than nothing.
+Set session_occurred to false if the user didn't train (sick, injured, rest day, skipped, etc.). When session_occurred is false, all other session fields should be null.
+Set debrief_complete to true when you have AT MINIMUM what they worked on and a general sense of how it went, OR when the user confirms they didn't train. Don't wait for perfect data — something logged is better than nothing.
 
 Only include fields you learned NEW information about. Use null for unknown fields. Always include debrief_complete.
 
@@ -538,5 +562,6 @@ ${buildGoalsSection(goals)}
 ${buildFocusPeriodSection(activeFocus)}
 ${buildPositionsSection(positions)}
 ${buildTechniquesSection(techniques)}
-${buildSessionsSection(recentSessions)}`;
+${buildSessionsSection(recentSessions)}
+${buildTechniqueReferencesSection(libraryMatches)}`;
 }

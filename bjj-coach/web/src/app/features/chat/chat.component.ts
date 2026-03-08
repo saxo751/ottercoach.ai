@@ -22,6 +22,7 @@ import type { ChatMessage, Button } from '../../shared/models';
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">coach.chat</span>
+          <img src="assets/otters/Otter-relaxed-with-arms-crossed-no-belt.svg" alt="" class="titlebar-otter" />
           <span class="connection-status" [class.online]="connected">
             {{ connected ? 'connected' : 'connecting...' }}
           </span>
@@ -36,6 +37,7 @@ import type { ChatMessage, Button } from '../../shared/models';
             ></app-message-bubble>
 
             <div class="typing" *ngIf="typing">
+              <img src="assets/otters/Otter-meditating.svg" alt="" class="typing-otter" />
               <span class="dot"></span>
               <span class="dot"></span>
               <span class="dot"></span>
@@ -107,6 +109,7 @@ import type { ChatMessage, Button } from '../../shared/models';
     }
     .typing {
       display: flex;
+      align-items: center;
       gap: 4px;
       padding: 10px 14px;
       background: var(--color-desktop);
@@ -114,6 +117,11 @@ import type { ChatMessage, Button } from '../../shared/models';
       border-radius: 2px 12px 12px 12px;
       width: fit-content;
       margin-bottom: 8px;
+    }
+    .typing-otter {
+      height: 24px;
+      margin-right: 4px;
+      opacity: 0.7;
     }
     .dot {
       width: 8px;

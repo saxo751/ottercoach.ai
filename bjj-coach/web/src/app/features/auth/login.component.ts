@@ -21,6 +21,9 @@ import { AuthService } from '../../core/services/auth.service';
         </div>
 
         <div class="retro-window__body login-body">
+          <div class="otter-hero">
+            <img src="assets/otters/Otter-ready-fight-stance-gi.svg" alt="Otter ready" class="otter-img" />
+          </div>
           <h2 class="title">Welcome back</h2>
           <p class="desc">Sign in with your email and password.</p>
 
@@ -144,6 +147,14 @@ import { AuthService } from '../../core/services/auth.service';
     }
     .signup-link a:hover {
       text-decoration: underline;
+    }
+    .otter-hero {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .otter-img {
+      height: 100px;
+      opacity: 0.85;
     }
   `],
 })

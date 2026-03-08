@@ -45,3 +45,36 @@ export function getLibraryTechniqueNames(db: Database.Database): string[] {
   const rows = db.prepare('SELECT name FROM technique_library ORDER BY name').all() as { name: string }[];
   return rows.map(r => r.name);
 }
+
+/**
+ * Find library techniques matching a list of technique names (from user's known techniques or focus period).
+ * Uses fuzzy matching: checks if the user's technique name appears in the library name/subcategory or vice versa.
+ * Only returns entries that have a youtube_url or description.
+ */
+export function findMatchingLibraryTechniques(db: Database.Database, techniqueNames: string[]): LibraryTechnique[] {
+  if (techniqueNames.length === 0) return [];
+
+  const allWithContent = db.prepare(
+    "SELECT * FROM technique_library WHERE (youtube_url IS NOT NULL AND youtube_url != 'NONE') OR description IS NOT NULL"
+  ).all() as LibraryTechnique[];
+
+  const matched = new Map<number, LibraryTechnique>();
+
+  for (const name of techniqueNames) {
+    const lower = name.toLowerCase().trim();
+    if (!lower) continue;
+
+    for (const lib of allWithContent) {
+      if (matched.has(lib.id)) continue;
+      const libName = lib.name.toLowerCase();
+      const libSub = lib.subcategory.toLowerCase();
+      // Match if user technique name contains the library subcategory or vice versa
+      if (libSub.includes(lower) || lower.includes(libSub) ||
+          libName.includes(lower) || lower.includes(libName)) {
+        matched.set(lib.id, lib);
+      }
+    }
+  }
+
+  return Array.from(matched.values());
+}

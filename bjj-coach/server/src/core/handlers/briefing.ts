@@ -13,6 +13,7 @@ import type { HandlerResult } from './types.js';
 import { getMemoriesForPrompt } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
+import { getLibraryMatchesForUser } from './techniqueContext.js';
 
 /**
  * Pre-session briefing handler.
@@ -35,6 +36,8 @@ export async function handleBriefing(
   const memories = getMemoriesForPrompt(db, user.id);
   const dailyLogs = getRecentDailyLogs(db, user.id, 3);
 
+  const libraryMatches = getLibraryMatchesForUser(db, techniques, activeFocus, userMessage);
+
   const systemPrompt = buildBriefingPrompt({
     user,
     positions,
@@ -44,6 +47,7 @@ export async function handleBriefing(
     goals,
     memories,
     dailyLogs,
+    libraryMatches,
   });
 
   // Get conversation history and prepare for AI

@@ -3,13 +3,13 @@ import { Telegraf } from 'telegraf';
 import type Database from 'better-sqlite3';
 import { findUserByPlatformId } from '../../db/queries/channels.js';
 import { verifyToken } from '../../utils/jwt.js';
-import { getUserById, updateUser } from '../../db/queries/users.js';
+import { getUserById, updateUser, getAllUsers } from '../../db/queries/users.js';
 import { getPositionsByUserId } from '../../db/queries/positions.js';
 import { getTechniquesByUserId } from '../../db/queries/techniques.js';
 import { createSession, getRecentSessionsByUserId, getSessionStats, updateSession, deleteSession } from '../../db/queries/sessions.js';
 import { getActiveFocusPeriod, getAllFocusPeriods, createFocusPeriod, updateFocusPeriod, deleteFocusPeriod } from '../../db/queries/focusPeriods.js';
 import { getAllGoals } from '../../db/queries/goals.js';
-import { getAllLibraryTechniques, getLibraryByCategory, searchLibrary, getLibraryTechniqueNames } from '../../db/queries/techniqueLibrary.js';
+import { getAllLibraryTechniques, getLibraryByCategory, searchLibrary, getLibraryTechniqueNames, updateLibraryVideoUrl, updateLibraryDescription } from '../../db/queries/techniqueLibrary.js';
 import type { TelegramBotManager } from '../../channels/telegram.js';
 import type { AIProvider } from '../../ai/provider.js';
 
@@ -131,6 +131,89 @@ export function createDashboardRouter(db: Database.Database, telegramManager?: T
       updated.telegram_bot_token = '...' + updated.telegram_bot_token.slice(-4);
     }
     res.json(updated);
+  });
+
+  // --- Technique library editing (authenticated) ---
+
+  router.put('/library/:id', (req, res) => {
+    const user = (req as any).user;
+    if (!user?.is_admin) {
+      res.status(403).json({ error: 'Admin access required' });
+      return;
+    }
+
+    const id = parseInt(req.params.id, 10);
+    if (isNaN(id)) {
+      res.status(400).json({ error: 'Invalid technique ID' });
+      return;
+    }
+
+    const { youtube_url, description } = req.body || {};
+    let updated = false;
+
+    if (youtube_url !== undefined) {
+      // Allow null to clear, or a valid YouTube URL
+      if (youtube_url !== null && typeof youtube_url === 'string' && youtube_url.trim()) {
+        updateLibraryVideoUrl(db, id, youtube_url.trim());
+      } else {
+        updateLibraryVideoUrl(db, id, null as any);
+      }
+      updated = true;
+    }
+
+    if (description !== undefined) {
+      if (description !== null && typeof description === 'string' && description.trim()) {
+        updateLibraryDescription(db, id, description.trim());
+      } else {
+        updateLibraryDescription(db, id, null as any);
+      }
+      updated = true;
+    }
+
+    if (!updated) {
+      res.status(400).json({ error: 'No valid fields provided (youtube_url or description)' });
+      return;
+    }
+
+    res.json({ success: true, id });
+  });
+
+  // --- Admin user management (super admin only) ---
+
+  const SUPER_ADMIN_EMAIL = 'saxo@handyhand.dk';
+
+  router.get('/admin/users', (req, res) => {
+    const user = (req as any).user;
+    if (!user?.is_admin || user.email !== SUPER_ADMIN_EMAIL) {
+      res.status(403).json({ error: 'Super admin access required' });
+      return;
+    }
+    res.json(getAllUsers(db));
+  });
+
+  router.put('/admin/users/:userId/toggle-admin', (req, res) => {
+    const user = (req as any).user;
+    if (!user?.is_admin || user.email !== SUPER_ADMIN_EMAIL) {
+      res.status(403).json({ error: 'Super admin access required' });
+      return;
+    }
+
+    const targetId = req.params.userId;
+    const target = getUserById(db, targetId);
+    if (!target) {
+      res.status(404).json({ error: 'User not found' });
+      return;
+    }
+
+    // Don't allow demoting the super admin
+    if (target.email === SUPER_ADMIN_EMAIL) {
+      res.status(400).json({ error: 'Cannot modify super admin' });
+      return;
+    }
+
+    const newStatus = target.is_admin ? 0 : 1;
+    updateUser(db, targetId, { is_admin: newStatus } as any);
+    res.json({ success: true, id: targetId, is_admin: newStatus });
   });
 
   router.get('/sessions', (req, res) => {

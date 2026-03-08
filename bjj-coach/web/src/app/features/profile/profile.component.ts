@@ -34,6 +34,7 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             <span class="retro-window__dot retro-window__dot--maximize"></span>
           </div>
           <span class="retro-window__title">profile.cfg &mdash; Settings</span>
+          <img src="assets/otters/Otter-approving-with-thumbs-up.svg" alt="" class="titlebar-otter" />
         </div>
 
         <div class="retro-window__body profile-body">
@@ -179,6 +180,45 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
             </div>
 
             <p class="telegram-success-msg" *ngIf="telegramSuccess">{{ telegramSuccess }}</p>
+
+            <!-- Admin: User Management -->
+            <ng-container *ngIf="isSuperAdmin">
+              <h2 class="section-title section-title--spaced">Admin Management</h2>
+              <div class="admin-table-wrap">
+                <table class="admin-table">
+                  <thead>
+                    <tr>
+                      <th>User</th>
+                      <th>Email</th>
+                      <th>Admin</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let u of adminUserList">
+                      <td>{{ u.name || '—' }}</td>
+                      <td class="email-cell">{{ u.email || '—' }}</td>
+                      <td>
+                        <span class="admin-badge" *ngIf="u.is_admin">admin</span>
+                        <span class="user-badge" *ngIf="!u.is_admin">user</span>
+                      </td>
+                      <td>
+                        <button
+                          *ngIf="u.email !== superAdminEmail"
+                          class="btn-toggle-admin"
+                          [class.btn-toggle-admin--revoke]="u.is_admin"
+                          (click)="toggleUserAdmin(u)"
+                          [disabled]="adminToggling === u.id"
+                        >
+                          {{ u.is_admin ? 'Revoke' : 'Make admin' }}
+                        </button>
+                        <span *ngIf="u.email === superAdminEmail" class="super-label">super</span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </ng-container>
 
             <!-- Messages -->
             <p class="success-msg" *ngIf="successMsg">{{ successMsg }}</p>
@@ -599,6 +639,90 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
       text-decoration: underline;
     }
 
+    /* Admin table */
+    .admin-table-wrap {
+      overflow-x: auto;
+    }
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+    }
+    .admin-table th {
+      text-align: left;
+      padding: 8px 10px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      font-size: var(--text-xs);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      border-bottom: var(--border-subtle);
+    }
+    .admin-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--color-desktop-darker);
+      color: var(--color-text-secondary);
+    }
+    .email-cell {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+    }
+    .admin-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .user-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: var(--color-desktop-darker);
+      color: var(--color-text-muted);
+      font-size: 10px;
+      font-weight: 500;
+    }
+    .super-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .btn-toggle-admin {
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 500;
+      cursor: pointer;
+      border: var(--border-subtle);
+      background: var(--color-surface);
+      color: var(--color-text-secondary);
+      transition: all 0.15s;
+    }
+    .btn-toggle-admin:hover:not(:disabled) {
+      border-color: var(--color-accent);
+      color: var(--color-text);
+    }
+    .btn-toggle-admin--revoke {
+      color: var(--color-danger, #dc2626);
+    }
+    .btn-toggle-admin--revoke:hover:not(:disabled) {
+      border-color: var(--color-danger, #dc2626);
+      background: var(--color-danger, #dc2626);
+      color: #fff;
+    }
+    .btn-toggle-admin:disabled {
+      opacity: 0.4;
+      cursor: default;
+    }
+
     @media (max-width: 480px) {
       .profile-body { padding: 20px 16px; }
     }
@@ -642,6 +766,12 @@ export class ProfileComponent implements OnInit {
   telegramSaving = false;
   telegramError = '';
   telegramSuccess = '';
+
+  // Admin management
+  isSuperAdmin = false;
+  superAdminEmail = 'saxo@handyhand.dk';
+  adminUserList: { id: string; email: string | null; name: string | null; is_admin: number; created_at: string }[] = [];
+  adminToggling: string | null = null;
 
   // State
   loading = true;
@@ -826,6 +956,28 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  toggleUserAdmin(u: { id: string; is_admin: number }): void {
+    this.adminToggling = u.id;
+    this.api.toggleAdmin(u.id).subscribe({
+      next: (res) => {
+        this.adminToggling = null;
+        const target = this.adminUserList.find(x => x.id === u.id);
+        if (target) target.is_admin = res.is_admin;
+      },
+      error: () => {
+        this.adminToggling = null;
+      },
+    });
+  }
+
+  private loadAdminUsers(): void {
+    this.api.getAdminUsers().subscribe({
+      next: (users) => {
+        this.adminUserList = users;
+      },
+    });
+  }
+
   private populateForm(user: User): void {
     this.profilePicturePreview = user.profile_picture || null;
     this.profilePictureData = user.profile_picture || null;
@@ -840,6 +992,10 @@ export class ProfileComponent implements OnInit {
     this.goals = user.goals || '';
     this.timezone = user.timezone || '';
     this.updatedAt = user.updated_at ? new Date(user.updated_at).toLocaleDateString() : '';
+
+    // Admin
+    this.isSuperAdmin = !!user.is_admin && user.email === this.superAdminEmail;
+    if (this.isSuperAdmin) this.loadAdminUsers();
 
     // Telegram
     this.hasTelegramBot = !!user.has_telegram_bot;

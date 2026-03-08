@@ -369,6 +369,13 @@ const migrations: Migration[] = [
       WHERE NOT EXISTS (SELECT 1 FROM technique_library WHERE subcategory = 'Guillotine Choke' AND starting_position = 'Octopus Guard');
     `,
   },
+  {
+    version: 16,
+    description: 'Add is_admin column to users',
+    up: `
+      ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

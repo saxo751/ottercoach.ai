@@ -26,6 +26,7 @@ export function createUser(db: Database.Database, overrides: Partial<User> = {})
     last_scheduled_date: overrides.last_scheduled_date || null,
     telegram_bot_token: overrides.telegram_bot_token || null,
     profile_picture: overrides.profile_picture || null,
+    is_admin: overrides.is_admin ?? 0,
     created_at: now,
     updated_at: now,
   };
@@ -52,6 +53,7 @@ export function updateUser(db: Database.Database, id: string, fields: Partial<Us
     'training_days', 'typical_training_time', 'injuries_limitations',
     'current_focus_area', 'goals', 'timezone', 'conversation_mode',
     'onboarding_complete', 'last_scheduled_action', 'last_scheduled_date', 'telegram_bot_token', 'profile_picture',
+    'is_admin',
   ];
 
   const updates: string[] = [];
@@ -86,4 +88,15 @@ export function setScheduledAction(db: Database.Database, id: string, action: st
   db.prepare(
     'UPDATE users SET last_scheduled_action = ?, last_scheduled_date = ? WHERE id = ?'
   ).run(action, date, id);
+}
+
+export function getAllUsers(db: Database.Database): Pick<User, 'id' | 'email' | 'name' | 'is_admin' | 'created_at'>[] {
+  return db.prepare('SELECT id, email, name, is_admin, created_at FROM users ORDER BY created_at').all() as any[];
+}
+
+export function ensureSuperAdmin(db: Database.Database, email: string): void {
+  const result = db.prepare('UPDATE users SET is_admin = 1 WHERE email = ? AND is_admin = 0').run(email);
+  if (result.changes > 0) {
+    console.log(`[db] Promoted ${email} to admin`);
+  }
 }

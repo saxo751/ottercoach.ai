@@ -18,6 +18,7 @@ import type { HandlerResult, SystemMessage } from './types.js';
 import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
+import { getLibraryMatchesForUser } from './techniqueContext.js';
 
 /**
  * Post-session debrief handler.
@@ -43,6 +44,8 @@ export async function handleDebrief(
   const memories = getMemoriesForPrompt(db, user.id);
   const dailyLogs = getRecentDailyLogs(db, user.id, 3);
 
+  const libraryMatches = getLibraryMatchesForUser(db, techniques, activeFocus, userMessage);
+
   const systemPrompt = buildDebriefPrompt({
     user,
     positions,
@@ -52,6 +55,7 @@ export async function handleDebrief(
     goals,
     memories,
     dailyLogs,
+    libraryMatches,
   });
 
   // Get conversation history and prepare for AI
@@ -71,8 +75,8 @@ export async function handleDebrief(
     // Process memory extraction
     processMemoryExtraction(db, user.id, data, 'debrief');
 
-    if (data.debrief_complete === true) {
-      // Create training session record
+    if (data.debrief_complete === true && data.session_occurred !== false) {
+      // Create training session record (only if session actually happened)
       const today = getUserLocalDate(user.timezone || 'America/New_York');
       const sessionType = SESSION_TYPES.includes(data.session_type as SessionType) ? (data.session_type as SessionType) : null;
       const durationMin = typeof data.duration_minutes === 'number' ? data.duration_minutes : null;
@@ -104,6 +108,10 @@ export async function handleDebrief(
       systemMessages.push({ text: sysMsg, link: '/dashboard' });
 
       // Transition back to idle
+      setConversationMode(db, user.id, CONVERSATION_MODES.IDLE);
+    } else if (data.debrief_complete === true && data.session_occurred === false) {
+      // User didn't train (rest day, sick, injured, etc.) — no session to log
+      console.log(`[debrief] No session — user ${user.id} (${user.name}) didn't train`);
       setConversationMode(db, user.id, CONVERSATION_MODES.IDLE);
     }
   }

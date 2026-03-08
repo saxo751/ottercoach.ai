@@ -17,6 +17,7 @@ import { getUserLocalDate } from '../../utils/time.js';
 import type { SessionType } from '../../utils/constants.js';
 import { SESSION_TYPES } from '../../utils/constants.js';
 import type { HandlerResult, SystemMessage } from './types.js';
+import { getLibraryMatchesForUser } from './techniqueContext.js';
 
 export async function handleFreeChat(
   db: Database.Database,
@@ -33,6 +34,8 @@ export async function handleFreeChat(
   const memories = getMemoriesForPrompt(db, user.id);
   const dailyLogs = getRecentDailyLogs(db, user.id, 3);
 
+  const libraryMatches = getLibraryMatchesForUser(db, techniques, activeFocus, userMessage);
+
   // Build system prompt with all context including memories
   const systemPrompt = buildFreeChatPrompt({
     user,
@@ -43,6 +46,7 @@ export async function handleFreeChat(
     goals,
     memories,
     dailyLogs,
+    libraryMatches,
   });
 
   // Get conversation history (filter out system messages for the AI)

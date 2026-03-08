@@ -57,6 +57,9 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
           <!-- Step 1: Name + Email -->
           <div class="step-content" *ngIf="step === 1">
+            <div class="otter-hero">
+              <img src="assets/otters/Otter-approving-with-thumbs-up.svg" alt="Welcome!" class="otter-img" />
+            </div>
             <h2 class="step-title">Let's get you started</h2>
             <p class="step-desc">We just need a few basics to set up your coaching experience.</p>
 
@@ -511,6 +514,15 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     }
     .telegram-error {
       color: var(--color-danger) !important;
+    }
+
+    .otter-hero {
+      text-align: center;
+      margin-bottom: 12px;
+    }
+    .otter-img {
+      height: 90px;
+      opacity: 0.85;
     }
 
     @media (max-width: 480px) {

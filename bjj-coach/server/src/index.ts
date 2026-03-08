@@ -14,6 +14,7 @@ import { WebAdapter } from './channels/web.js';
 import { CoachingEngine } from './core/engine.js';
 import { Scheduler } from './scheduler/scheduler.js';
 import { seedTechniqueLibrary } from './db/seed/techniqueLibrary.js';
+import { ensureSuperAdmin } from './db/queries/users.js';
 
 const PORT = parseInt(process.env.WEB_PORT || '3000', 10);
 
@@ -21,6 +22,7 @@ async function main() {
   // 1. Database
   const db = initDatabase();
   seedTechniqueLibrary(db);
+  ensureSuperAdmin(db, 'saxo@handyhand.dk');
   console.log('[db] SQLite initialized');
 
   // 2. AI Provider

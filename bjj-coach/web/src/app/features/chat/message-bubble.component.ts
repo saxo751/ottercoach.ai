@@ -19,7 +19,7 @@ import type { ChatMessage } from '../../shared/models';
         <a class="system-link" [routerLink]="message.link">{{ message.content }}</a>
       </ng-container>
       <ng-template #plainText>
-        <div class="text">{{ message.content }}</div>
+        <div class="text" [innerHTML]="linkify(message.content)"></div>
       </ng-template>
     </div>
   `,
@@ -74,8 +74,27 @@ import type { ChatMessage } from '../../shared/models';
     .system-link:hover {
       text-decoration: underline;
     }
+    :host ::ng-deep .msg-link {
+      color: var(--color-accent);
+      text-decoration: underline;
+      word-break: break-all;
+    }
+    :host .user ::ng-deep .msg-link {
+      color: var(--color-accent-text);
+    }
   `],
 })
 export class MessageBubbleComponent {
   @Input() message!: ChatMessage;
+
+  linkify(text: string): string {
+    const escaped = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+    return escaped.replace(
+      /https?:\/\/[^\s<]+/g,
+      (url) => `<a href="${url}" target="_blank" rel="noopener noreferrer" class="msg-link">${url}</a>`
+    );
+  }
 }

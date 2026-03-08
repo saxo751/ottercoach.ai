@@ -13,69 +13,7 @@ import { AuthService, type AuthUser } from '../../core/services/auth.service';
       <div class="navbar__inner">
         <!-- Left: Logo + brand -->
         <a class="navbar__brand" routerLink="/">
-          <svg
-            class="navbar__logo"
-            viewBox="0 0 32 32"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <circle cx="16" cy="16" r="14" fill="#252119" />
-            <ellipse cx="16" cy="15" rx="12" ry="8" fill="#5C4120" />
-            <circle cx="5.5" cy="11" r="2" fill="#5C4120" />
-            <circle cx="26.5" cy="11" r="2" fill="#5C4120" />
-            <ellipse cx="16" cy="18" rx="7" ry="4.5" fill="#A89060" />
-            <ellipse cx="16" cy="19.5" rx="4" ry="2.5" fill="#B8A47C" />
-            <ellipse cx="12" cy="14.5" rx="1.5" ry="1.7" fill="#1E100A" />
-            <ellipse cx="20" cy="14.5" rx="1.5" ry="1.7" fill="#1E100A" />
-            <circle cx="12.6" cy="13.8" r="0.6" fill="white" opacity="0.8" />
-            <circle cx="20.6" cy="13.8" r="0.6" fill="white" opacity="0.8" />
-            <ellipse cx="16" cy="17.5" rx="1.5" ry="1" fill="#1E100A" />
-            <path
-              d="M13.5 20.5 Q16 22.5 18.5 20.5"
-              stroke="#33250F"
-              stroke-width="0.8"
-              fill="none"
-              stroke-linecap="round"
-            />
-            <line
-              x1="12"
-              y1="18.5"
-              x2="6"
-              y2="17"
-              stroke="#33250F"
-              stroke-width="0.5"
-              opacity="0.5"
-            />
-            <line
-              x1="12"
-              y1="19.5"
-              x2="5.5"
-              y2="19.5"
-              stroke="#33250F"
-              stroke-width="0.5"
-              opacity="0.5"
-            />
-            <line
-              x1="20"
-              y1="18.5"
-              x2="26"
-              y2="17"
-              stroke="#33250F"
-              stroke-width="0.5"
-              opacity="0.5"
-            />
-            <line
-              x1="20"
-              y1="19.5"
-              x2="26.5"
-              y2="19.5"
-              stroke="#33250F"
-              stroke-width="0.5"
-              opacity="0.5"
-            />
-            <rect x="6" y="27" width="20" height="3" rx="1.5" fill="#7B4BAA" />
-          </svg>
-          <span class="navbar__brand-text">BJJ Coach</span>
+          <span class="navbar__brand-text">The Otter Coach</span>
         </a>
 
         <!-- Center: Nav links -->
@@ -156,7 +94,11 @@ import { AuthService, type AuthUser } from '../../core/services/auth.service';
               (click)="dropdownOpen = !dropdownOpen"
             >
               @if (user?.profile_picture) {
-                <img [src]="user!.profile_picture!" class="navbar__avatar-img" alt="Avatar" />
+                <img
+                  [src]="user!.profile_picture!"
+                  class="navbar__avatar-img"
+                  alt="Avatar"
+                />
               } @else {
                 {{ userInitial }}
               }
@@ -471,6 +413,8 @@ import { AuthService, type AuthUser } from '../../core/services/auth.service';
         justify-content: center;
         cursor: pointer;
         transition: background 0.15s ease;
+        overflow: hidden;
+        padding: 0;
       }
 
       .navbar__avatar:hover {
