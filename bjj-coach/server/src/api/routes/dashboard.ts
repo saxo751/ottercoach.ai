@@ -12,6 +12,7 @@ import { getAllGoals } from '../../db/queries/goals.js';
 import { getAllLibraryTechniques, getLibraryByCategory, searchLibrary, getLibraryTechniqueNames, updateLibraryVideoUrl, updateLibraryDescription } from '../../db/queries/techniqueLibrary.js';
 import type { TelegramBotManager } from '../../channels/telegram.js';
 import type { AIProvider } from '../../ai/provider.js';
+import { isValidTrainingStartMonth } from '../../utils/experience.js';
 
 export function createDashboardRouter(db: Database.Database, telegramManager?: TelegramBotManager, ai?: AIProvider): Router {
   const router = Router();
@@ -80,7 +81,7 @@ export function createDashboardRouter(db: Database.Database, telegramManager?: T
     const body = req.body || {};
 
     const allowed = [
-      'name', 'email', 'belt_rank', 'experience_months', 'preferred_game_style',
+      'name', 'email', 'belt_rank', 'experience_months', 'training_start_month', 'preferred_game_style',
       'training_days', 'typical_training_time', 'injuries_limitations',
       'current_focus_area', 'goals', 'timezone', 'profile_picture',
     ];
@@ -113,6 +114,16 @@ export function createDashboardRouter(db: Database.Database, telegramManager?: T
         }
         if (pic.length > 300_000) {
           res.status(400).json({ error: 'Profile picture is too large (max ~200KB)' });
+          return;
+        }
+      }
+    }
+
+    if ('training_start_month' in fields) {
+      const tsm = fields.training_start_month;
+      if (tsm !== null) {
+        if (typeof tsm !== 'string' || !isValidTrainingStartMonth(tsm as string)) {
+          res.status(400).json({ error: 'training_start_month must be YYYY-MM format and not in the future' });
           return;
         }
       }
