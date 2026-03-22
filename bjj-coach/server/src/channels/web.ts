@@ -56,6 +56,12 @@ export class WebAdapter implements ChannelAdapter {
     client.ws.send(JSON.stringify({ type: 'buttons', text, buttons }));
   }
 
+  /** Check if a user has an active, open WebSocket connection. */
+  isClientConnected(sessionId: string): boolean {
+    const client = this.clients.get(sessionId);
+    return !!client && client.ws.readyState === WebSocket.OPEN;
+  }
+
   async start(): Promise<void> {
     this.wss = new WebSocketServer({ server: this.httpServer, path: '/ws' });
 
