@@ -9,7 +9,6 @@ import { createAdminRouter } from './api/routes/admin.js';
 import { initDatabase } from './db/database.js';
 import { createAIProvider } from './ai/factory.js';
 import { ChannelManager } from './channels/manager.js';
-import { TelegramBotManager } from './channels/telegram.js';
 import { WebAdapter } from './channels/web.js';
 import { CoachingEngine } from './core/engine.js';
 import { Scheduler } from './scheduler/scheduler.js';
@@ -46,11 +45,8 @@ async function main() {
   });
 
   app.use('/api', apiRouter);
-  // Telegram bot manager (initialized early so routers can reference it)
-  const telegramManager = new TelegramBotManager(db);
-
-  app.use('/api/auth', createAuthRouter(db, telegramManager));
-  app.use('/api/dashboard', createDashboardRouter(db, telegramManager, ai));
+  app.use('/api/auth', createAuthRouter(db));
+  app.use('/api/dashboard', createDashboardRouter(db, ai));
   app.use('/api/ideas', createIdeasRouter(db));
 
   const server = createServer(app);
@@ -62,9 +58,6 @@ async function main() {
     const webAdapter = new WebAdapter(server, db);
     channelManager.registerAdapter('web', webAdapter);
   }
-
-  // Telegram: always register (starts zero bots if no users have tokens)
-  channelManager.registerAdapter('telegram', telegramManager);
 
   // Admin router (needs ai + channelManager, so mounted after adapters)
   app.use('/api/admin', createAdminRouter(db, ai, channelManager));
