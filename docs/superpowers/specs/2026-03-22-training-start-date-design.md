@@ -33,8 +33,9 @@ New function in `src/utils/experience.ts`:
 function getExperienceMonths(user: { training_start_month?: string | null; experience_months?: number | null }): number | null
 ```
 
-- If `training_start_month` is set: parse `"YYYY-MM"`, diff against current year/month, return total months
+- If `training_start_month` is set: parse `"YYYY-MM"`, diff against current UTC year/month, return total months. Returns `0` for current month (not `null`).
 - Else: return `experience_months` (may be `null`)
+- Uses UTC month arithmetic — acceptable given month-only precision.
 
 Used everywhere experience is needed — replaces direct reads of `experience_months`.
 
@@ -48,11 +49,12 @@ In `src/ai/prompts.ts` — onboarding `---DATA---` JSON schema:
 In `src/core/handlers/onboarding.ts`:
 
 - Extract and save `training_start_month` from AI-parsed data
-- Continue to also save `experience_months` if the AI provides it (backward compat)
+- Validate format (`YYYY-MM`) and reject future months before saving
+- Drop `experience_months` from the onboarding AI extraction schema — the helper function makes it redundant for new users. Existing users who already have `experience_months` set keep it as a fallback.
 
 ### 4. Web Profile
 
-API — extend `PATCH /api/dashboard/profile` (or equivalent profile update endpoint):
+API — extend `PUT /api/dashboard/profile`:
 
 - Accept `training_start_month` in request body
 - Validate format matches `YYYY-MM` and is not in the future
@@ -86,7 +88,7 @@ In `src/db/types.ts`:
 
 In `src/db/queries/users.ts`:
 
-- Add `training_start_month` to default user creation and allowed update fields
+- Add `training_start_month` to the `INSERT` column list in `createUser()` and to the `allowed` array in `updateUser()`
 
 ## Files Changed
 
@@ -100,7 +102,9 @@ In `src/db/queries/users.ts`:
 | `src/core/handlers/onboarding.ts` | Save `training_start_month` from extracted data |
 | `src/api/routes/dashboard.ts` | Include in profile response, use helper |
 | `src/api/routes/auth.ts` | Accept `training_start_month` on signup |
-| Web profile component | Add month/year picker |
+| `src/ai/prompts.ts` (free chat) | Add `training_start_month` to `profile_updates` in free chat `---DATA---` schema |
+| `web/src/app/shared/models/index.ts` | Add `training_start_month` to frontend `User` model |
+| `web/src/app/features/profile/profile.component.ts` | Add month/year picker; replace legacy numeric experience input; add field to `save()` updates object |
 
 ## Out of Scope
 
