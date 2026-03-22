@@ -246,7 +246,7 @@ import { AuthService, type AuthUser } from '../../core/services/auth.service';
               (click)="mobileOpen = false"
               >Sign in</a
             >
-          } @else if (user) {
+          } @else {
             <a
               class="navbar__mobile-link"
               routerLink="/profile"
