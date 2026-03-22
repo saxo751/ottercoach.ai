@@ -16,6 +16,7 @@ import { logTokenUsage } from '../../db/queries/tokenUsage.js';
 import { getUserLocalDate } from '../../utils/time.js';
 import type { SessionType } from '../../utils/constants.js';
 import { SESSION_TYPES } from '../../utils/constants.js';
+import { isValidTrainingStartMonth } from '../../utils/experience.js';
 import type { HandlerResult, SystemMessage } from './types.js';
 import { getLibraryMatchesForUser } from './techniqueContext.js';
 
@@ -110,6 +111,11 @@ export async function handleFreeChat(
       if (p.injuries_limitations && typeof p.injuries_limitations === 'string') updates.injuries_limitations = p.injuries_limitations;
       if (p.preferred_game_style && typeof p.preferred_game_style === 'string') updates.preferred_game_style = p.preferred_game_style;
       if (p.current_focus_area && typeof p.current_focus_area === 'string') updates.current_focus_area = p.current_focus_area;
+      if (p.training_start_month && typeof p.training_start_month === 'string') {
+        if (isValidTrainingStartMonth(p.training_start_month)) {
+          updates.training_start_month = p.training_start_month;
+        }
+      }
 
       if (Object.keys(updates).length > 0) {
         updateUser(db, user.id, updates);

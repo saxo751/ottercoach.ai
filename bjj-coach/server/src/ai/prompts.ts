@@ -438,6 +438,7 @@ If the user shares new or changed information about their profile, include it in
 
 "profile_updates": {
   "training_schedule": {"monday": "06:00", "wednesday": "20:00"} or null,
+  "training_start_month": "YYYY-MM or null",
   "goals": "new goal description or null",
   "injuries_limitations": "updated info or null",
   "preferred_game_style": "updated style or null",
