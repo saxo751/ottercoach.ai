@@ -41,3 +41,17 @@ export function getLastMessage(
     LIMIT 1
   `).get(userId) as ConversationEntry | undefined;
 }
+
+export function getMessagesSince(
+  db: Database.Database,
+  userId: string,
+  since: string,
+  limit = 100
+): ConversationEntry[] {
+  return db.prepare(`
+    SELECT * FROM conversation_history
+    WHERE user_id = ? AND created_at > ?
+    ORDER BY created_at ASC
+    LIMIT ?
+  `).all(userId, since, limit) as ConversationEntry[];
+}
