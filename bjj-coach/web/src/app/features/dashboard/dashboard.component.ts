@@ -34,8 +34,8 @@ import type { User, Position, Technique, TrainingSession, FocusPeriod, SessionSt
               <span *ngIf="profile.belt_rank" class="belt-badge" [attr.data-belt]="profile.belt_rank">
                 {{ profile.belt_rank }} belt
               </span>
-              <span *ngIf="profile.experience_months" class="meta-item">
-                {{ profile.experience_months }} mo training
+              <span *ngIf="profile.training_start_month || profile.experience_months" class="meta-item">
+                {{ formatExperience(profile) }}
               </span>
             </div>
             <div class="details" *ngIf="profile.preferred_game_style || profile.goals || profile.current_focus_area">
@@ -287,6 +287,23 @@ export class DashboardComponent implements OnInit {
   editingSession: TrainingSession | null = null;
 
   constructor(private api: ApiService) {}
+
+  formatExperience(profile: any): string {
+    if (profile.training_start_month) {
+      const match = profile.training_start_month.match(/^(\d{4})-(\d{2})$/);
+      if (match) {
+        const now = new Date();
+        const totalMonths = Math.max(0, (now.getFullYear() - parseInt(match[1])) * 12 + (now.getMonth() + 1 - parseInt(match[2])));
+        const years = Math.floor(totalMonths / 12);
+        const months = totalMonths % 12;
+        return years > 0 ? `${years}y ${months}m training` : `${months}m training`;
+      }
+    }
+    if (profile.experience_months) {
+      return `${profile.experience_months} mo training`;
+    }
+    return '';
+  }
 
   ngOnInit(): void {
     this.api.getProfile().subscribe({
