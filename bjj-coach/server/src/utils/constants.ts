@@ -12,7 +12,7 @@ export type ConversationMode = typeof CONVERSATION_MODES[keyof typeof CONVERSATI
 export const BELT_RANKS = ['white', 'blue', 'purple', 'brown', 'black', 'none'] as const;
 export type BeltRank = typeof BELT_RANKS[number];
 
-export const PLATFORMS = ['telegram', 'whatsapp', 'web'] as const;
+export const PLATFORMS = ['whatsapp', 'web', 'mobile'] as const;
 export type Platform = typeof PLATFORMS[number];
 
 export const TECHNIQUE_TYPES = [

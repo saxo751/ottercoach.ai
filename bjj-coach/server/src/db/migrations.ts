@@ -383,6 +383,14 @@ const migrations: Migration[] = [
       ALTER TABLE users ADD COLUMN training_start_month TEXT;
     `,
   },
+  {
+    version: 18,
+    description: 'Drop telegram_bot_token, add push_token to user_channels',
+    up: `
+      ALTER TABLE users DROP COLUMN telegram_bot_token;
+      ALTER TABLE user_channels ADD COLUMN push_token TEXT;
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {

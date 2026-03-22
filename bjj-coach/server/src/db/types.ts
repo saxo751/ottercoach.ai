@@ -19,7 +19,6 @@ export interface User {
   onboarding_complete: number;          // SQLite boolean: 0 or 1
   last_scheduled_action: string | null; // 'briefing' | 'debrief' | null
   last_scheduled_date: string | null;   // 'YYYY-MM-DD' — resets daily
-  telegram_bot_token: string | null;
   profile_picture: string | null;
   is_admin: number;              // SQLite boolean: 0 or 1
   created_at: string;
@@ -41,6 +40,7 @@ export interface UserChannel {
   platform: Platform;
   platform_user_id: string;
   is_primary: number;
+  push_token: string | null;
   created_at: string;
 }
 
