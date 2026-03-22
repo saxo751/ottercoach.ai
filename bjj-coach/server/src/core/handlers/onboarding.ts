@@ -7,6 +7,7 @@ import { getUserById, updateUser } from '../../db/queries/users.js';
 import { getRecentMessages } from '../../db/queries/conversations.js';
 import { createGoal } from '../../db/queries/goals.js';
 import { CONVERSATION_MODES } from '../../utils/constants.js';
+import { isValidTrainingStartMonth } from '../../utils/experience.js';
 import { getMemoriesForPrompt, processMemoryExtraction } from '../../db/queries/memories.js';
 import { getRecentDailyLogs } from '../../db/queries/dailyLogs.js';
 import { logTokenUsage } from '../../db/queries/tokenUsage.js';
@@ -54,6 +55,11 @@ export async function handleOnboarding(
     if (data.name && typeof data.name === 'string') updates.name = data.name;
     if (data.belt_rank && typeof data.belt_rank === 'string') {
       updates.belt_rank = data.belt_rank as any; // includes "none" for no-gi only
+    }
+    if (data.training_start_month && typeof data.training_start_month === 'string') {
+      if (isValidTrainingStartMonth(data.training_start_month)) {
+        updates.training_start_month = data.training_start_month;
+      }
     }
     if (data.experience_months != null && typeof data.experience_months === 'number') {
       updates.experience_months = data.experience_months;
