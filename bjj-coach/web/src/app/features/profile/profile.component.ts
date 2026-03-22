@@ -84,10 +84,11 @@ const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
               </div>
             </div>
 
-            <!-- Experience -->
+            <!-- Training start date -->
             <div class="field">
-              <label class="field-label">Experience (months)</label>
-              <input type="number" class="field-input field-input--short" [(ngModel)]="experienceMonths" min="0" placeholder="e.g. 18" />
+              <label class="field-label">When did you start training?</label>
+              <input type="month" class="field-input field-input--short" [(ngModel)]="trainingStartMonth" [max]="maxMonth" />
+              <span class="field-hint" *ngIf="trainingStartMonth">{{ computedExperience }}</span>
             </div>
 
             <!-- Game style -->
@@ -739,6 +740,7 @@ export class ProfileComponent implements OnInit {
   email = '';
   beltRank = '';
   experienceMonths: number | null = null;
+  trainingStartMonth: string | null = null;
   gameStyle = '';
   daySchedule: Record<string, string> = {};
   injuries = '';
@@ -757,6 +759,25 @@ export class ProfileComponent implements OnInit {
     return this.days
       .map((day, i) => ({ day, label: this.dayLabels[i] }))
       .filter(entry => this.daySchedule[entry.day]);
+  }
+
+  get maxMonth(): string {
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  }
+
+  get computedExperience(): string {
+    if (!this.trainingStartMonth) return '';
+    const match = this.trainingStartMonth.match(/^(\d{4})-(\d{2})$/);
+    if (!match) return '';
+    const startYear = parseInt(match[1], 10);
+    const startMonth = parseInt(match[2], 10);
+    const now = new Date();
+    const totalMonths = Math.max(0, (now.getFullYear() - startYear) * 12 + (now.getMonth() + 1 - startMonth));
+    const years = Math.floor(totalMonths / 12);
+    const months = totalMonths % 12;
+    if (years > 0) return `${years}y ${months}m training`;
+    return `${months}m training`;
   }
 
   // Telegram
@@ -885,6 +906,7 @@ export class ProfileComponent implements OnInit {
       email: this.email.trim().toLowerCase(),
       belt_rank: this.beltRank || null,
       experience_months: this.experienceMonths,
+      training_start_month: this.trainingStartMonth,
       preferred_game_style: this.gameStyle.trim() || null,
       training_days: trainingDaysJson,
       typical_training_time: null,
@@ -986,6 +1008,7 @@ export class ProfileComponent implements OnInit {
     this.email = user.email || '';
     this.beltRank = user.belt_rank || '';
     this.experienceMonths = user.experience_months;
+    this.trainingStartMonth = user.training_start_month;
     this.gameStyle = user.preferred_game_style || '';
     this.injuries = user.injuries_limitations || '';
     this.focusArea = user.current_focus_area || '';

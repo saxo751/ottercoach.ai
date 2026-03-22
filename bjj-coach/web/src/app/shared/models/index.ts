@@ -4,6 +4,7 @@ export interface User {
   name: string | null;
   belt_rank: string | null;
   experience_months: number | null;
+  training_start_month: string | null;
   preferred_game_style: string | null;
   training_days: string | null;
   typical_training_time: string | null;
