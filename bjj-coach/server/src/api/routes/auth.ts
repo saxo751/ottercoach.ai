@@ -19,7 +19,7 @@ export function createAuthRouter(db: Database.Database, telegramManager?: Telegr
   // POST /api/auth/signup
   router.post('/signup', async (req, res) => {
     try {
-      const { email, password, name, belt_rank, experience_months, training_days, goals, telegram_bot_token } = req.body;
+      const { email, password, name, belt_rank, experience_months, training_days, goals, telegram_bot_token, training_start_month } = req.body;
 
       if (!email || !EMAIL_REGEX.test(email)) {
         res.status(400).json({ error: 'Valid email is required' });
@@ -64,6 +64,7 @@ export function createAuthRouter(db: Database.Database, telegramManager?: Telegr
         name: name.trim(),
         belt_rank: belt_rank || null,
         experience_months: experience_months != null ? Number(experience_months) : null,
+        training_start_month: training_start_month || null,
         training_days: training_days || null,
         goals: goals || null,
         telegram_bot_token: validatedTelegramToken,
