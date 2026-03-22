@@ -6,6 +6,7 @@ import { createUser, getUserById } from '../../db/queries/users.js';
 import { createUserChannel } from '../../db/queries/channels.js';
 import { findUserByEmail } from '../../db/queries/auth.js';
 import { signToken } from '../../utils/jwt.js';
+import { isValidTrainingStartMonth } from '../../utils/experience.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import type { TelegramBotManager } from '../../channels/telegram.js';
 
@@ -64,7 +65,7 @@ export function createAuthRouter(db: Database.Database, telegramManager?: Telegr
         name: name.trim(),
         belt_rank: belt_rank || null,
         experience_months: experience_months != null ? Number(experience_months) : null,
-        training_start_month: training_start_month || null,
+        training_start_month: training_start_month && isValidTrainingStartMonth(training_start_month) ? training_start_month : null,
         training_days: training_days || null,
         goals: goals || null,
         telegram_bot_token: validatedTelegramToken,
