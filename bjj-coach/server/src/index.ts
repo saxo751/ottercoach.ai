@@ -6,6 +6,8 @@ import { createDashboardRouter } from './api/routes/dashboard.js';
 import { createAuthRouter } from './api/routes/auth.js';
 import { createIdeasRouter } from './api/routes/ideas.js';
 import { createAdminRouter } from './api/routes/admin.js';
+import { createPushRouter } from './api/routes/push.js';
+import { createChatRouter } from './api/routes/chat.js';
 import { initDatabase } from './db/database.js';
 import { createAIProvider } from './ai/factory.js';
 import { ChannelManager } from './channels/manager.js';
@@ -52,11 +54,14 @@ async function main() {
   app.use('/api/auth', createAuthRouter(db, telegramManager));
   app.use('/api/dashboard', createDashboardRouter(db, telegramManager, ai));
   app.use('/api/ideas', createIdeasRouter(db));
+  app.use('/api/push', createPushRouter(db));
+  app.use('/api/chat', createChatRouter(db, ai));
 
   const server = createServer(app);
 
   // 4. Channel adapters
   const channelManager = new ChannelManager();
+  channelManager.setDatabase(db);
 
   if (process.env.WEB_ENABLED === 'true') {
     const webAdapter = new WebAdapter(server, db);
