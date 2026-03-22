@@ -1,4 +1,5 @@
 import type { User, Position, Technique, TrainingSession, FocusPeriod, Goal, UserMemory, UserDailyLog, LibraryTechnique } from '../db/types.js';
+import { getExperienceMonths } from '../utils/experience.js';
 
 // ── Shared coach persona (constant across all modes) ────────────────────────
 
@@ -30,9 +31,10 @@ function buildProfileSection(user: User): string {
 
   if (user.name) parts.push(`Name: ${user.name}`);
   if (user.belt_rank) parts.push(`Belt: ${user.belt_rank === 'none' ? 'No-gi only (no belt)' : user.belt_rank}`);
-  if (user.experience_months != null) {
-    const years = Math.floor(user.experience_months / 12);
-    const months = user.experience_months % 12;
+  const expMonths = getExperienceMonths(user);
+  if (expMonths != null) {
+    const years = Math.floor(expMonths / 12);
+    const months = expMonths % 12;
     parts.push(`Experience: ${years > 0 ? `${years}y ` : ''}${months}m`);
   }
   if (user.preferred_game_style) parts.push(`Game style: ${user.preferred_game_style}`);
@@ -233,7 +235,7 @@ export function buildOnboardingPrompt(ctx: OnboardingContext): string {
 
   check('name', user.name);
   check('belt rank (or "none" for no-gi only)', user.belt_rank);
-  check('experience (months training)', user.experience_months);
+  check('experience / training start date', user.training_start_month || user.experience_months);
   check('favorite positions / game style', user.preferred_game_style);
   check('training schedule (days + times)', user.training_days);
   check('injuries or limitations', user.injuries_limitations);
@@ -268,7 +270,7 @@ After EVERY response, you MUST append a data block. Write your conversational re
 {
   "name": "extracted name or null",
   "belt_rank": "white/blue/purple/brown/black/none or null",
-  "experience_months": number or null,
+  "training_start_month": "YYYY-MM or null",
   "preferred_game_style": "description or null",
   "training_schedule": {"monday": "06:00", "wednesday": "20:00"} or null,
   "injuries_limitations": "description or null",
@@ -279,7 +281,7 @@ After EVERY response, you MUST append a data block. Write your conversational re
 Field rules:
 - belt_rank: Use "none" if the user trains no-gi only or explicitly says they have no belt. This is perfectly valid — not everyone trains in the gi.
 - training_schedule: A JSON object mapping day names to 24h times. Extract SPECIFIC per-day times when given (e.g. "monday at 6am and wednesday at 8pm" → {"monday":"06:00","wednesday":"20:00"}). If they give days but no specific times, use their general time for all days (e.g. "monday, wednesday, friday at 7pm" → {"monday":"19:00","wednesday":"19:00","friday":"19:00"}). If they give days but NO time at all, use "unknown" as the time value.
-- experience_months: Convert naturally. "3 years" = 36. "about a year and a half" = 18. "6 months" = 6. "just started" = 1.
+- training_start_month: Convert to YYYY-MM. "3 years" → subtract 3 years from current date. "about a year and a half" → subtract 18 months. "just started" → current month. "started in March 2022" → "2022-03". Always produce YYYY-MM format.
 
 Set onboarding_complete to true ONLY when you have AT MINIMUM: name, experience (months or approximate), and training schedule (at least which days). Other fields are nice to have but not required to complete onboarding.
 
