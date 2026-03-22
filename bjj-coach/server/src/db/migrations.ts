@@ -385,9 +385,8 @@ const migrations: Migration[] = [
   },
   {
     version: 18,
-    description: 'Drop telegram_bot_token, add push_token to user_channels',
+    description: 'Add push_token to user_channels for mobile push notifications',
     up: `
-      ALTER TABLE users DROP COLUMN telegram_bot_token;
       ALTER TABLE user_channels ADD COLUMN push_token TEXT;
     `,
   },

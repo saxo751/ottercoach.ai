@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { Telegraf } from 'telegraf';
 import type Database from 'better-sqlite3';
 import { findUserByPlatformId } from '../../db/queries/channels.js';
 import { verifyToken } from '../../utils/jwt.js';
@@ -9,10 +10,11 @@ import { createSession, getRecentSessionsByUserId, getSessionStats, updateSessio
 import { getActiveFocusPeriod, getAllFocusPeriods, createFocusPeriod, updateFocusPeriod, deleteFocusPeriod } from '../../db/queries/focusPeriods.js';
 import { getAllGoals } from '../../db/queries/goals.js';
 import { getAllLibraryTechniques, getLibraryByCategory, searchLibrary, getLibraryTechniqueNames, updateLibraryVideoUrl, updateLibraryDescription } from '../../db/queries/techniqueLibrary.js';
+import type { TelegramBotManager } from '../../channels/telegram.js';
 import type { AIProvider } from '../../ai/provider.js';
 import { isValidTrainingStartMonth } from '../../utils/experience.js';
 
-export function createDashboardRouter(db: Database.Database, ai?: AIProvider): Router {
+export function createDashboardRouter(db: Database.Database, telegramManager?: TelegramBotManager, ai?: AIProvider): Router {
   const router = Router();
 
   // --- Public routes (no auth required) ---
@@ -66,6 +68,11 @@ export function createDashboardRouter(db: Database.Database, ai?: AIProvider): R
 
   router.get('/profile', (req, res) => {
     const user = { ...(req as any).user };
+    // Mask telegram bot token — only expose last 4 chars
+    if (user.telegram_bot_token) {
+      user.telegram_bot_token = '...' + user.telegram_bot_token.slice(-4);
+    }
+    user.has_telegram_bot = !!(req as any).user.telegram_bot_token;
     res.json(user);
   });
 
@@ -129,6 +136,11 @@ export function createDashboardRouter(db: Database.Database, ai?: AIProvider): R
 
     updateUser(db, userId, fields);
     const updated = { ...getUserById(db, userId) } as any;
+    // Mask telegram bot token and add has_telegram_bot (same as GET /profile)
+    updated.has_telegram_bot = !!updated.telegram_bot_token;
+    if (updated.telegram_bot_token) {
+      updated.telegram_bot_token = '...' + updated.telegram_bot_token.slice(-4);
+    }
     res.json(updated);
   });
 
@@ -430,6 +442,59 @@ Return ONLY a JSON array of 1-5 matching technique names, most likely first. Pic
     }
 
     res.status(204).send();
+  });
+
+  // --- Telegram bot management ---
+
+  router.post('/telegram/validate', async (req, res) => {
+    const { token } = req.body;
+    if (!token || typeof token !== 'string') {
+      res.status(400).json({ valid: false, error: 'Token is required' });
+      return;
+    }
+
+    try {
+      const tempBot = new Telegraf(token.trim());
+      const me = await tempBot.telegram.getMe();
+      res.json({ valid: true, bot_username: me.username });
+    } catch (err: any) {
+      res.json({ valid: false, error: 'Invalid bot token' });
+    }
+  });
+
+  router.put('/telegram/token', async (req, res) => {
+    const userId = (req as any).userId as string;
+    const { token } = req.body;
+
+    if (token === null || token === '') {
+      // Disconnect: clear token and stop bot
+      updateUser(db, userId, { telegram_bot_token: null } as any);
+      if (telegramManager) {
+        await telegramManager.stopBotForUser(userId);
+      }
+      res.json({ success: true });
+      return;
+    }
+
+    if (typeof token !== 'string') {
+      res.status(400).json({ error: 'Token must be a string' });
+      return;
+    }
+
+    try {
+      const tempBot = new Telegraf(token.trim());
+      const me = await tempBot.telegram.getMe();
+
+      updateUser(db, userId, { telegram_bot_token: token.trim() } as any);
+
+      if (telegramManager) {
+        await telegramManager.startBotForUser(userId, token.trim());
+      }
+
+      res.json({ success: true, bot_username: me.username });
+    } catch (err: any) {
+      res.status(400).json({ error: 'Invalid bot token' });
+    }
   });
 
   return router;
