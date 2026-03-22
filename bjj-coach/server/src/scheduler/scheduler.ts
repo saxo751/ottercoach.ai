@@ -110,6 +110,11 @@ export class Scheduler {
       if (channel) {
         addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
         await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
+        await this.channels.sendToUser(user.id, result.text, {
+          title: 'Coach',
+          body: result.text.substring(0, 100),
+          data: { type: 'message' },
+        });
         if (result.systemMessages?.length) {
           for (const sysMsg of result.systemMessages) {
             addMessage(this.db, user.id, 'system', sysMsg.text, channel.platform as Platform);
@@ -198,6 +203,11 @@ export class Scheduler {
     // Store in conversation history and send
     addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
     await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
+    await this.channels.sendToUser(user.id, result.text, {
+      title: 'Check-in',
+      body: result.text.substring(0, 100),
+      data: { type: 'checkin' },
+    });
 
     // Track that check-in was sent today
     setScheduledAction(this.db, user.id, 'checkin', localDate);
@@ -221,6 +231,11 @@ export class Scheduler {
     // Store in conversation history and send
     addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
     await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
+    await this.channels.sendToUser(user.id, result.text, {
+      title: 'Pre-session',
+      body: result.text.substring(0, 100),
+      data: { type: 'briefing' },
+    });
 
     // Track that briefing was sent today
     setScheduledAction(this.db, user.id, 'briefing', localDate);
@@ -244,6 +259,11 @@ export class Scheduler {
     // Store in conversation history and send
     addMessage(this.db, user.id, 'assistant', result.text, channel.platform as Platform);
     await this.channels.sendMessage(channel.platform as Platform, channel.platform_user_id, result.text);
+    await this.channels.sendToUser(user.id, result.text, {
+      title: "How'd it go?",
+      body: result.text.substring(0, 100),
+      data: { type: 'debrief' },
+    });
 
     // Track that debrief was sent today
     setScheduledAction(this.db, user.id, 'debrief', localDate);
