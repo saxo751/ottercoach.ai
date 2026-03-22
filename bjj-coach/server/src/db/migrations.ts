@@ -376,6 +376,13 @@ const migrations: Migration[] = [
       ALTER TABLE users ADD COLUMN is_admin INTEGER NOT NULL DEFAULT 0;
     `,
   },
+  {
+    version: 17,
+    description: 'Add training_start_month column to users',
+    up: `
+      ALTER TABLE users ADD COLUMN training_start_month TEXT;
+    `,
+  },
 ];
 
 export function runMigrations(db: Database.Database): void {
