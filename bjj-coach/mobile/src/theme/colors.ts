@@ -1,0 +1,15 @@
+export const colors = {
+  parchment: '#f5f0e8',
+  dark: '#1a1a2e',
+  surface: '#2a2a4a',
+  accent: '#e8a87c',
+  text: '#1a1a2e',
+  textLight: '#f5f0e8',
+  textMuted: '#888',
+  close: '#ff5f57',
+  minimize: '#febc2e',
+  maximize: '#28c840',
+  border: '#ddd',
+  white: '#fff',
+  error: '#ff5f57',
+};
