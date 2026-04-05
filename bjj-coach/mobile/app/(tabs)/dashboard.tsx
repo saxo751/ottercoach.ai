@@ -7,18 +7,19 @@ import { useSessionStats } from '../../src/hooks/use-sessions';
 import { useActiveFocus } from '../../src/hooks/use-focus';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
+import { Icon } from '../../src/components/icon';
 
 function BeltBadge({ rank }: { rank: string | null }) {
   if (!rank) return null;
   const beltColors: Record<string, string> = {
-    White: '#f0f0f0',
-    Blue: '#4a90d9',
-    Purple: '#9b59b6',
-    Brown: '#8b4513',
-    Black: '#1a1a1a',
+    White: colors.beltWhite,
+    Blue: colors.beltBlue,
+    Purple: colors.beltPurple,
+    Brown: colors.beltBrown,
+    Black: colors.beltBlack,
   };
   return (
-    <View style={[styles.beltBadge, { backgroundColor: beltColors[rank] || '#888' }]}>
+    <View style={[styles.beltBadge, { backgroundColor: beltColors[rank] || colors.midGray }]}>
       <Text style={[styles.beltText, rank === 'White' ? { color: '#333' } : { color: '#fff' }]}>{rank}</Text>
     </View>
   );
@@ -64,6 +65,7 @@ export default function DashboardScreen() {
         </View>
 
         <View style={styles.sectionHeader}>
+          <Icon name="fire" size={14} color={colors.textMuted} />
           <Text style={styles.sectionTitle}>TRAINING SESSIONS</Text>
         </View>
 
@@ -78,6 +80,7 @@ export default function DashboardScreen() {
         )}
 
         <View style={styles.sectionHeader}>
+          <Icon name="flag-01" size={14} color={colors.textMuted} />
           <Text style={styles.sectionTitle}>CURRENT FOCUS</Text>
         </View>
 
@@ -100,11 +103,11 @@ const styles = StyleSheet.create({
   loading: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.dark },
   profileCard: { backgroundColor: colors.white, borderRadius: 8, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: colors.border },
   profileRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 },
-  profileName: { fontFamily: fonts.mono, fontSize: 18, color: colors.text, fontWeight: '600' },
+  profileName: { fontFamily: fonts.heading, fontSize: 18, color: colors.text, fontWeight: '600' },
   beltBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 4 },
   beltText: { fontFamily: fonts.mono, fontSize: 11, fontWeight: '600' },
   profileGoals: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, lineHeight: 18 },
-  sectionHeader: { marginBottom: 8, marginTop: 4 },
+  sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: 8, marginTop: 4 },
   sectionTitle: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, letterSpacing: 1 },
   statsRow: { flexDirection: 'row', gap: 12, marginBottom: 16 },
   statCard: { flex: 1, backgroundColor: colors.dark, borderRadius: 8, padding: 14, alignItems: 'center' },

@@ -14,6 +14,7 @@ import { RetroWindow } from '../../src/components/RetroWindow';
 import { useLibrary } from '../../src/hooks/use-techniques';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
+import { Icon } from '../../src/components/icon';
 import type { LibraryTechnique } from '../../src/types';
 
 function TechniqueCard({ technique }: { technique: LibraryTechnique }) {
@@ -59,6 +60,7 @@ export default function TechniquesScreen() {
         scrollable={false}
       >
         <View style={styles.searchBar}>
+          <Icon name="search-01" size={18} color={colors.textMuted} />
           <TextInput
             style={styles.searchInput}
             value={search}
@@ -92,7 +94,7 @@ export default function TechniquesScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.dark },
-  searchBar: { backgroundColor: colors.parchment, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
+  searchBar: { flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.light, paddingHorizontal: 16, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.border },
   searchInput: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
   cardName: { fontFamily: fonts.mono, fontSize: 14, color: colors.text, flex: 1, flexShrink: 1 },
   videoIcon: { fontSize: 12, color: colors.accent, marginLeft: 8 },
   cardMeta: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, marginBottom: 6 },
-  cardDesc: { fontFamily: fonts.body, fontSize: 13, color: '#555', lineHeight: 18 },
+  cardDesc: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
   separator: { height: 10 },
   empty: { fontFamily: fonts.mono, fontSize: 13, color: colors.textMuted, textAlign: 'center', padding: 32, fontStyle: 'italic' },
 });

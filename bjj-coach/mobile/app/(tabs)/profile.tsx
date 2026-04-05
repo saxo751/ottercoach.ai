@@ -14,6 +14,7 @@ import { useProfile, useUpdateProfile } from '../../src/hooks/use-profile';
 import { useAuthStore } from '../../src/stores/auth';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
+import { Icon } from '../../src/components/icon';
 
 const BELT_RANKS = ['White', 'Blue', 'Purple', 'Brown', 'Black'];
 
@@ -119,7 +120,10 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>Logout</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+            <Icon name="logout-03" size={18} color={colors.error} />
+            <Text style={styles.logoutText}>Logout</Text>
+          </View>
         </TouchableOpacity>
       </RetroWindow>
     </SafeAreaView>

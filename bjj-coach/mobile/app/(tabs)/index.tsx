@@ -3,12 +3,13 @@ import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-na
 import { useRouter } from 'expo-router';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
+import { Icon, type IconName } from '../../src/components/icon';
 
-const ICONS = [
-  { label: 'coach.chat', subtitle: 'Talk to your coach', tab: '/chat', emoji: '💬' },
-  { label: 'stats.dash', subtitle: 'Training stats', tab: '/dashboard', emoji: '📊' },
-  { label: 'techniques/', subtitle: 'Technique library', tab: '/techniques', emoji: '📚' },
-  { label: 'profile.cfg', subtitle: 'Your settings', tab: '/profile', emoji: '⚙️' },
+const ICONS: { label: string; subtitle: string; tab: string; icon: IconName }[] = [
+  { label: 'coach.chat', subtitle: 'Talk to your coach', tab: '/chat', icon: 'message-02' },
+  { label: 'stats.dash', subtitle: 'Training stats', tab: '/dashboard', icon: 'dashboard-speed-01' },
+  { label: 'techniques/', subtitle: 'Technique library', tab: '/techniques', icon: 'award-01' },
+  { label: 'profile.cfg', subtitle: 'Your settings', tab: '/profile', icon: 'setting-07' },
 ];
 
 export default function HomeScreen() {
@@ -31,7 +32,7 @@ export default function HomeScreen() {
               activeOpacity={0.7}
             >
               <View style={styles.iconBox}>
-                <Text style={styles.iconEmoji}>{icon.emoji}</Text>
+                <Icon name={icon.icon} size={32} color={colors.accent} />
               </View>
               <Text style={styles.iconLabel}>{icon.label}</Text>
               <Text style={styles.iconSubtitle}>{icon.subtitle}</Text>
@@ -52,7 +53,7 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.dark },
   container: { flex: 1, padding: 24 },
   header: { alignItems: 'center', marginBottom: 32, marginTop: 16 },
-  title: { fontFamily: fonts.mono, fontSize: 28, color: colors.accent, letterSpacing: 3 },
+  title: { fontFamily: fonts.heading, fontSize: 28, color: colors.accent, letterSpacing: 3 },
   subtitle: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted, marginTop: 4 },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignContent: 'flex-start' },
   iconItem: { width: '46%', alignItems: 'center', padding: 16 },
@@ -60,14 +61,14 @@ const styles = StyleSheet.create({
     width: 72,
     height: 72,
     borderRadius: 12,
-    backgroundColor: colors.surface,
+    backgroundColor: colors.lightGray,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: '#3a3a5a',
+    borderColor: colors.border,
   },
-  iconEmoji: { fontSize: 32 },
+  // iconEmoji removed — using Icon component
   iconLabel: { fontFamily: fonts.mono, fontSize: 12, color: colors.accent, textAlign: 'center' },
   iconSubtitle: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
   footer: { alignItems: 'center', paddingBottom: 16 },

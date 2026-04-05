@@ -13,6 +13,7 @@ import {
 import { useChatStore } from '../../src/stores/chat';
 import { MessageBubble } from '../../src/components/MessageBubble';
 import { QuickButtons } from '../../src/components/QuickButtons';
+import { Icon } from '../../src/components/icon';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
 
@@ -92,7 +93,7 @@ export default function ChatScreen() {
             multiline
           />
           <TouchableOpacity style={[styles.sendButton, !inputText.trim() && styles.sendDisabled]} onPress={handleSend} disabled={!inputText.trim()}>
-            <Text style={styles.sendText}>Send</Text>
+            <Icon name="sent" size={20} color={colors.accent} />
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
@@ -107,19 +108,19 @@ export default function ChatScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.dark },
-  titleBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
+  titleBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.lightGray, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   dots: { flexDirection: 'row', gap: 5 },
   dot: { width: 10, height: 10, borderRadius: 5 },
   windowTitle: { fontFamily: fonts.mono, fontSize: 13, color: colors.textMuted, flex: 1 },
   statusDot: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   connectionDot: { width: 7, height: 7, borderRadius: 4 },
   statusText: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted },
-  body: { flex: 1, backgroundColor: colors.parchment },
+  body: { flex: 1, backgroundColor: colors.light },
   messageList: { padding: 16, paddingBottom: 8 },
   typingContainer: { paddingHorizontal: 16, paddingBottom: 4 },
   typingBubble: { backgroundColor: colors.surface, paddingHorizontal: 14, paddingVertical: 8, borderRadius: 14, borderBottomLeftRadius: 4, alignSelf: 'flex-start' },
   typingText: { fontFamily: fonts.mono, fontSize: 12, color: colors.textMuted, fontStyle: 'italic' },
-  inputBar: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.parchment, borderTopWidth: 1, borderTopColor: colors.border, gap: 8 },
+  inputBar: { flexDirection: 'row', alignItems: 'flex-end', paddingHorizontal: 12, paddingVertical: 8, backgroundColor: colors.light, borderTopWidth: 1, borderTopColor: colors.border, gap: 8 },
   input: {
     flex: 1,
     borderWidth: 1,
@@ -136,5 +137,5 @@ const styles = StyleSheet.create({
   sendDisabled: { opacity: 0.4 },
   sendText: { fontFamily: fonts.mono, fontSize: 13, color: colors.accent },
   statusBar: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.dark, paddingHorizontal: 12, paddingVertical: 4 },
-  statusBarText: { fontFamily: fonts.mono, fontSize: 10, color: '#666' },
+  statusBarText: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted },
 });
