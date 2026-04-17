@@ -1,0 +1,32 @@
+{
+  "id": "closed-guard",
+  "slug": "closed-guard",
+  "name": "Closed Guard",
+  "aliases": ["guarda fechada", "full guard"],
+  "category": "guard",
+  "description": "PLACEHOLDER_POSITION_DESCRIPTION. Closed guard is the foundational bottom guard position in Brazilian Jiu-Jitsu in which the bottom practitioner wraps both legs around the top practitioner's torso with ankles crossed behind the back. It is the first position most white belts learn and remains a central strategic position at every rank. From closed guard the bottom player has access to a wide variety of attacks including the triangle choke, armbar, omoplata, kimura, guillotine, and numerous sweeps that return the fight to a neutral or advantageous scramble. Defensive utility is equally important: closed guard neutralizes most of the top player's offense by preventing posture, passing, and most strike-based offense. This makes it particularly valuable in mixed-rules or self-defense contexts even though dynamic modern competitive jiu-jitsu has moved toward more varied guard play. Keeping the position requires constant attention to the opponent's posture and base — letting the opponent sit up, stand, or create space immediately degrades the position's value. Breaking the opponent's posture is the single most leveraged action the bottom player performs from closed guard. This 300-word placeholder exists so that the Technique page for triangle-choke can resolve its parentPositionId reference during Plan-1 build; real long-form closed-guard content will be authored in Plan 2 when the Position page template ships. No position page is publicly indexable in Plan 1.",
+  "whenYoureInIt": "You are in closed guard when you are on your back with your legs wrapped around your opponent's torso and your ankles crossed behind their back. Your primary goal in this position is to keep your opponent's posture broken, isolate one of their arms or their head, and transition to a sweep or submission. Losing ankle control or letting the opponent stand up means you have lost the position.",
+  "primaryAttackIds": [
+    "triangle-choke",
+    "armbar",
+    "kimura",
+    "omoplata",
+    "scissor-sweep"
+  ],
+  "primaryEscapeIds": ["guard-pass-stand-up", "knee-slide-pass", "torreando-pass"],
+  "counterPositionIds": ["open-guard"],
+  "topPractitionerIds": ["roger-gracie", "bernardo-faria", "marcelo-garcia"],
+  "targetBeltId": "white",
+  "heroImage": {
+    "src": "/img/positions/closed-guard.avif",
+    "width": 1200,
+    "height": 800,
+    "alt": "Closed guard position viewed from the bottom practitioner",
+    "format": "avif"
+  },
+  "citationSources": ["marcelo-garcia-book"],
+  "reviewedById": "founder",
+  "dateModified": "2026-04-13",
+  "noindex": true,
+  "ready": false
+}
