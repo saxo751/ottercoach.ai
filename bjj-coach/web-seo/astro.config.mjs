@@ -6,15 +6,11 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   site: 'https://theottercoach.com',
   output: 'static',
-  build: {
-    format: 'directory',
-  },
+  build: { format: 'directory' },
   trailingSlash: 'never',
   integrations: [
     mdx(),
     tailwind({ applyBaseStyles: true }),
-    sitemap({
-      filter: (page) => !page.includes('/draft/'),
-    }),
+    sitemap(),
   ],
 });
