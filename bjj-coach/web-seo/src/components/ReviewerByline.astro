@@ -1,0 +1,27 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props {
+  reviewerId: string;
+  dateModified: string;
+}
+const { reviewerId, dateModified } = Astro.props;
+const reviewer = await getEntry('reviewers', reviewerId);
+if (!reviewer) throw new Error(`Reviewer ${reviewerId} not found`);
+const { data } = reviewer;
+---
+<aside class="mt-8 border-t pt-6 flex items-center gap-4">
+  <img
+    src={data.photo.src}
+    alt={data.photo.alt}
+    width={data.photo.width}
+    height={data.photo.height}
+    class="w-16 h-16 rounded-full object-cover"
+    loading="lazy"
+  />
+  <div class="text-sm">
+    <p class="font-heading">Reviewed by {data.name}</p>
+    <p class="opacity-70">{data.currentBeltId} belt · {data.academy}</p>
+    <p class="opacity-70">Last updated: <time datetime={dateModified}>{dateModified}</time></p>
+  </div>
+</aside>

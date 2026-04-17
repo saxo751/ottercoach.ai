@@ -1,0 +1,30 @@
+---
+import { getEntry } from 'astro:content';
+
+interface Props {
+  citationIds: string[];
+}
+const { citationIds } = Astro.props;
+const citations = await Promise.all(
+  citationIds.map((id) => getEntry('citations', id)),
+);
+---
+<section class="mt-10 border-t pt-6">
+  <h2 class="font-heading text-xl mb-3">Sources</h2>
+  <ul class="space-y-2 text-sm">
+    {citations.filter(Boolean).map((c) => (
+      <li>
+        {c!.data.url ? (
+          <a href={c!.data.url} class="underline" rel="nofollow noopener">
+            {c!.data.title}
+          </a>
+        ) : (
+          <span>{c!.data.title}</span>
+        )}
+        {c!.data.author && <span> — {c!.data.author}</span>}
+        {c!.data.publicationYear && <span> ({c!.data.publicationYear})</span>}
+        {c!.data.pageOrTimestamp && <span>, {c!.data.pageOrTimestamp}</span>}
+      </li>
+    ))}
+  </ul>
+</section>
