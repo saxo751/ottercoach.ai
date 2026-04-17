@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
+  Image,
   Text,
   TextInput,
   TouchableOpacity,
@@ -36,21 +37,33 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView style={styles.root} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Text style={styles.mascot}>🥋</Text>
-          <Text style={styles.title}>BJJ Coach</Text>
-          <Text style={styles.subtitle}>coach.chat — v1.0.0</Text>
+
+        {/* Hero otter */}
+        <View style={styles.hero}>
+          <Image
+            source={require('../../assets/otters/Otter-ready-fight-stance-gi.png')}
+            style={styles.otterImage}
+            resizeMode="contain"
+          />
         </View>
 
+        {/* Branding */}
+        <View style={styles.branding}>
+          <Text style={styles.appName}>BJJ Pocket Coach</Text>
+          <Text style={styles.tagline}>Your personal training companion</Text>
+        </View>
+
+        {/* Login window */}
         <View style={styles.window}>
           <View style={styles.titleBar}>
             <View style={styles.dots}>
-              <View style={[styles.dot, { backgroundColor: colors.close }]} />
-              <View style={[styles.dot, { backgroundColor: colors.minimize }]} />
-              <View style={[styles.dot, { backgroundColor: colors.maximize }]} />
+              <View style={[styles.dot, { backgroundColor: '#d97757' }]} />
+              <View style={[styles.dot, { backgroundColor: '#b0aea5' }]} />
+              <View style={[styles.dot, { backgroundColor: '#788c5d' }]} />
             </View>
-            <Text style={styles.windowTitle}>login.exe</Text>
+            <Text style={styles.windowTitle}>login</Text>
           </View>
+
           <View style={styles.windowBody}>
             <Text style={styles.label}>EMAIL</Text>
             <TextInput
@@ -70,58 +83,179 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
               secureTextEntry
-              placeholder="••••••••"
+              placeholder="Enter password"
               placeholderTextColor={colors.textMuted}
             />
 
-            <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleLogin} disabled={loading}>
-              <Text style={styles.buttonText}>{loading ? 'Authenticating...' : '> LOGIN'}</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.link} onPress={() => router.push('/(auth)/signup')}>
-              <Text style={styles.linkText}>No account? Sign up →</Text>
+            <TouchableOpacity
+              style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.9}
+            >
+              <Text style={styles.loginButtonText}>{loading ? 'Signing in...' : 'Sign In'}</Text>
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* Sign up link */}
+        <TouchableOpacity style={styles.signupLink} onPress={() => router.push('/(auth)/signup')}>
+          <Text style={styles.signupText}>
+            Don't have an account? <Text style={styles.signupAccent}>Sign up</Text>
+          </Text>
+        </TouchableOpacity>
+
+        {/* Footer version */}
+        <Text style={styles.version}>coach.chat v1.0.0</Text>
+
       </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.dark },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  header: { alignItems: 'center', marginBottom: 32 },
-  mascot: { fontSize: 48, marginBottom: 8 },
-  title: { fontFamily: fonts.heading, fontSize: 24, color: colors.accent, letterSpacing: 2 },
-  subtitle: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted, marginTop: 4 },
-  window: { borderRadius: 8, overflow: 'hidden', borderWidth: 1, borderColor: colors.lightGray },
-  titleBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.lightGray, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
-  dots: { flexDirection: 'row', gap: 5 },
-  dot: { width: 10, height: 10, borderRadius: 5 },
-  windowTitle: { fontFamily: fonts.mono, fontSize: 12, color: colors.textMuted },
-  windowBody: { backgroundColor: colors.light, padding: 20 },
-  label: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, marginBottom: 4, marginTop: 12 },
+  root: {
+    flex: 1,
+    backgroundColor: colors.light,
+  },
+  container: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 28,
+    paddingVertical: 40,
+  },
+
+  // Hero otter
+  hero: {
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  otterImage: {
+    height: 160,
+    width: 160,
+  },
+
+  // Branding
+  branding: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  appName: {
+    fontFamily: fonts.heading,
+    fontSize: 28,
+    fontWeight: '700',
+    color: colors.text,
+    letterSpacing: 0.5,
+  },
+  tagline: {
+    fontFamily: fonts.body,
+    fontSize: 15,
+    color: colors.textMuted,
+    marginTop: 4,
+  },
+
+  // Window chrome
+  window: {
+    borderRadius: 8,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: colors.lightGray,
+    shadowColor: '#141413',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 3,
+  },
+  titleBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.lightGray,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    gap: 8,
+  },
+  dots: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+  },
+  windowTitle: {
+    fontFamily: fonts.heading,
+    fontSize: 13,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  windowBody: {
+    backgroundColor: colors.white,
+    padding: 24,
+  },
+
+  // Form fields
+  label: {
+    fontFamily: fonts.heading,
+    fontSize: 10,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    color: colors.textMuted,
+    marginBottom: 6,
+    marginTop: 16,
+  },
   input: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 4,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    fontFamily: fonts.mono,
-    color: colors.text,
-    backgroundColor: colors.white,
-  },
-  button: {
-    marginTop: 20,
-    backgroundColor: colors.dark,
+    borderRadius: 6,
+    paddingHorizontal: 14,
     paddingVertical: 12,
-    borderRadius: 4,
+    fontSize: 15,
+    fontFamily: fonts.body,
+    color: colors.text,
+    backgroundColor: colors.surfaceMuted,
+  },
+
+  // Primary button — Anthropic Orange
+  loginButton: {
+    marginTop: 24,
+    backgroundColor: colors.accent,
+    paddingVertical: 14,
+    borderRadius: 6,
     alignItems: 'center',
   },
-  buttonDisabled: { opacity: 0.6 },
-  buttonText: { fontFamily: fonts.mono, fontSize: 14, color: colors.accent, letterSpacing: 1 },
-  link: { marginTop: 16, alignItems: 'center' },
-  linkText: { fontFamily: fonts.mono, fontSize: 12, color: colors.textMuted },
+  loginButtonDisabled: {
+    opacity: 0.6,
+  },
+  loginButtonText: {
+    fontFamily: fonts.heading,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textLight,
+  },
+
+  // Sign up link
+  signupLink: {
+    marginTop: 24,
+    alignItems: 'center',
+  },
+  signupText: {
+    fontFamily: fonts.body,
+    fontSize: 14,
+    color: colors.textMuted,
+  },
+  signupAccent: {
+    color: colors.accent,
+    fontWeight: '600',
+  },
+
+  // Footer
+  version: {
+    fontFamily: fonts.mono,
+    fontSize: 11,
+    color: colors.midGray,
+    textAlign: 'center',
+    marginTop: 32,
+  },
 });

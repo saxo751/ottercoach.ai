@@ -1,82 +1,75 @@
 ---
-name: retro-os-design
-description: Apply a retro desktop OS aesthetic to web interfaces, inspired by PostHog's desktop-metaphor website. Warm parchment backgrounds, desktop icons as navigation, illustrated mascot scenes, window chrome only for opened content. Use this skill whenever building UI for the BJJ Coach Bot project. Triggers on keywords like retro, old school, OS style, desktop, nostalgic, PostHog-style.
+name: anthropic-design
+description: Apply Anthropic's official brand aesthetic to web and mobile interfaces. Clean, warm, and minimal — Anthropic's color palette, Poppins/Lora typography, and accent system. Keeps the project's otter mascots and desktop icon navigation. Use this skill whenever building UI for the BJJ Coach Bot project.
 ---
 
-# Retro Desktop Design System — BJJ Coach Bot
+# Anthropic Brand Design System — BJJ Coach Bot
 
-This skill defines the visual language for the BJJ Coach Bot web interface. The aesthetic is a **warm retro desktop** — not a strict Windows 95 clone, but a desktop OS *metaphor* where navigation happens through desktop icons, content opens in windows, and an illustrated mascot scene anchors the visual identity.
+This skill defines the visual language for the BJJ Coach Bot interface, built on **Anthropic's official brand guidelines**. Clean, warm, and minimal — with the project's signature otter mascots and desktop icon navigation layered on top.
 
-**Inspiration:** PostHog's website redesign — a warm parchment-textured desktop where file/folder icons serve as navigation, the mascot illustration is a centerpiece, and actual window chrome only appears when you "open" content. The vibe is cozy, playful, and developer-friendly.
-
-**The tone:** A coach's desk, not a corporate app. Warm, lived-in, slightly messy in a charming way. The otter mascot appears in an isometric illustrated scene. Everything feels tangible — like objects on a desk rather than elements on a screen.
+**The tone:** A coach's desk, not a corporate app. Anthropic's restrained palette keeps things calm and focused. The otter mascot and desktop icons add personality without fighting the brand.
 
 ---
 
 ## Core Design Principles
 
-1. **Desktop metaphor first.** The main view IS a desktop. Navigation happens through clickable icons with labels, not a nav bar or sidebar. The desktop background is visible and textured.
-2. **Windows only for opened content.** Window chrome (title bar, controls, borders) only appears when the user opens something — the chat, a dashboard panel, a technique detail. On the desktop itself, no windows.
-3. **Warm, not cold.** The palette is parchment, cream, warm grays, and orange accents. NOT the cold blue/teal of classic Win95. Think of aged paper, a warm office, earth tones.
-4. **Illustrated mascot scene.** The otter mascot (in gi, with belt) appears in an isometric/illustrated scene on the desktop — a dojo, a mat area, a training scene. This is a visual anchor, not a logo.
-5. **Icons are charming and distinct.** Each desktop icon should be visually unique and slightly retro — think early macOS or Windows XP icon style with warm colors. Not pixel art, not flat modern icons. Detailed, colorful, with character.
-6. **Clean labels, readable type.** Icon labels and body text use a clean sans-serif. Pixel/mono fonts are reserved for very specific UI moments (status bars, timestamps, code-like data).
+1. **Anthropic's palette is the foundation.** Dark (`#141413`), Light (`#faf9f5`), accents of Orange (`#d97757`), Blue (`#6a9bcc`), Green (`#788c5d`). No other brand colors.
+2. **Desktop metaphor for navigation.** The main view IS a desktop. Navigation through clickable icons with file-extension labels. No nav bar.
+3. **Windows only for opened content.** Window chrome (title bar, controls) only appears when the user opens something. On the desktop itself, no windows.
+4. **Illustrated mascot scene.** The otter mascot appears in scenes on the desktop — decorative, not interactive.
+5. **Typography is Poppins + Lora.** Headings in Poppins (clean geometric sans), body text in Lora (readable serif). Monospace only for data/timestamps.
+6. **Minimal, not busy.** Anthropic's brand is restrained. White space is a feature. Fewer borders, softer shadows, less visual noise.
 
 ---
 
 ## Color Palette
 
-Warm and desaturated, like a sun-faded desktop.
+Anthropic's official brand colors, extended with BJJ belt colors and status indicators.
 
 ```css
 :root {
-  /* Desktop & backgrounds */
-  --color-desktop: #f3efe6;
-  --color-desktop-darker: #e8e2d6;
-  --color-surface: #ffffff;
-  --color-surface-muted: #faf8f4;
+  /* Anthropic Main Colors */
+  --color-dark: #141413;
+  --color-light: #faf9f5;
+  --color-mid-gray: #b0aea5;
+  --color-light-gray: #e8e6dc;
 
-  /* Primary accent — warm orange */
-  --color-accent: #f5a623;
-  --color-accent-hover: #e09400;
-  --color-accent-text: #1a1a1a;
+  /* Anthropic Accent Colors */
+  --color-accent: #d97757;        /* Orange — primary accent */
+  --color-accent-secondary: #6a9bcc; /* Blue — secondary accent */
+  --color-accent-tertiary: #788c5d;  /* Green — tertiary accent */
 
-  /* Secondary accent — deep navy */
-  --color-navy: #1d2433;
-  --color-navy-light: #2d3748;
+  /* Derived from Anthropic palette */
+  --color-desktop: #faf9f5;       /* Light — desktop background */
+  --color-surface: #ffffff;        /* Content surfaces */
+  --color-surface-muted: #f5f4f0; /* Subtle card backgrounds */
+  --color-titlebar: #e8e6dc;      /* Light Gray — window chrome */
+  --color-window-border: #b0aea5; /* Mid Gray — borders */
 
-  /* Window chrome */
-  --color-titlebar: #e8e2d6;
-  --color-titlebar-text: #1a1a1a;
-  --color-titlebar-active: #f5a623;
-  --color-window-bg: #f0ece4;
-  --color-window-border: #c4bfb3;
-  --color-window-shadow: rgba(0,0,0,0.12);
+  /* Text — derived from Dark */
+  --color-text: #141413;
+  --color-text-secondary: #4a4a46;
+  --color-text-muted: #b0aea5;
+  --color-text-inverse: #faf9f5;
 
-  /* Text */
-  --color-text: #1a1a1a;
-  --color-text-secondary: #5a5650;
-  --color-text-muted: #9b9589;
-  --color-text-inverse: #ffffff;
-
-  /* BJJ belt colors */
-  --color-belt-white: #f0ece4;
-  --color-belt-blue: #3b82f6;
+  /* BJJ belt colors (project-specific) */
+  --color-belt-white: #e8e6dc;
+  --color-belt-blue: #6a9bcc;
   --color-belt-purple: #8b5cf6;
   --color-belt-brown: #92400e;
-  --color-belt-black: #1a1a1a;
+  --color-belt-black: #141413;
 
-  /* Status */
-  --color-success: #22c55e;
-  --color-warning: #f5a623;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
+  /* Status — using Anthropic accents where possible */
+  --color-success: #788c5d;       /* Green accent */
+  --color-warning: #d97757;       /* Orange accent */
+  --color-danger: #c44d3b;        /* Darker orange for danger */
+  --color-info: #6a9bcc;          /* Blue accent */
 
-  /* Borders & shadows */
-  --border-subtle: 1px solid #d4cfc5;
-  --border-medium: 2px solid #c4bfb3;
-  --shadow-window: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
-  --shadow-window-active: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  /* Borders & shadows — softer, Anthropic-minimal */
+  --border-subtle: 1px solid #e8e6dc;
+  --border-medium: 1px solid #b0aea5;
+  --shadow-window: 0 2px 16px rgba(20, 20, 19, 0.06);
+  --shadow-window-active: 0 4px 24px rgba(20, 20, 19, 0.10);
 }
 ```
 
@@ -84,12 +77,12 @@ Warm and desaturated, like a sun-faded desktop.
 
 ## Typography
 
-Clean and readable. Retro character comes from the desktop metaphor, not from fonts.
+Anthropic's official fonts: **Poppins** for headings, **Lora** for body text. Monospace for data.
 
 ```css
 :root {
-  --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+  --font-heading: 'Poppins', Arial, sans-serif;
+  --font-body: 'Lora', Georgia, serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
   --text-xs: 11px;
@@ -103,21 +96,28 @@ Clean and readable. Retro character comes from the desktop metaphor, not from fo
 
 Font loading:
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 ```
 
-Rules: Desktop icon labels use `--font-body` at 13px, weight 500. Window titles use `--font-body` at 13px, weight 600. Chat messages use `--font-body` at 15px. Data/timestamps use `--font-mono` at 11px.
+Rules:
+- **Headings (24pt+):** Poppins, weight 600–800
+- **Subheadings / labels:** Poppins, weight 500, uppercase, letter-spacing 0.5px
+- **Body text:** Lora, weight 400–500, 15px
+- **Desktop icon labels:** Poppins, 13px, weight 500
+- **Window titles:** Poppins, 13px, weight 600
+- **Chat messages:** Lora, 15px
+- **Data/timestamps:** IBM Plex Mono, 11px
 
 ---
 
 ## Desktop Background
 
-Warm parchment with subtle paper grain texture.
+Clean Anthropic Light with subtle paper grain.
 
 ```css
 body.desktop {
-  background-color: var(--color-desktop);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background-color: var(--color-light);
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
   min-height: 100vh;
 }
 ```
@@ -126,9 +126,7 @@ body.desktop {
 
 ## Desktop Icons
 
-Primary navigation. Arranged in columns on left and right sides of the desktop.
-
-### Individual Icon
+Primary navigation. File-extension labels. Detailed SVGs, warm and charming.
 
 ```css
 .desktop-icon {
@@ -138,7 +136,7 @@ Primary navigation. Arranged in columns on left and right sides of the desktop.
   gap: 4px;
   padding: 8px 12px;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 6px;
   text-decoration: none;
   color: var(--color-text);
   transition: background 0.15s ease;
@@ -147,7 +145,7 @@ Primary navigation. Arranged in columns on left and right sides of the desktop.
 }
 
 .desktop-icon:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(20, 20, 19, 0.04);
 }
 
 .desktop-icon__image {
@@ -157,7 +155,7 @@ Primary navigation. Arranged in columns on left and right sides of the desktop.
 }
 
 .desktop-icon__label {
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: 13px;
   font-weight: 500;
   text-align: center;
@@ -165,23 +163,23 @@ Primary navigation. Arranged in columns on left and right sides of the desktop.
 }
 ```
 
-Use file-extension labels: "coach.chat", "techniques/", "stats.dashboard", "focus-plan.md". Icons should be detailed SVGs (48x48), not emoji or flat icons.
+Use file-extension labels: "coach.chat", "techniques/", "stats.dashboard", "focus-plan.md". Icons should be detailed SVGs (48x48).
 
 ### Mobile
 
-On mobile, icons go into a two-column grid (matching PostHog's mobile layout).
+On mobile, icons go into a two-column grid.
 
 ---
 
 ## Window Chrome
 
-Appears when user opens content. Warm gray title bar, colored dot controls (macOS-style), soft shadows. NOT hard beveled Win95 borders.
+Anthropic Light Gray title bar, macOS-style dot controls, soft shadows.
 
 ```css
 .retro-window {
   background: var(--color-surface);
   border: var(--border-medium);
-  border-radius: 8px 8px 4px 4px;
+  border-radius: 8px;
   box-shadow: var(--shadow-window);
   display: flex;
   flex-direction: column;
@@ -189,13 +187,12 @@ Appears when user opens content. Warm gray title bar, colored dot controls (macO
 }
 
 .retro-window__titlebar {
-  background: var(--color-titlebar);
+  background: var(--color-light-gray);
   padding: 8px 12px;
   display: flex;
   align-items: center;
   gap: 8px;
   border-bottom: var(--border-subtle);
-  cursor: grab;
 }
 
 .retro-window__controls {
@@ -207,23 +204,21 @@ Appears when user opens content. Warm gray title bar, colored dot controls (macO
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.15);
-  cursor: pointer;
 }
 
-.retro-window__dot--close { background: #ef6b5e; }
-.retro-window__dot--minimize { background: #f5bf4f; }
-.retro-window__dot--maximize { background: #62c554; }
+.retro-window__dot--close { background: #d97757; }    /* Anthropic Orange */
+.retro-window__dot--minimize { background: #b0aea5; }  /* Anthropic Mid Gray */
+.retro-window__dot--maximize { background: #788c5d; }  /* Anthropic Green */
 
 .retro-window__title {
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: 13px;
   font-weight: 600;
-  color: var(--color-titlebar-text);
+  color: var(--color-text);
 }
 
 .retro-window__statusbar {
-  background: var(--color-desktop);
+  background: var(--color-light-gray);
   padding: 4px 12px;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -236,50 +231,147 @@ Appears when user opens content. Warm gray title bar, colored dot controls (macO
 
 ## Chat Messages
 
-Coach messages: parchment background, left-aligned with avatar. User messages: orange background, right-aligned.
+Coach messages: light surface, left-aligned. User messages: Anthropic Orange background, right-aligned.
 
 ```css
 .chat-msg__bubble--coach {
-  background: var(--color-desktop);
+  background: var(--color-surface-muted);
   border: var(--border-subtle);
   border-radius: 2px 12px 12px 12px;
   padding: 10px 14px;
+  font-family: var(--font-body);
 }
 
 .chat-msg__bubble--user {
   background: var(--color-accent);
-  color: var(--color-accent-text);
+  color: var(--color-text-inverse);
   border-radius: 12px 2px 12px 12px;
   padding: 10px 14px;
+  font-family: var(--font-body);
 }
 ```
 
-Quick reply buttons: pill-shaped, subtle border, turn orange on hover.
+Quick reply buttons: pill-shaped, Anthropic Orange border, fills on hover.
 
 ---
 
 ## Buttons
 
-Primary CTA: orange with dark border (PostHog-style). Secondary: outlined. Ghost: minimal.
+Primary: Anthropic Orange. Secondary: outlined with Mid Gray. Ghost: minimal.
 
 ```css
 .btn-primary {
   background: var(--color-accent);
-  color: var(--color-accent-text);
-  border: 2px solid var(--color-text);
+  color: var(--color-text-inverse);
+  border: none;
   border-radius: 6px;
-  padding: 8px 20px;
+  padding: 10px 24px;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: 14px;
   cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
 }
 
 .btn-secondary {
   background: transparent;
-  border: var(--border-subtle);
+  border: var(--border-medium);
   border-radius: 6px;
-  padding: 8px 20px;
+  padding: 10px 24px;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: 14px;
   cursor: pointer;
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--color-light-gray);
+}
+```
+
+---
+
+## Icon System (HugeIcons Pro)
+
+All icons use the **HugeIcons Pro** library via a registry pattern. Icons are managed in `bjj-coach/web/src/app/components/ui-components/icon/icon-registry.ts`.
+
+### Usage
+
+```html
+<ui-icon name="calendar-01" />
+<ui-icon name="tick-01" variant="solid" />
+<ui-icon name="arrow-right-01" variant="stroke-sharp" />
+```
+
+Import `IconComponent` from `@components/ui-components/icon/icon.component` in your standalone component's `imports` array.
+
+### Available Icons
+
+**Navigation:** `search-01`, `help-circle`, `arrow-left-01`, `arrow-right-01`, `arrow-down-01`, `arrow-up-01`, `cancel-01`, `cancel-circle`, `menu-01`, `home-01`, `grid`, `logout-03`
+
+**Actions:** `tick-01`, `tick-02`, `plus-sign`, `plus-sign-circle`, `minus-sign-circle`, `edit-01`, `pencil-edit-01`, `delete-03`, `more-horizontal`, `filter-horizontal`, `refresh-01`, `view`, `view-off`
+
+**Time:** `calendar-01`, `clock-01`
+
+**Communication:** `message-02`, `chat-done`, `notification-02`, `sent`, `information-circle`, `alert-circle`, `checkmark-circle-02`, `checkmark-badge-01`
+
+**Users:** `user-01`, `user-02`, `user-circle`
+
+**BJJ / Training:** `star`, `star-half`, `award-01`, `champion`, `medal-01`, `fire`, `zap-01`, `flag-01`, `thumbs-up`, `repeat`, `dashboard-speed-01`, `record`, `idea-01`
+
+**Settings:** `setting-07`
+
+### Variants
+
+Each icon supports a subset of: `stroke` (default), `stroke-sharp`, `solid`, `solid-sharp`, `auto` (resolves to `stroke`). If a variant is missing, the `help-circle` fallback renders.
+
+### Adding a New Icon
+
+1. Find the icon at [hugeicons.com](https://hugeicons.com/)
+2. Import from the appropriate `@hugeicons-pro/core-*` package in `icon-registry.ts`
+3. Add a kebab-case entry to the `icons` object with variant mappings
+4. The `IconName` type is auto-inferred — no extra type changes needed
+
+### Packages Installed
+
+- `@hugeicons-pro/core-stroke-rounded`
+- `@hugeicons-pro/core-stroke-sharp`
+- `@hugeicons-pro/core-solid-rounded`
+- `@hugeicons-pro/core-solid-sharp`
+
+Registry configured via `.npmrc`: `@hugeicons-pro:registry=https://npm.hugeicons.com/`
+
+---
+
+## Cards
+
+Content cards use Anthropic's light palette with minimal borders.
+
+```css
+.card {
+  background: var(--color-surface);
+  border: var(--border-subtle);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.card--accent {
+  background: var(--color-surface);
+  border-left: 3px solid var(--color-accent);
+}
+
+.card__label {
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--color-accent);
 }
 ```
 
@@ -287,7 +379,7 @@ Primary CTA: orange with dark border (PostHog-style). Secondary: outlined. Ghost
 
 ## Mascot Scene
 
-The otter mascot in an isometric illustrated scene — positioned in the lower-right quadrant of the desktop. Decorative, not interactive.
+The otter mascot in an illustrated scene — lower-right quadrant of the desktop.
 
 ```css
 .desktop-scene {
@@ -313,27 +405,23 @@ The otter mascot in an isometric illustrated scene — positioned in the lower-r
 
 ## Otter Mascot Library
 
-The project has a library of SVG otter illustrations at `bjj-coach/web/src/assets/otters/`. **Every new screen/window MUST include a relevant otter** in the titlebar using the `.titlebar-otter` class (defined in `styles.css`). Choose the most thematically appropriate otter for each screen.
+The project has SVG otter illustrations at `bjj-coach/web/src/assets/otters/`. **Every new screen/window MUST include a relevant otter** in the titlebar.
 
-### Available Otters
-
-| File | Mood / Context | Currently Used On |
-|------|---------------|-------------------|
-| `Otter-relaxed-with-arms-crossed.svg` | Confident, chill (has belt) | Landing page desktop scene |
-| `Otter-relaxed-with-arms-crossed-no-belt.svg` | Confident, chill (no belt) | Chat titlebar |
-| `Otter-ready-fight-stance.svg` | Ready, energized (no gi) | Dashboard titlebar |
+| File | Mood / Context | Use On |
+|------|---------------|--------|
+| `Otter-relaxed-with-arms-crossed.svg` | Confident, chill (with belt) | Landing page desktop scene |
+| `Otter-relaxed-with-arms-crossed-no-belt.svg` | Confident, chill | Chat titlebar |
+| `Otter-ready-fight-stance.svg` | Ready, energized | Dashboard titlebar |
 | `Otter-ready-fight-stance-gi.svg` | Ready, energized (with gi) | Login page hero |
-| `Otter-meditating.svg` | Calm, focused, patient | Focus Timeline titlebar, loading states, typing indicator |
+| `Otter-meditating.svg` | Calm, focused | Focus Timeline, loading, typing |
 | `Otter-armbar-turtle.svg` | Playful, technical | Techniques titlebar |
-| `Otter-with-finger-in-air.svg` | Idea, eureka moment | Ideas titlebar |
-| `Otter-approving-with-thumbs-up.svg` | Positive, encouraging | Profile titlebar, signup hero, empty states |
+| `Otter-with-finger-in-air.svg` | Idea, eureka | Ideas titlebar |
+| `Otter-approving-with-thumbs-up.svg` | Positive, encouraging | Profile, signup, empty states |
 | `Otter-confused.svg` | Lost, searching | Empty search results |
 | `Otter-trippin-turtle.svg` | Silly, unexpected | Error states, 404 |
-| `otter_base.svg` | Neutral base pose | Fallback |
+| `otter_base.svg` | Neutral base | Fallback |
 
-### How to Use
-
-**Titlebar otter (every window):** Add an `<img>` with class `titlebar-otter` inside the `.retro-window__titlebar`, after the `__title` span. The `margin-left: auto` on the class pushes it to the right side of the titlebar.
+### Usage
 
 ```html
 <div class="retro-window__titlebar">
@@ -343,14 +431,45 @@ The project has a library of SVG otter illustrations at `bjj-coach/web/src/asset
 </div>
 ```
 
-**Empty/loading states:** Use a larger otter (class `empty-otter`, 80px height) centered in the empty state area.
+---
 
-**New screens:** When creating any new screen or window, always pick a relevant otter from the library above and add it to the titlebar. If none fits, use `Otter-relaxed-with-arms-crossed-no-belt.svg` as a safe default. If the project needs a new pose, use the `/mascot` skill to generate one.
+## React Native Theme Mapping
+
+For the mobile app (`bjj-coach/mobile/src/theme/`), use these Anthropic values:
+
+```typescript
+// colors.ts
+export const colors = {
+  dark: '#141413',        // Anthropic Dark
+  light: '#faf9f5',       // Anthropic Light (replaces parchment)
+  surface: '#ffffff',
+  surfaceMuted: '#f5f4f0',
+  lightGray: '#e8e6dc',   // Anthropic Light Gray
+  midGray: '#b0aea5',     // Anthropic Mid Gray
+  accent: '#d97757',      // Anthropic Orange
+  accentBlue: '#6a9bcc',  // Anthropic Blue
+  accentGreen: '#788c5d', // Anthropic Green
+  text: '#141413',
+  textLight: '#faf9f5',
+  textMuted: '#b0aea5',
+  border: '#e8e6dc',
+  white: '#ffffff',
+  error: '#c44d3b',
+};
+
+// fonts.ts
+import { Platform } from 'react-native';
+export const fonts = {
+  heading: Platform.select({ ios: 'Poppins-SemiBold', android: 'Poppins-SemiBold', default: 'System' }),
+  body: Platform.select({ ios: 'Lora', android: 'Lora', default: 'Georgia' }),
+  mono: Platform.select({ ios: 'Menlo', android: 'monospace', default: 'monospace' }),
+};
+```
 
 ---
 
 ## Do's and Don'ts
 
-**DO:** Use warm parchment background with paper grain texture. Make desktop icons detailed, colorful, and charming with file-extension labels. Use orange as primary accent. Use modern soft shadows on windows. Keep body text clean with DM Sans. Place mascot scene in lower-right. Use macOS-style colored dots for window controls. **Include a relevant otter in every window titlebar.**
+**DO:** Use Anthropic's `#141413` / `#faf9f5` / `#d97757` palette exclusively. Use Poppins for headings, Lora for body. Keep layouts minimal with generous white space. Use soft shadows (`rgba(20,20,19,0.06)`). Make desktop icons charming with file-extension labels. Include a relevant otter in every window titlebar. Use Orange as primary accent, Blue/Green as secondary.
 
-**DON'T:** Use classic teal Win95 desktop. Apply hard 3D beveled borders. Use pixel fonts for body text. Use a taskbar at the bottom. Use blue gradient title bars. Put emoji as desktop icons. Use sharp Win95 corners (use border-radius 4-8px). **Don't create a new window without an otter.**
+**DON'T:** Use colors outside the Anthropic palette. Use heavy borders or hard shadows. Mix in other brand aesthetics. Use sans-serif for body text (use Lora). Create a new window without an otter. Use more than 2 accent colors on one screen. Use bold/heavy visual treatments — Anthropic's brand is restrained.

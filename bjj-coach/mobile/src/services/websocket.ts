@@ -5,9 +5,12 @@ import type { ChatMessage, ChatButton } from '../types';
 const WS_URL = Constants.expoConfig?.extra?.WS_URL || 'ws://localhost:3000/ws';
 
 type MessageHandler = (messages: ChatMessage[]) => void;
+type HistoryPageHandler = (messages: ChatMessage[], hasMore: boolean) => void;
 let ws: WebSocket | null = null;
 let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 let onHistory: MessageHandler | null = null;
+let onHistoryHasMore: ((hasMore: boolean) => void) | null = null;
+let onHistoryPage: HistoryPageHandler | null = null;
 let onMessage: ((msg: ChatMessage) => void) | null = null;
 let onButtons: ((text: string, buttons: ChatButton[]) => void) | null = null;
 let onStatus: ((connected: boolean) => void) | null = null;
@@ -16,12 +19,16 @@ let pendingMessages: string[] = [];
 
 export function setHandlers(handlers: {
   onHistory: MessageHandler;
+  onHistoryHasMore: (hasMore: boolean) => void;
+  onHistoryPage: HistoryPageHandler;
   onMessage: (msg: ChatMessage) => void;
   onButtons: (text: string, buttons: ChatButton[]) => void;
   onStatus: (connected: boolean) => void;
   onAuthError: () => void;
 }) {
   onHistory = handlers.onHistory;
+  onHistoryHasMore = handlers.onHistoryHasMore;
+  onHistoryPage = handlers.onHistoryPage;
   onMessage = handlers.onMessage;
   onButtons = handlers.onButtons;
   onStatus = handlers.onStatus;
@@ -44,8 +51,12 @@ export async function connect() {
         pendingMessages = [];
         break;
       case 'history':
+        onHistoryHasMore?.(!!msg.hasMore);
         if (msg.messages?.length > 0) onHistory?.(msg.messages);
         else send('/start');
+        break;
+      case 'history_page':
+        onHistoryPage?.(msg.messages || [], !!msg.hasMore);
         break;
       case 'message':
         onMessage?.({ role: 'assistant', content: msg.text, created_at: new Date().toISOString() });
@@ -73,6 +84,10 @@ export function send(text: string) {
 
 export function sendButton(data: string) {
   if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'button', data }));
+}
+
+export function loadMore(beforeId: number) {
+  if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'load_more', beforeId }));
 }
 
 export function disconnect() {

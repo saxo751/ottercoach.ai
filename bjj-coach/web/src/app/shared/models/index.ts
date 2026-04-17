@@ -111,6 +111,7 @@ export interface LibraryTechnique {
 }
 
 export interface ChatMessage {
+  id?: number;
   role: 'user' | 'assistant' | 'system';
   content: string;
   link?: string;

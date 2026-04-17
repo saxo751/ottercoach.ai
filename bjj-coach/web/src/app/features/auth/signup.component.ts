@@ -7,8 +7,8 @@ import { AuthService, type SignupData } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
 
 const BELT_OPTIONS = [
-  { value: 'white', label: 'White', color: '#f0ece4', textColor: '#1a1a1a', border: true },
-  { value: 'blue', label: 'Blue', color: '#3b82f6', textColor: '#fff', border: false },
+  { value: 'white', label: 'White', color: '#e8e6dc', textColor: '#141413', border: true },
+  { value: 'blue', label: 'Blue', color: '#6a9bcc', textColor: '#faf9f5', border: false },
   { value: 'purple', label: 'Purple', color: '#8b5cf6', textColor: '#fff', border: false },
   { value: 'brown', label: 'Brown', color: '#92400e', textColor: '#fff', border: false },
   { value: 'black', label: 'Black', color: '#1a1a1a', textColor: '#fff', border: false },

@@ -13,12 +13,12 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: colors.dark,
+          backgroundColor: colors.light,
           borderTopColor: colors.lightGray,
           borderTopWidth: 1,
         },
         tabBarActiveTintColor: colors.accent,
-        tabBarInactiveTintColor: colors.textMuted,
+        tabBarInactiveTintColor: colors.midGray,
         tabBarLabelStyle: { fontFamily: fonts.mono, fontSize: 10 },
       }}
     >

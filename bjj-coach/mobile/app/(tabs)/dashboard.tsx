@@ -53,6 +53,7 @@ export default function DashboardScreen() {
         title="stats.dash"
         statusLeft={`user: ${profile?.name || 'unknown'}`}
         statusRight={`mode: ${profile?.conversation_mode || 'idle'}`}
+        otterImage={require('../../assets/otters/Otter-ready-fight-stance.png')}
       >
         <View style={styles.profileCard}>
           <View style={styles.profileRow}>

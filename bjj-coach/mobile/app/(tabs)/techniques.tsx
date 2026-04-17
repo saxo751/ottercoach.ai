@@ -58,6 +58,7 @@ export default function TechniquesScreen() {
         statusLeft={`${techniques?.length ?? 0} techniques`}
         statusRight="tap to watch"
         scrollable={false}
+        otterImage={require('../../assets/otters/Otter-armbar-turtle.png')}
       >
         <View style={styles.searchBar}>
           <Icon name="search-01" size={18} color={colors.textMuted} />

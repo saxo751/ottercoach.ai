@@ -9,25 +9,54 @@ import type { ChatMessage } from '../../shared/models';
   imports: [CommonModule, RouterModule],
   template: `
     <div
-      class="bubble"
-      [class.user]="message.role === 'user'"
-      [class.coach]="message.role === 'assistant'"
-      [class.system]="message.role === 'system'"
+      class="bubble-row"
+      [class.bubble-row--user]="message.role === 'user'"
+      [class.bubble-row--coach]="message.role === 'assistant'"
     >
-      <div class="label" *ngIf="message.role === 'assistant'">Coach</div>
-      <ng-container *ngIf="message.role === 'system' && message.link; else plainText">
-        <a class="system-link" [routerLink]="message.link">{{ message.content }}</a>
-      </ng-container>
-      <ng-template #plainText>
-        <div class="text" [innerHTML]="linkify(message.content)"></div>
-      </ng-template>
+      <div
+        class="bubble"
+        [class.user]="message.role === 'user'"
+        [class.coach]="message.role === 'assistant'"
+        [class.system]="message.role === 'system'"
+      >
+        <div class="label" *ngIf="message.role === 'assistant'">
+          <img
+            src="assets/otters/Otter-relaxed-with-arms-crossed-no-belt.svg"
+            alt=""
+            class="coach-avatar"
+          />
+          Coach
+        </div>
+        <ng-container *ngIf="message.role === 'system' && message.link; else plainText">
+          <a class="system-link" [routerLink]="message.link">{{ message.content }}</a>
+        </ng-container>
+        <ng-template #plainText>
+          <div class="text" [innerHTML]="linkify(message.content)"></div>
+        </ng-template>
+      </div>
     </div>
   `,
   styles: [`
+    .bubble-row {
+      display: flex;
+      margin-bottom: 8px;
+    }
+    .bubble-row--user {
+      justify-content: flex-end;
+    }
+    .bubble-row--coach {
+      justify-content: flex-start;
+    }
+    .coach-avatar {
+      width: 50px;
+      height: 50px;
+      transform: scaleX(-1);
+      vertical-align: middle;
+      margin-right: 4px;
+    }
     .bubble {
       max-width: 80%;
       padding: 10px 14px;
-      margin-bottom: 8px;
       line-height: 1.45;
       word-wrap: break-word;
       white-space: pre-wrap;
@@ -48,12 +77,14 @@ import type { ChatMessage } from '../../shared/models';
       border-radius: 2px 12px 12px 12px;
     }
     .label {
-      font-size: var(--text-xs);
-      font-weight: 600;
+      font-size: var(--text-base);
+      font-weight: 700;
       color: var(--color-text-muted);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      display: flex;
+      align-items: center;
     }
     .system {
       max-width: 100%;

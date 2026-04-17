@@ -55,3 +55,18 @@ export function getMessagesSince(
     LIMIT ?
   `).all(userId, since, limit) as ConversationEntry[];
 }
+
+/** Returns messages older than the given id, ordered oldest-first. */
+export function getMessagesBefore(
+  db: Database.Database,
+  userId: string,
+  beforeId: number,
+  limit = 30
+): ConversationEntry[] {
+  return db.prepare(`
+    SELECT * FROM conversation_history
+    WHERE user_id = ? AND id < ?
+    ORDER BY id DESC
+    LIMIT ?
+  `).all(userId, beforeId, limit).reverse() as ConversationEntry[];
+}

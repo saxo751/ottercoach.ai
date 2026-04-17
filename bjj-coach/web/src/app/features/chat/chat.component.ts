@@ -29,8 +29,13 @@ import type { ChatMessage, Button } from '../../shared/models';
         </div>
 
         <!-- Messages -->
-        <div class="retro-window__body messages" #messagesContainer>
+        <div class="retro-window__body messages" #messagesContainer (scroll)="onScroll()">
           <div class="messages-inner">
+            <div class="load-more" *ngIf="hasMore">
+              <button class="load-more-btn" (click)="loadMore()" [disabled]="loadingMore">
+                {{ loadingMore ? 'Loading...' : 'Load older messages' }}
+              </button>
+            </div>
             <app-message-bubble
               *ngFor="let msg of messages"
               [message]="msg"
@@ -97,6 +102,31 @@ import type { ChatMessage, Button } from '../../shared/models';
     .messages-inner {
       display: flex;
       flex-direction: column;
+    }
+    .load-more {
+      display: flex;
+      justify-content: center;
+      padding: 8px 0 12px;
+    }
+    .load-more-btn {
+      padding: 6px 16px;
+      border: var(--border-subtle);
+      background: var(--color-surface);
+      color: var(--color-text-muted);
+      border-radius: 16px;
+      cursor: pointer;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      transition: all 0.15s;
+    }
+    .load-more-btn:hover:not(:disabled) {
+      background: var(--color-accent);
+      color: var(--color-accent-text);
+      border-color: var(--color-accent);
+    }
+    .load-more-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
     }
     .connection-status {
       font-family: var(--font-mono);
@@ -212,6 +242,8 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
   inputText = '';
   connected = false;
   typing = false;
+  hasMore = false;
+  loadingMore = false;
 
   private subs: Subscription[] = [];
   private shouldScroll = false;
@@ -235,6 +267,12 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
       this.chatService.typing$.subscribe((t) => {
         this.typing = t;
         if (t) this.shouldScroll = true;
+      }),
+      this.chatService.hasMore$.subscribe((h) => {
+        this.hasMore = h;
+      }),
+      this.chatService.loadingMore$.subscribe((l) => {
+        this.loadingMore = l;
       })
     );
   }
@@ -252,6 +290,26 @@ export class ChatComponent implements OnInit, OnDestroy, AfterViewChecked {
     this.inputText = '';
     this.activeButtons = [];
     this.chatService.sendMessage(text);
+  }
+
+  onScroll(): void {
+    const el = this.messagesContainer?.nativeElement;
+    if (el && el.scrollTop < 100 && this.hasMore && !this.loadingMore) {
+      this.loadMore();
+    }
+  }
+
+  loadMore(): void {
+    const el = this.messagesContainer?.nativeElement;
+    const scrollHeightBefore = el?.scrollHeight || 0;
+    this.chatService.loadMore();
+    // Preserve scroll position after older messages are prepended
+    setTimeout(() => {
+      if (el) {
+        const scrollHeightAfter = el.scrollHeight;
+        el.scrollTop += scrollHeightAfter - scrollHeightBefore;
+      }
+    }, 50);
   }
 
   onButtonClick(btn: Button): void {

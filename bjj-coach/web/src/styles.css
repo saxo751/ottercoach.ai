@@ -1,55 +1,64 @@
 :root {
-  /* Desktop & backgrounds */
-  --color-desktop: #f3efe6;
-  --color-desktop-darker: #e8e2d6;
+  /* Anthropic Main Colors */
+  --color-dark: #141413;
+  --color-light: #faf9f5;
+  --color-mid-gray: #b0aea5;
+  --color-light-gray: #e8e6dc;
+
+  /* Anthropic Accent Colors */
+  --color-accent: #d97757;
+  --color-accent-hover: #c4613f;
+  --color-accent-secondary: #6a9bcc;
+  --color-accent-tertiary: #788c5d;
+  --color-accent-text: #faf9f5;
+
+  /* Desktop & backgrounds — mapped from Anthropic palette */
+  --color-desktop: #faf9f5;
+  --color-desktop-darker: #e8e6dc;
   --color-surface: #ffffff;
-  --color-surface-muted: #faf8f4;
+  --color-surface-muted: #f5f4f0;
 
-  /* Primary accent — warm orange */
-  --color-accent: #f5a623;
-  --color-accent-hover: #e09400;
-  --color-accent-text: #1a1a1a;
-
-  /* Secondary accent — deep navy */
-  --color-navy: #1d2433;
+  /* Secondary accent — deep navy (kept for dark UI elements) */
+  --color-navy: #141413;
   --color-navy-light: #2d3748;
 
   /* Window chrome */
-  --color-titlebar: #e8e2d6;
-  --color-titlebar-text: #1a1a1a;
-  --color-titlebar-active: #f5a623;
-  --color-window-bg: #f0ece4;
-  --color-window-border: #c4bfb3;
-  --color-window-shadow: rgba(0,0,0,0.12);
+  --color-titlebar: #e8e6dc;
+  --color-titlebar-text: #141413;
+  --color-titlebar-active: #d97757;
+  --color-window-bg: #faf9f5;
+  --color-window-border: #b0aea5;
+  --color-window-shadow: rgba(20,20,19,0.06);
 
   /* Text */
-  --color-text: #1a1a1a;
-  --color-text-secondary: #5a5650;
-  --color-text-muted: #9b9589;
-  --color-text-inverse: #ffffff;
+  --color-text: #141413;
+  --color-text-secondary: #4a4a46;
+  --color-text-muted: #b0aea5;
+  --color-text-inverse: #faf9f5;
 
   /* BJJ belt colors */
-  --color-belt-white: #f0ece4;
-  --color-belt-blue: #3b82f6;
+  --color-belt-white: #e8e6dc;
+  --color-belt-blue: #6a9bcc;
   --color-belt-purple: #8b5cf6;
   --color-belt-brown: #92400e;
-  --color-belt-black: #1a1a1a;
+  --color-belt-black: #141413;
 
-  /* Status */
-  --color-success: #22c55e;
-  --color-warning: #f5a623;
-  --color-danger: #ef4444;
-  --color-info: #3b82f6;
+  /* Status — using Anthropic accents */
+  --color-success: #788c5d;
+  --color-warning: #d97757;
+  --color-danger: #c44d3b;
+  --color-info: #6a9bcc;
 
-  /* Borders & shadows */
-  --border-subtle: 1px solid #d4cfc5;
-  --border-medium: 2px solid #c4bfb3;
-  --shadow-window: 0 4px 24px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.06);
-  --shadow-window-active: 0 8px 40px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08);
+  /* Borders & shadows — softer, Anthropic-minimal */
+  --border-subtle: 1px solid #e8e6dc;
+  --border-medium: 1px solid #b0aea5;
+  --shadow-window: 0 2px 16px rgba(20,20,19,0.06);
+  --shadow-window-active: 0 4px 24px rgba(20,20,19,0.10);
 
-  /* Typography */
-  --font-body: 'DM Sans', 'Segoe UI', system-ui, sans-serif;
-  --font-display: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+  /* Typography — Anthropic: Poppins headings, Lora body */
+  --font-heading: 'Poppins', Arial, sans-serif;
+  --font-display: 'Poppins', Arial, sans-serif; /* alias for --font-heading */
+  --font-body: 'Lora', Georgia, serif;
   --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
 
   --text-xs: 11px;
@@ -70,8 +79,7 @@ body.desktop {
   font-family: var(--font-body);
   color: var(--color-text);
   background-color: var(--color-desktop);
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.8' numOctaves='6' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='discrete' tableValues='0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
-  background-size: 200px 200px;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.02'/%3E%3C/svg%3E");
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -81,7 +89,7 @@ body.desktop {
 .retro-window {
   background: var(--color-surface);
   border: var(--border-medium);
-  border-radius: 8px 8px 4px 4px;
+  border-radius: 8px;
   box-shadow: var(--shadow-window);
   display: flex;
   flex-direction: column;
@@ -89,7 +97,7 @@ body.desktop {
 }
 
 .retro-window__titlebar {
-  background: var(--color-titlebar);
+  background: var(--color-light-gray);
   padding: 8px 12px;
   display: flex;
   align-items: center;
@@ -107,17 +115,16 @@ body.desktop {
   width: 12px;
   height: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(0,0,0,0.15);
   cursor: pointer;
   transition: filter 0.1s;
 }
 .retro-window__dot:hover { filter: brightness(0.9); }
-.retro-window__dot--close { background: #ef6b5e; }
-.retro-window__dot--minimize { background: #f5bf4f; }
-.retro-window__dot--maximize { background: #62c554; }
+.retro-window__dot--close { background: #d97757; }
+.retro-window__dot--minimize { background: #b0aea5; }
+.retro-window__dot--maximize { background: #788c5d; }
 
 .retro-window__title {
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-titlebar-text);
@@ -125,7 +132,7 @@ body.desktop {
 }
 
 .retro-window__statusbar {
-  background: var(--color-desktop);
+  background: var(--color-light-gray);
   padding: 4px 12px;
   font-family: var(--font-mono);
   font-size: var(--text-xs);

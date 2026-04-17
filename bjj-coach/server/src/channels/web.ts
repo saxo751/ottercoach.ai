@@ -3,7 +3,7 @@ import type { Server } from 'http';
 import type Database from 'better-sqlite3';
 import type { ChannelAdapter, Button, MessageCallback, ButtonCallback } from './adapter.js';
 import { findOrCreateUser } from '../db/queries/channels.js';
-import { getRecentMessages } from '../db/queries/conversations.js';
+import { getRecentMessages, getMessagesBefore } from '../db/queries/conversations.js';
 import { verifyToken } from '../utils/jwt.js';
 import { getUserById } from '../db/queries/users.js';
 
@@ -125,11 +125,16 @@ export class WebAdapter implements ChannelAdapter {
 
           ws.send(JSON.stringify({ type: 'auth_ok' }));
 
-          const history = getRecentMessages(this.db, userId, 50);
-          console.log(`[web] Sending ${history.length} history messages`);
+          const PAGE_SIZE = 30;
+          const history = getRecentMessages(this.db, userId, PAGE_SIZE + 1);
+          const hasMore = history.length > PAGE_SIZE;
+          const page = hasMore ? history.slice(1) : history; // drop oldest if there's more
+          console.log(`[web] Sending ${page.length} history messages (hasMore=${hasMore})`);
           ws.send(JSON.stringify({
             type: 'history',
-            messages: history.map((m) => ({
+            hasMore,
+            messages: page.map((m) => ({
+              id: m.id,
               role: m.role,
               content: m.content,
               created_at: m.created_at,
@@ -160,6 +165,23 @@ export class WebAdapter implements ChannelAdapter {
           for (const cb of this.messageCallbacks) {
             cb(client.sessionId, msg.data, 'web');
           }
+        }
+
+        if (msg.type === 'load_more' && typeof msg.beforeId === 'number' && client.userId) {
+          const PAGE_SIZE = 30;
+          const older = getMessagesBefore(this.db, client.userId, msg.beforeId, PAGE_SIZE + 1);
+          const hasMore = older.length > PAGE_SIZE;
+          const page = hasMore ? older.slice(1) : older;
+          ws.send(JSON.stringify({
+            type: 'history_page',
+            hasMore,
+            messages: page.map((m) => ({
+              id: m.id,
+              role: m.role,
+              content: m.content,
+              created_at: m.created_at,
+            })),
+          }));
         }
       });
 

@@ -30,6 +30,7 @@ export interface AuthUser {
 }
 
 export interface ChatMessage {
+  id?: number;
   role: 'user' | 'assistant' | 'system';
   content: string;
   link?: string;

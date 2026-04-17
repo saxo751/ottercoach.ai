@@ -23,9 +23,9 @@ import { AuthService } from '../../core/services/auth.service';
           <!-- Envelope icon -->
           <div class="icon">
             <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="6" y="16" width="52" height="36" rx="4" fill="#e8e2d6" stroke="#1a1a1a" stroke-width="2"/>
+              <rect x="6" y="16" width="52" height="36" rx="4" fill="#e8e6dc" stroke="#1a1a1a" stroke-width="2"/>
               <path d="M6 20 L32 38 L58 20" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linejoin="round"/>
-              <circle cx="32" cy="30" r="6" fill="#f5a623" stroke="#1a1a1a" stroke-width="1.5"/>
+              <circle cx="32" cy="30" r="6" fill="#d97757" stroke="#1a1a1a" stroke-width="1.5"/>
               <path d="M30 30 L31.5 31.5 L34 28.5" stroke="#1a1a1a" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>

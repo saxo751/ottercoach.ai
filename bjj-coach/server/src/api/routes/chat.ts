@@ -2,7 +2,7 @@ import { Router } from 'express';
 import type Database from 'better-sqlite3';
 import type { AIProvider } from '../../ai/provider.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
-import { getMessagesSince, getRecentMessages, addMessage } from '../../db/queries/conversations.js';
+import { getMessagesSince, getRecentMessages, getMessagesBefore, addMessage } from '../../db/queries/conversations.js';
 import { getUserById, setConversationMode } from '../../db/queries/users.js';
 import { CONVERSATION_MODES } from '../../utils/constants.js';
 import { handleFreeChat } from '../../core/handlers/freeChat.js';
@@ -16,14 +16,29 @@ export function createChatRouter(db: Database.Database, ai: AIProvider): Router 
   const requireAuth = createAuthMiddleware(db);
   router.use(requireAuth);
 
-  // GET /api/chat/history?since=ISO8601&limit=100
+  // GET /api/chat/history?since=ISO8601&before=id&limit=30
   router.get('/history', (req, res) => {
     const userId = (req as any).userId as string;
     const since = req.query.since as string | undefined;
-    const limit = parseInt(req.query.limit as string) || 100;
+    const beforeId = req.query.before ? parseInt(req.query.before as string) : undefined;
+    const limit = parseInt(req.query.limit as string) || 30;
 
     let messages;
-    if (since) {
+    if (beforeId) {
+      messages = getMessagesBefore(db, userId, beforeId, limit + 1);
+      const hasMore = messages.length > limit;
+      const page = hasMore ? messages.slice(1) : messages;
+      res.json({
+        hasMore,
+        messages: page.map((m) => ({
+          id: m.id,
+          role: m.role,
+          content: m.content,
+          created_at: m.created_at,
+        })),
+      });
+      return;
+    } else if (since) {
       messages = getMessagesSince(db, userId, since, limit);
     } else {
       messages = getRecentMessages(db, userId, limit);
@@ -31,6 +46,7 @@ export function createChatRouter(db: Database.Database, ai: AIProvider): Router 
 
     res.json({
       messages: messages.map((m) => ({
+        id: m.id,
         role: m.role,
         content: m.content,
         created_at: m.created_at,

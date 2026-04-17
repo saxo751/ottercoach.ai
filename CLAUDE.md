@@ -78,6 +78,15 @@ Standalone components with lazy-loaded routes. `ChatService` manages WebSocket c
 ### Scheduler
 `node-cron` runs every 10 minutes, checks each user's `typical_training_time` to trigger briefings (30-60 min before) and debriefs (60+ min after). Tracks `last_scheduled_action` and `last_scheduled_date` on the user record to avoid duplicates.
 
+### Mobile App (bjj-coach/mobile/)
+Expo managed workflow with Expo Router (file-based navigation). React Native app with 5-tab bottom bar (Home, Dashboard, Coach, Techniques, Profile). TanStack Query for server state, Zustand for auth/chat. WebSocket for real-time chat, REST fallback. Push notifications via expo-notifications.
+
+### Design System
+The `/design-skill` slash command (`.claude/commands/design-skill.md`) defines the visual language for all UI work. Uses **Anthropic's brand guidelines**: colors (`#141413` dark, `#faf9f5` light, `#d97757` orange accent, `#6a9bcc` blue, `#788c5d` green), **Poppins** headings, **Lora** body text. Retro desktop metaphor with otter mascots and window chrome. **Always invoke `/design-skill` when building or modifying UI.**
+
+### Icon System (HugeIcons Pro)
+Web frontend uses HugeIcons Pro via `<ui-icon name="..." variant="..." />`. Registry at `bjj-coach/web/src/app/components/ui-components/icon/icon-registry.ts`. Packages from `@hugeicons-pro/core-*` (auth via `.npmrc`). See the design skill for the full list of available icon names.
+
 ## Key Patterns
 
 - **Adapter pattern everywhere**: Both `ChannelAdapter` and `AIProvider` are interfaces. Engine never imports platform/provider specifics.

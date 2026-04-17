@@ -19,6 +19,8 @@ export class ChatService implements OnDestroy {
   buttons$ = new Subject<ButtonMessage>();
   connected$ = new BehaviorSubject<boolean>(false);
   typing$ = new BehaviorSubject<boolean>(false);
+  hasMore$ = new BehaviorSubject<boolean>(false);
+  loadingMore$ = new BehaviorSubject<boolean>(false);
 
   constructor(private auth: AuthService, private zone: NgZone) {}
 
@@ -64,6 +66,7 @@ export class ChatService implements OnDestroy {
 
           case 'history':
             console.log(`[chat] History received: ${msg.messages?.length || 0} messages`);
+            this.hasMore$.next(!!msg.hasMore);
             if (msg.messages && msg.messages.length > 0) {
               this.messages$.next(msg.messages.map((m: any) =>
                 m.role === 'system' ? { ...m, link: this.deriveSystemLink(m.content) } : m
@@ -74,6 +77,19 @@ export class ChatService implements OnDestroy {
               this.doSend('/start', false);
             }
             break;
+
+          case 'history_page': {
+            console.log(`[chat] History page received: ${msg.messages?.length || 0} older messages`);
+            this.loadingMore$.next(false);
+            this.hasMore$.next(!!msg.hasMore);
+            if (msg.messages && msg.messages.length > 0) {
+              const older = msg.messages.map((m: any) =>
+                m.role === 'system' ? { ...m, link: this.deriveSystemLink(m.content) } : m
+              );
+              this.messages$.next([...older, ...this.messages$.value]);
+            }
+            break;
+          }
 
           case 'message': {
             console.log(`[chat] Coach message: "${msg.text?.substring(0, 100)}"`);
@@ -153,6 +169,17 @@ export class ChatService implements OnDestroy {
     }
     this.typing$.next(true);
     this.doSend(text, true);
+  }
+
+  loadMore(): void {
+    if (this.loadingMore$.value || !this.hasMore$.value) return;
+    const messages = this.messages$.value;
+    const oldest = messages[0];
+    if (!oldest?.id) return;
+    this.loadingMore$.next(true);
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ type: 'load_more', beforeId: oldest.id }));
+    }
   }
 
   sendButton(data: string): void {

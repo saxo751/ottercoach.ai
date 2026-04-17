@@ -71,7 +71,7 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      <RetroWindow title="profile.cfg" statusLeft={`id: ${profile?.id?.slice(0, 8) || '...'}`} statusRight="editable">
+      <RetroWindow title="profile.cfg" statusLeft={`id: ${profile?.id?.slice(0, 8) || '...'}`} statusRight="editable" otterImage={require('../../assets/otters/Otter-approving-with-thumbs-up.png')}>
         <Text style={styles.label}>NAME</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="Your name" placeholderTextColor={colors.textMuted} />
 

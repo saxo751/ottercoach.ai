@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
+  Image,
   TextInput,
   TouchableOpacity,
   FlatList,
@@ -28,7 +29,7 @@ function TypingIndicator() {
 }
 
 export default function ChatScreen() {
-  const { messages, buttons, connected, typing, connect, disconnect, sendMessage, sendButton } = useChatStore();
+  const { messages, buttons, connected, typing, hasMore, loadingMore, connect, disconnect, sendMessage, sendButton, loadMore } = useChatStore();
   const [inputText, setInputText] = useState('');
   const flatListRef = useRef<FlatList>(null);
 
@@ -61,6 +62,7 @@ export default function ChatScreen() {
           <View style={[styles.dot, { backgroundColor: colors.maximize }]} />
         </View>
         <Text style={styles.windowTitle}>coach.chat</Text>
+        <Image source={require('../../assets/otters/Otter-relaxed-with-arms-crossed-no-belt.png')} style={styles.titleOtter} resizeMode="contain" />
         <View style={styles.statusDot}>
           <View style={[styles.connectionDot, { backgroundColor: statusDotColor }]} />
           <Text style={styles.statusText}>{connected ? 'connected' : 'offline'}</Text>
@@ -71,10 +73,16 @@ export default function ChatScreen() {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(_, i) => String(i)}
+          keyExtractor={(item, i) => item.id ? String(item.id) : `local-${i}`}
           renderItem={({ item }) => <MessageBubble message={item} />}
           contentContainerStyle={styles.messageList}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+          ListHeaderComponent={hasMore ? (
+            <TouchableOpacity style={styles.loadMoreBtn} onPress={loadMore} disabled={loadingMore}>
+              <Text style={styles.loadMoreText}>{loadingMore ? 'Loading...' : 'Load older messages'}</Text>
+            </TouchableOpacity>
+          ) : null}
+          maintainVisibleContentPosition={{ minIndexForVisible: 0 }}
         />
 
         {typing && <TypingIndicator />}
@@ -111,7 +119,8 @@ const styles = StyleSheet.create({
   titleBar: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.lightGray, paddingHorizontal: 12, paddingVertical: 10, gap: 8 },
   dots: { flexDirection: 'row', gap: 5 },
   dot: { width: 10, height: 10, borderRadius: 5 },
-  windowTitle: { fontFamily: fonts.mono, fontSize: 13, color: colors.textMuted, flex: 1 },
+  windowTitle: { fontFamily: fonts.heading, fontSize: 13, fontWeight: '600', color: colors.text, flex: 1 },
+  titleOtter: { height: 28, width: 28, opacity: 0.7 },
   statusDot: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   connectionDot: { width: 7, height: 7, borderRadius: 4 },
   statusText: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted },
@@ -136,6 +145,17 @@ const styles = StyleSheet.create({
   sendButton: { backgroundColor: colors.dark, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 20 },
   sendDisabled: { opacity: 0.4 },
   sendText: { fontFamily: fonts.mono, fontSize: 13, color: colors.accent },
+  loadMoreBtn: {
+    alignSelf: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.surface,
+    marginBottom: 12,
+  },
+  loadMoreText: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted },
   statusBar: { flexDirection: 'row', justifyContent: 'space-between', backgroundColor: colors.dark, paddingHorizontal: 12, paddingVertical: 4 },
   statusBarText: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted },
 });

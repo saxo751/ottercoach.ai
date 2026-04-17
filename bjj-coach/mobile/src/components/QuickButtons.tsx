@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { colors } from '../theme/colors';
+import { fonts } from '../theme/fonts';
 import type { ChatButton } from '../types';
 
 export function QuickButtons({ buttons, onPress }: { buttons: ChatButton[]; onPress: (data: string) => void }) {
@@ -17,7 +18,7 @@ export function QuickButtons({ buttons, onPress }: { buttons: ChatButton[]; onPr
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 12, paddingBottom: 8 },
+  container: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, paddingHorizontal: 12, paddingBottom: 8, backgroundColor: colors.light },
   button: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, borderWidth: 1, borderColor: colors.accent },
-  text: { fontSize: 13, color: colors.accent },
+  text: { fontSize: 13, fontFamily: fonts.body, color: colors.accent },
 });

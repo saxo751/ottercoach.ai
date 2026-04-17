@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../src/theme/colors';
 import { fonts } from '../../src/theme/fonts';
@@ -41,7 +41,7 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.footer}>
-          <Text style={styles.mascot}>🦦</Text>
+          <Image source={require('../../assets/otters/Otter-relaxed-with-arms-crossed.png')} style={styles.mascotImage} resizeMode="contain" />
           <Text style={styles.footerText}>Your mat companion</Text>
         </View>
       </View>
@@ -50,11 +50,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.dark },
+  root: { flex: 1, backgroundColor: colors.light },
   container: { flex: 1, padding: 24 },
   header: { alignItems: 'center', marginBottom: 32, marginTop: 16 },
-  title: { fontFamily: fonts.heading, fontSize: 28, color: colors.accent, letterSpacing: 3 },
-  subtitle: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted, marginTop: 4 },
+  title: { fontFamily: fonts.heading, fontSize: 28, color: colors.text, letterSpacing: 3 },
+  subtitle: { fontFamily: fonts.mono, fontSize: 11, color: colors.textSecondary, marginTop: 4 },
   grid: { flex: 1, flexDirection: 'row', flexWrap: 'wrap', gap: 16, alignContent: 'flex-start' },
   iconItem: { width: '46%', alignItems: 'center', padding: 16 },
   iconBox: {
@@ -69,9 +69,9 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   // iconEmoji removed — using Icon component
-  iconLabel: { fontFamily: fonts.mono, fontSize: 12, color: colors.accent, textAlign: 'center' },
-  iconSubtitle: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, textAlign: 'center', marginTop: 2 },
+  iconLabel: { fontFamily: fonts.heading, fontSize: 13, color: colors.text, textAlign: 'center', fontWeight: '500' as const },
+  iconSubtitle: { fontFamily: fonts.body, fontSize: 11, color: colors.textSecondary, textAlign: 'center', marginTop: 2 },
   footer: { alignItems: 'center', paddingBottom: 16 },
-  mascot: { fontSize: 36, marginBottom: 4 },
-  footerText: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted },
+  mascotImage: { height: 120, width: 120, marginBottom: 8 },
+  footerText: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary },
 });

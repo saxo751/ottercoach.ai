@@ -10,6 +10,10 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
+    "@hugeicons-pro/core-solid-rounded": "^4.1.0",
+    "@hugeicons-pro/core-solid-sharp": "^4.1.0",
+    "@hugeicons-pro/core-stroke-rounded": "^4.1.0",
+    "@hugeicons-pro/core-stroke-sharp": "^4.1.0",
     "@react-navigation/native": "^7.1.8",
     "@tanstack/react-query": "^5.96.2",
     "axios": "^1.14.0",
