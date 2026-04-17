@@ -53,9 +53,10 @@ export async function resolveRelatedCards(input: {
       seen.add(id);
       const entry = await getEntry('techniques', id);
       if (!entry) continue;
+      const slug = (entry as any).slug ?? id;
       out.push({
-        slug: entry.data.slug,
-        href: `/technique/${entry.data.slug}`,
+        slug,
+        href: `/technique/${slug}`,
         title: entry.data.name,
         blurb: entry.data.shortDescription,
         label,

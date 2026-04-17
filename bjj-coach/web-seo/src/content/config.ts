@@ -209,7 +209,6 @@ const LegalByRuleset = z.object({
 
 export const Technique = z.object({
   id: z.string().min(1),
-  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
   name: z.string().min(1),
   aliases: z.array(z.string()).default([]),
   category: TechniqueCategory,
@@ -255,7 +254,6 @@ export const TechniqueVariation = z.object({
   id: z.string().min(1),
   techniqueId: z.string().min(1),
   fromPositionId: z.string().min(1),
-  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
   variationName: z.string().min(1),
   shortDescription: z.string().refine((s) => s.split(/\s+/).length <= 40, '≤40 words'),
   steps: z.array(Step).min(4),
@@ -274,7 +272,6 @@ export const TechniqueVariation = z.object({
 export const Flow = z
   .object({
     id: z.string().min(1),
-    slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
     fromTechniqueId: z.string().min(1),
     toTechniqueId: z.string().optional(),
     toPositionId: z.string().optional(),
@@ -339,7 +336,6 @@ export const GlossaryTerm = z.object({
 // -------- Drill --------
 export const Drill = z.object({
   id: z.string().min(1),
-  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
   name: z.string().min(1),
   level: DrillLevel,
   positionIds: z.array(z.string()).min(1),
@@ -361,7 +357,6 @@ export const Drill = z.object({
 // -------- Athlete --------
 export const Athlete = z.object({
   id: z.string().min(1),
-  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
   name: z.string().min(1),
   aliases: z.array(z.string()).default([]),
   dateOfBirth: ISODate.optional(),

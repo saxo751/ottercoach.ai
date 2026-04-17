@@ -180,7 +180,6 @@ import { Technique, Flow } from '../config';
 describe('Technique', () => {
   const valid = {
     id: 'triangle-choke',
-    slug: 'triangle-choke',
     name: 'Triangle Choke',
     category: 'submission' as const,
     submissionType: 'choke' as const,
@@ -238,7 +237,6 @@ describe('Technique', () => {
 describe('Flow', () => {
   const base = {
     id: 'scissor-to-mount',
-    slug: 'scissor-to-mount',
     fromTechniqueId: 'scissor-sweep',
     name: 'Scissor Sweep to Mount',
     transitionNarrative: wordsOf(200),

@@ -1,0 +1,159 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import SourcesList from '@/components/SourcesList.astro';
+import ReviewerByline from '@/components/ReviewerByline.astro';
+import Faq from '@/components/Faq.astro';
+import VideoFacade from '@/components/VideoFacade.astro';
+import RelatedCard from '@/components/RelatedCard.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import {
+  buildHowTo,
+  buildBreadcrumbList,
+  buildFaqPage,
+  buildVideoObject,
+} from '@/lib/schema-ld';
+import { resolveRelatedCards } from '@/lib/related';
+
+export async function getStaticPaths() {
+  const techniques = await getCollection('techniques');
+  return techniques.map((t) => ({ params: { slug: t.slug }, props: { technique: t } }));
+}
+
+const { technique } = Astro.props;
+const { data } = technique;
+const techniqueSlug = technique.slug;
+
+const position = await getEntry('positions', data.parentPositionId);
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const pageUrl = `${siteUrl}/technique/${techniqueSlug}`;
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Techniques', href: '/technique' },
+  { label: `${data.category}`, href: `/technique?category=${data.category}` },
+  { label: data.name },
+];
+
+const related = await resolveRelatedCards({
+  counterIds: data.counterTechniqueIds,
+  followUpIds: data.followUpTechniqueIds ?? [],
+  relatedIds: data.relatedTechniqueIds ?? [],
+});
+
+const ldBlocks: object[] = [
+  buildHowTo({
+    name: data.name,
+    description: data.shortDescription,
+    image: new URL(data.heroImage.src, siteUrl).toString(),
+    url: pageUrl,
+    steps: data.steps,
+  }),
+  buildBreadcrumbList(
+    crumbs
+      .filter((c) => !!c.href)
+      .map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+  buildFaqPage(data.faq),
+];
+
+if (data.videoEmbed) {
+  ldBlocks.push(
+    buildVideoObject({
+      name: data.name,
+      description: data.videoEmbed.description,
+      thumbnailUrl: data.videoEmbed.thumbnailUrl,
+      contentUrl:
+        data.videoEmbed.provider === 'youtube'
+          ? `https://www.youtube.com/watch?v=${data.videoEmbed.videoId}`
+          : `https://vimeo.com/${data.videoEmbed.videoId}`,
+      uploadDate: data.dateModified,
+      durationSeconds: data.videoEmbed.durationSeconds,
+    }),
+  );
+}
+---
+<BaseLayout
+  title={`${data.name} — Step-by-Step BJJ Technique`}
+  description={data.shortDescription}
+  noindex={data.noindex}
+  canonicalPath={`/technique/${techniqueSlug}`}
+  dateModified={data.dateModified}
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">{data.name} — Step-by-Step BJJ Technique</h1>
+
+  <section aria-labelledby="quick-answer" class="my-4 p-4 bg-white/40 rounded">
+    <h2 id="quick-answer" class="sr-only">Quick answer</h2>
+    <p class="font-semibold">{data.shortDescription}</p>
+  </section>
+
+  {data.videoEmbed && (
+    <VideoFacade
+      provider={data.videoEmbed.provider}
+      videoId={data.videoEmbed.videoId}
+      thumbnailUrl={data.videoEmbed.thumbnailUrl}
+      description={data.videoEmbed.description}
+      durationSeconds={data.videoEmbed.durationSeconds}
+    />
+  )}
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Overview</h2>
+    <p>{data.longDescription}</p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Step by step</h2>
+    <ol class="space-y-3 list-decimal pl-5">
+      {data.steps.map((s) => (
+        <li>
+          <p class="font-semibold">{s.title}</p>
+          <p>{s.detail}</p>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Common mistakes</h2>
+    <ul class="space-y-3 list-disc pl-5">
+      {data.commonMistakes.map((m) => (
+        <li>
+          <p class="font-semibold">{m.title}</p>
+          <p>{m.detail}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  {position && (
+    <section class="my-6">
+      <h2 class="font-heading text-xl mb-2">Position context</h2>
+      <p>
+        The {data.name.toLowerCase()} is primarily attacked from{' '}
+        <a href={`/position/${position.data.slug}`} class="underline">{position.data.name}</a>.
+      </p>
+    </section>
+  )}
+
+  {related.length > 0 && (
+    <section class="my-6">
+      <h2 class="font-heading text-xl mb-2">Related techniques</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        {related.map((c) => (
+          <RelatedCard href={c.href} title={c.title} blurb={c.blurb} label={c.label} />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <Faq items={data.faq} />
+  <SourcesList citationIds={data.citationSources} />
+  <ReviewerByline reviewerId={data.reviewedById} dateModified={data.dateModified} />
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>
