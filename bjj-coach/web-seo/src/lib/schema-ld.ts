@@ -27,3 +27,59 @@ export function buildHowTo(input: HowToInput): WithContext<HowTo> {
     ...(input.totalTimeMinutes && { totalTime: `PT${input.totalTimeMinutes}M` }),
   };
 }
+
+export function buildBreadcrumbList(
+  crumbs: Array<{ name: string; url: string }>,
+): WithContext<BreadcrumbList> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((c, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      name: c.name,
+      item: c.url,
+    })),
+  };
+}
+
+export function buildFaqPage(
+  items: Array<{ question: string; answer: string }>,
+): WithContext<FAQPage> {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((i) => ({
+      '@type': 'Question',
+      name: i.question,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: i.answer,
+      },
+    })),
+  };
+}
+
+export interface VideoObjectInput {
+  name: string;
+  description: string;
+  thumbnailUrl: string;
+  contentUrl: string;
+  uploadDate: string;
+  durationSeconds: number;
+}
+
+export function buildVideoObject(v: VideoObjectInput): WithContext<VideoObject> {
+  const minutes = Math.floor(v.durationSeconds / 60);
+  const seconds = v.durationSeconds % 60;
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: v.name,
+    description: v.description,
+    thumbnailUrl: v.thumbnailUrl,
+    contentUrl: v.contentUrl,
+    uploadDate: v.uploadDate,
+    duration: `PT${minutes}M${seconds}S`,
+  };
+}
