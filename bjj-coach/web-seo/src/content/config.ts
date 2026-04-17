@@ -112,5 +112,55 @@ export const BaseMeta = z.object({
   dateModified: ISODate,
 });
 
-// Placeholder collections object — will be populated in Tasks 5–9.
-export const collections = {};
+// -------- Citation --------
+export const Citation = z.object({
+  id: z.string().min(1),
+  sourceType: CitationSourceType,
+  title: z.string().min(1),
+  author: z.string().optional(),
+  publisher: z.string().optional(),
+  publicationYear: z.number().int().min(1800).max(2100).optional(),
+  url: z.string().url().optional(),
+  pageOrTimestamp: z.string().optional(),
+  accessedDate: ISODate.optional(),
+  notes: z.string().optional(),
+});
+
+// -------- Reviewer --------
+export const Reviewer = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  photo: ImageAsset,
+  currentBeltId: BeltId,
+  yearPromotedToBlack: z.number().int().optional(),
+  lineage: z.array(LineageNode).min(1),
+  academy: z.string().min(1),
+  bio: z.string().refine((s) => s.split(/\s+/).length >= 200, 'Bio must be ≥200 words'),
+  credentials: z.array(z.string()).min(2),
+  socialLinks: z
+    .object({
+      instagram: z.string().url().optional(),
+      youtube: z.string().url().optional(),
+      twitter: z.string().url().optional(),
+    })
+    .optional(),
+  reviewCount: z.number().int().nonnegative().default(0),
+  scopeOfExpertise: z.array(z.string()).min(1),
+});
+
+// -------- Astro collections --------
+const reviewersCollection = defineCollection({
+  type: 'data',
+  schema: Reviewer,
+});
+
+const citationsCollection = defineCollection({
+  type: 'data',
+  schema: Citation,
+});
+
+export const collections = {
+  reviewers: reviewersCollection,
+  citations: citationsCollection,
+};

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { ImageAsset, ISODate, Step, Mistake, BeltId } from '../config';
+import { ImageAsset, ISODate, Step, Mistake, BeltId, Reviewer, Citation } from '../config';
 
 describe('BeltId enum', () => {
   it('accepts valid belts', () => {
@@ -52,5 +52,60 @@ describe('Step & Mistake', () => {
   });
   it('accepts valid Mistake', () => {
     expect(() => Mistake.parse({ title: 'Arms inside', detail: 'Keeps attack shallow.' })).not.toThrow();
+  });
+});
+
+describe('Citation', () => {
+  it('accepts a federation document citation', () => {
+    expect(() =>
+      Citation.parse({
+        id: 'ibjjf-rulebook-2024',
+        sourceType: 'federation-document',
+        title: 'IBJJF Rule Book 2024',
+        publicationYear: 2024,
+        url: 'https://ibjjf.com/rules',
+      }),
+    ).not.toThrow();
+  });
+  it('rejects invalid URL', () => {
+    expect(() =>
+      Citation.parse({
+        id: 'bad',
+        sourceType: 'book',
+        title: 'x',
+        url: 'not-a-url',
+      }),
+    ).toThrow();
+  });
+});
+
+describe('Reviewer', () => {
+  const longBio = Array(200).fill('word').join(' ');
+  const valid = {
+    id: 'founder',
+    slug: 'founder',
+    name: 'Jane Doe',
+    photo: {
+      src: '/img/jane.avif',
+      width: 800,
+      height: 800,
+      alt: 'Jane Doe headshot at academy',
+      format: 'avif' as const,
+    },
+    currentBeltId: 'black' as const,
+    lineage: [{ coachName: 'Helio Gracie', beltReceived: 'black' as const }],
+    academy: 'Otter BJJ Academy',
+    bio: longBio,
+    credentials: ['IBJJF black belt', 'Judges panel 2020–2024'],
+    scopeOfExpertise: ['no-gi', 'closed-guard'],
+  };
+  it('accepts a complete reviewer', () => {
+    expect(() => Reviewer.parse(valid)).not.toThrow();
+  });
+  it('rejects bio with <200 words', () => {
+    expect(() => Reviewer.parse({ ...valid, bio: 'Short bio.' })).toThrow();
+  });
+  it('rejects bad slug', () => {
+    expect(() => Reviewer.parse({ ...valid, slug: 'Bad Slug!' })).toThrow();
   });
 });
