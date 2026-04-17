@@ -34,7 +34,7 @@ const crumbs = [
   { label: 'Home', href: '/' },
   { label: 'Techniques', href: '/technique' },
   { label: `${data.category}`, href: `/technique?category=${data.category}` },
-  ...(position ? [{ label: position.data.name, href: `/position/${position.slug}` }] : []),
+  ...(position ? [{ label: position.data.name, href: `/position/${position.data.slug}` }] : []),
   { label: data.name },
 ];
 
