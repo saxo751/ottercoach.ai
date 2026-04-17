@@ -174,3 +174,90 @@ describe('Position', () => {
     expect(() => Position.parse({ ...valid, primaryAttackIds: ['a'] })).toThrow();
   });
 });
+
+import { Technique, Flow } from '../config';
+
+describe('Technique', () => {
+  const valid = {
+    id: 'triangle-choke',
+    slug: 'triangle-choke',
+    name: 'Triangle Choke',
+    category: 'submission' as const,
+    submissionType: 'choke' as const,
+    parentPositionId: 'closed-guard',
+    targetBeltId: 'blue' as const,
+    difficulty: 2 as const,
+    legalByRuleset: {
+      ibjjfGi: { allowedAt: 'white' as const },
+      ibjjfNoGi: { allowedAt: 'white' as const },
+      adcc: { allowed: true },
+      submissionOnly: { allowed: true },
+    },
+    shortDescription: 'A chokehold using the legs from closed guard.',
+    longDescription: wordsOf(150),
+    steps: [
+      { order: 1, title: 'Control posture', detail: 'Pull head down.' },
+      { order: 2, title: 'Isolate arm', detail: 'Shoot the other arm across.' },
+      { order: 3, title: 'Lock triangle', detail: 'Trap neck and shoulder.' },
+      { order: 4, title: 'Finish', detail: 'Angle and squeeze.' },
+    ],
+    commonMistakes: [
+      { title: 'Arms inside', detail: 'Choke is shallow.' },
+      { title: 'No angle', detail: 'Cannot finish.' },
+      { title: 'Flat hips', detail: 'Leverage is lost.' },
+    ],
+    counterTechniqueIds: ['triangle-defense'],
+    signaturePractitionerIds: ['ryan-hall', 'marcelo-garcia', 'roger-gracie'],
+    heroImage: {
+      src: '/img/triangle.avif',
+      width: 1200,
+      height: 800,
+      alt: 'Triangle choke applied from closed guard',
+      format: 'avif' as const,
+    },
+    citationSources: ['marcelo-garcia-book'],
+    reviewedById: 'founder',
+    dateModified: '2026-04-13',
+    faq: [
+      { question: 'Is the triangle legal at white belt?', answer: 'Yes in IBJJF gi and no-gi.' },
+      { question: 'What is the best setup?', answer: 'From closed guard, breaking posture first.' },
+      { question: 'Why is my triangle not finishing?', answer: 'Often the angle is wrong.' },
+    ],
+  };
+  it('accepts a complete Technique', () => {
+    expect(() => Technique.parse(valid)).not.toThrow();
+  });
+  it('rejects fewer than 4 steps', () => {
+    expect(() => Technique.parse({ ...valid, steps: valid.steps.slice(0, 3) })).toThrow();
+  });
+  it('rejects long description <150 words', () => {
+    expect(() => Technique.parse({ ...valid, longDescription: 'too short' })).toThrow();
+  });
+});
+
+describe('Flow', () => {
+  const base = {
+    id: 'scissor-to-mount',
+    slug: 'scissor-to-mount',
+    fromTechniqueId: 'scissor-sweep',
+    name: 'Scissor Sweep to Mount',
+    transitionNarrative: wordsOf(200),
+    commonMistakes: [
+      { title: 'Losing grip', detail: 'Opponent recovers guard.' },
+      { title: 'Bad timing', detail: 'Fails to establish mount.' },
+    ],
+    triggerConditions: wordsOf(80),
+    citationSources: ['c1'],
+    reviewedById: 'founder',
+    dateModified: '2026-04-13',
+  };
+  it('accepts with toTechniqueId', () => {
+    expect(() => Flow.parse({ ...base, toTechniqueId: 'armbar' })).not.toThrow();
+  });
+  it('accepts with toPositionId', () => {
+    expect(() => Flow.parse({ ...base, toPositionId: 'mount' })).not.toThrow();
+  });
+  it('rejects if neither destination is present', () => {
+    expect(() => Flow.parse(base)).toThrow();
+  });
+});

@@ -199,6 +199,100 @@ export const Position = z.object({
   ready: z.boolean().default(false),
 });
 
+// -------- Technique --------
+const LegalByRuleset = z.object({
+  ibjjfGi: z.object({ allowedAt: z.union([BeltId, z.literal('never')]) }),
+  ibjjfNoGi: z.object({ allowedAt: z.union([BeltId, z.literal('never')]) }),
+  adcc: z.object({ allowed: z.boolean() }),
+  submissionOnly: z.object({ allowed: z.boolean() }),
+});
+
+export const Technique = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  aliases: z.array(z.string()).default([]),
+  category: TechniqueCategory,
+  submissionType: SubmissionType.optional(),
+  jointTargeted: JointTargeted.optional(),
+  parentPositionId: z.string().min(1),
+  targetBeltId: BeltId,
+  difficulty: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4), z.literal(5)]),
+  legalByRuleset: LegalByRuleset,
+  shortDescription: z
+    .string()
+    .refine((s) => s.split(/\s+/).length <= 40, 'Short description ≤40 words'),
+  longDescription: z.string().refine((s) => s.split(/\s+/).length >= 150, '≥150 words'),
+  history: z.string().optional(),
+  steps: z.array(Step).min(4),
+  commonMistakes: z.array(Mistake).min(3),
+  counterTechniqueIds: z.array(z.string()).min(1),
+  followUpTechniqueIds: z.array(z.string()).default([]),
+  relatedTechniqueIds: z.array(z.string()).default([]),
+  signaturePractitionerIds: z.array(z.string()).min(3),
+  glossaryTermIds: z.array(z.string()).default([]),
+  heroImage: ImageAsset,
+  videoEmbed: VideoEmbed.optional(),
+  citationSources: z.array(z.string()).min(1),
+  reviewedById: z.string().min(1),
+  datePublished: ISODate.optional(),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+  faq: z
+    .array(
+      z.object({
+        question: z.string().min(1),
+        answer: z.string().min(1),
+      }),
+    )
+    .min(3)
+    .max(5),
+});
+
+// -------- TechniqueVariation --------
+export const TechniqueVariation = z.object({
+  id: z.string().min(1),
+  techniqueId: z.string().min(1),
+  fromPositionId: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  variationName: z.string().min(1),
+  shortDescription: z.string().refine((s) => s.split(/\s+/).length <= 40, '≤40 words'),
+  steps: z.array(Step).min(4),
+  commonMistakes: z.array(Mistake).min(3),
+  counterTechniqueIds: z.array(z.string()).min(1),
+  setupDetail: z.string().refine((s) => s.split(/\s+/).length >= 80, '≥80 words'),
+  videoEmbed: VideoEmbed.optional(),
+  citationSources: z.array(z.string()).min(1),
+  reviewedById: z.string().min(1),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- Flow --------
+export const Flow = z
+  .object({
+    id: z.string().min(1),
+    slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+    fromTechniqueId: z.string().min(1),
+    toTechniqueId: z.string().optional(),
+    toPositionId: z.string().optional(),
+    name: z.string().min(1),
+    transitionNarrative: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+    commonMistakes: z.array(Mistake).min(2),
+    triggerConditions: z.string().refine((s) => s.split(/\s+/).length >= 80, '≥80 words'),
+    videoEmbed: VideoEmbed.optional(),
+    citationSources: z.array(z.string()).min(1),
+    reviewedById: z.string().min(1),
+    dateModified: ISODate,
+    noindex: z.boolean().default(true),
+    ready: z.boolean().default(false),
+  })
+  .refine((d) => !!d.toTechniqueId || !!d.toPositionId, {
+    message: 'Flow requires toTechniqueId or toPositionId',
+  });
+
 // -------- Astro collections --------
 const reviewersCollection = defineCollection({
   type: 'data',
@@ -212,10 +306,16 @@ const citationsCollection = defineCollection({
 
 const beltsCollection = defineCollection({ type: 'data', schema: Belt });
 const positionsCollection = defineCollection({ type: 'data', schema: Position });
+const techniquesCollection = defineCollection({ type: 'content', schema: Technique });
+const variationsCollection = defineCollection({ type: 'content', schema: TechniqueVariation });
+const flowsCollection = defineCollection({ type: 'content', schema: Flow });
 
 export const collections = {
   reviewers: reviewersCollection,
   citations: citationsCollection,
   belts: beltsCollection,
   positions: positionsCollection,
+  techniques: techniquesCollection,
+  variations: variationsCollection,
+  flows: flowsCollection,
 };
