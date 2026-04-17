@@ -261,3 +261,38 @@ describe('Flow', () => {
     expect(() => Flow.parse(base)).toThrow();
   });
 });
+
+import { GlossaryTerm } from '../config';
+
+describe('GlossaryTerm', () => {
+  it('accepts a complete term', () => {
+    expect(() =>
+      GlossaryTerm.parse({
+        id: 'berimbolo',
+        slug: 'berimbolo',
+        term: 'Berimbolo',
+        language: 'pt',
+        translations: { en: 'back-take inversion' },
+        definition: wordsOf(80),
+        relatedTermIds: ['de-la-riva', 'back-take'],
+        citationSources: ['c1'],
+        dateModified: '2026-04-13',
+      }),
+    ).not.toThrow();
+  });
+  it('rejects <80 word definition', () => {
+    expect(() =>
+      GlossaryTerm.parse({
+        id: 'berimbolo',
+        slug: 'berimbolo',
+        term: 'Berimbolo',
+        language: 'pt',
+        translations: {},
+        definition: 'Short.',
+        relatedTermIds: ['a', 'b'],
+        citationSources: ['c1'],
+        dateModified: '2026-04-13',
+      }),
+    ).toThrow();
+  });
+});

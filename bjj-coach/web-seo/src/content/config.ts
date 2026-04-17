@@ -293,6 +293,131 @@ export const Flow = z
     message: 'Flow requires toTechniqueId or toPositionId',
   });
 
+// -------- CurriculumModule --------
+export const CurriculumModule = z.object({
+  id: z.string().min(1),
+  beltId: BeltId,
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  order: z.number().int().positive(),
+  description: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+  techniqueIds: z.array(z.string()).min(5),
+  drillIds: z.array(z.string()).default([]),
+  estimatedWeeksToComplete: z.number().int().positive(),
+  federation: z.enum(['ibjjf', 'gracie', 'generic']).optional(),
+  citationSources: z.array(z.string()).min(1),
+  reviewedById: z.string().min(1),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- GlossaryTerm --------
+export const GlossaryTerm = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  term: z.string().min(1),
+  aliases: z.array(z.string()).default([]),
+  language: z.enum(['en', 'pt', 'jp']),
+  translations: z.object({
+    en: z.string().optional(),
+    pt: z.string().optional(),
+    jp: z.string().optional(),
+  }),
+  definition: z.string().refine((s) => s.split(/\s+/).length >= 80, '≥80 words'),
+  etymology: z.string().optional(),
+  firstUseContext: z.string().optional(),
+  relatedTermIds: z.array(z.string()).min(2),
+  relatedTechniqueIds: z.array(z.string()).default([]),
+  relatedPositionIds: z.array(z.string()).default([]),
+  citationSources: z.array(z.string()).min(1),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- Drill --------
+export const Drill = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  level: DrillLevel,
+  positionIds: z.array(z.string()).min(1),
+  techniqueIds: z.array(z.string()).default([]),
+  durationMinutes: z.number().positive(),
+  reps: z.number().int().positive().optional(),
+  description: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+  instructions: z.array(Step).min(3),
+  coachingPoints: z.array(z.string()).min(3),
+  progressions: z.array(z.string()).default([]),
+  videoEmbed: VideoEmbed.optional(),
+  citationSources: z.array(z.string()).min(1),
+  reviewedById: z.string().min(1),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- Athlete --------
+export const Athlete = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  aliases: z.array(z.string()).default([]),
+  dateOfBirth: ISODate.optional(),
+  nationality: z.string().length(2),
+  genderCategory: GenderCategory,
+  currentBeltId: BeltId,
+  academyName: z.string().min(1),
+  lineage: z.array(LineageNode).min(1),
+  weightClass: z.string().optional(),
+  status: AthleteStatus,
+  competitionCategory: z.array(CompetitionCategory).min(1),
+  careerSummary: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+  notableAccomplishments: z.array(Accomplishment).min(3),
+  signatureTechniqueIds: z.array(z.string()).min(1),
+  notableMatchIds: z.array(z.string()).default([]),
+  photo: ImageAsset.optional(),
+  citationSources: z.array(z.string()).min(2),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- EventSeries --------
+export const EventSeries = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  organization: z.string().min(1),
+  description: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+  firstHeldYear: z.number().int().min(1900).max(2100),
+  officialUrl: z.string().url().optional(),
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
+// -------- Event --------
+export const Event = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  seriesId: z.string().min(1),
+  year: z.number().int().min(1900).max(2100),
+  startDate: ISODate,
+  endDate: ISODate,
+  locationCity: z.string().min(1),
+  locationCountry: z.string().length(2),
+  ruleset: EventRuleset,
+  divisions: z.array(Division).min(1),
+  narrative: z.string().refine((s) => s.split(/\s+/).length >= 200, '≥200 words'),
+  topStorylines: z.array(z.string()).min(3).max(5),
+  citationSources: z.array(z.string()).min(2),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
 // -------- Astro collections --------
 const reviewersCollection = defineCollection({
   type: 'data',
@@ -309,6 +434,12 @@ const positionsCollection = defineCollection({ type: 'data', schema: Position })
 const techniquesCollection = defineCollection({ type: 'content', schema: Technique });
 const variationsCollection = defineCollection({ type: 'content', schema: TechniqueVariation });
 const flowsCollection = defineCollection({ type: 'content', schema: Flow });
+const curriculumCollection = defineCollection({ type: 'data', schema: CurriculumModule });
+const glossaryCollection = defineCollection({ type: 'data', schema: GlossaryTerm });
+const drillsCollection = defineCollection({ type: 'content', schema: Drill });
+const athletesCollection = defineCollection({ type: 'content', schema: Athlete });
+const eventSeriesCollection = defineCollection({ type: 'data', schema: EventSeries });
+const eventsCollection = defineCollection({ type: 'data', schema: Event });
 
 export const collections = {
   reviewers: reviewersCollection,
@@ -318,4 +449,10 @@ export const collections = {
   techniques: techniquesCollection,
   variations: variationsCollection,
   flows: flowsCollection,
+  curriculum: curriculumCollection,
+  glossary: glossaryCollection,
+  drills: drillsCollection,
+  athletes: athletesCollection,
+  eventSeries: eventSeriesCollection,
+  events: eventsCollection,
 };
