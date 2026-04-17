@@ -1,16 +1,11 @@
 ---
-const title = 'The Otter Coach — BJJ Knowledge Base';
+import BaseLayout from '@/layouts/BaseLayout.astro';
 ---
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{title}</title>
-    <meta name="description" content="The open web's most structured BJJ knowledge base." />
-  </head>
-  <body>
-    <h1>{title}</h1>
-    <p>Coming soon.</p>
-  </body>
-</html>
+<BaseLayout
+  title="The Otter Coach — BJJ Knowledge Base"
+  description="The open web's most structured BJJ knowledge base."
+  noindex={true}
+>
+  <h1 class="font-heading text-3xl mb-4">The Otter Coach</h1>
+  <p>Coming soon.</p>
+</BaseLayout>
