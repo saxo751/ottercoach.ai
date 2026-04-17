@@ -149,6 +149,56 @@ export const Reviewer = z.object({
   scopeOfExpertise: z.array(z.string()).min(1),
 });
 
+// -------- Belt --------
+export const Belt = z.object({
+  id: BeltId,
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  order: z.number().int().min(1).max(5),
+  description: z.string().refine((s) => s.split(/\s+/).length >= 300, 'Description ≥300 words'),
+  averageTimeAtBeltMonths: z.object({
+    min: z.number().nonnegative(),
+    typical: z.number().nonnegative(),
+    max: z.number().nonnegative(),
+  }),
+  promotionCriteriaByFederation: z.object({
+    ibjjf: z.string().min(1),
+    gracieHumaita: z.string().min(1),
+    gracieBarra: z.string().min(1),
+  }),
+  coreTechniqueIds: z.array(z.string()).min(8),
+  corePositionIds: z.array(z.string()).min(3),
+  stripeCount: z.union([z.literal(0), z.literal(4)]),
+  citationSources: z.array(z.string()).min(2),
+  reviewedById: z.string().min(1),
+});
+
+// -------- Position --------
+export const Position = z.object({
+  id: z.string().min(1),
+  slug: z.string().regex(/^[a-z0-9]+(-[a-z0-9]+)*$/),
+  name: z.string().min(1),
+  aliases: z.array(z.string()).default([]),
+  category: PositionCategory,
+  parentPositionId: z.string().optional(),
+  description: z.string().refine((s) => s.split(/\s+/).length >= 300, 'Description ≥300 words'),
+  whenYoureInIt: z.string().refine((s) => s.split(/\s+/).length >= 80, '≥80 words'),
+  primaryAttackIds: z.array(z.string()).min(5),
+  primaryEscapeIds: z.array(z.string()).min(3),
+  subPositionIds: z.array(z.string()).default([]),
+  counterPositionIds: z.array(z.string()).min(1),
+  topPractitionerIds: z.array(z.string()).min(3),
+  relatedDrillIds: z.array(z.string()).default([]),
+  targetBeltId: BeltId,
+  heroImage: ImageAsset,
+  videoEmbed: VideoEmbed.optional(),
+  citationSources: z.array(z.string()).min(1),
+  reviewedById: z.string().min(1),
+  dateModified: ISODate,
+  noindex: z.boolean().default(true),
+  ready: z.boolean().default(false),
+});
+
 // -------- Astro collections --------
 const reviewersCollection = defineCollection({
   type: 'data',
@@ -160,7 +210,12 @@ const citationsCollection = defineCollection({
   schema: Citation,
 });
 
+const beltsCollection = defineCollection({ type: 'data', schema: Belt });
+const positionsCollection = defineCollection({ type: 'data', schema: Position });
+
 export const collections = {
   reviewers: reviewersCollection,
   citations: citationsCollection,
+  belts: beltsCollection,
+  positions: positionsCollection,
 };
