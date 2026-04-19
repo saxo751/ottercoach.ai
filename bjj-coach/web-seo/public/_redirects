@@ -1,0 +1,24 @@
+# Cloudflare Pages redirects — apex + www handling for theottercoach.com.
+#
+# 1. Legacy app paths that used to live at the apex now live at app.theottercoach.com.
+#    Permanent (301) redirects preserve any old bookmarks, social shares, search-engine
+#    references, and external links for the Angular app.
+#
+# 2. www.* canonicalises to apex via a wildcard 301 so search engines treat the apex
+#    as the single source of truth (matches the canonical tag in BaseLayout.astro).
+
+# Legacy Angular app routes -> app subdomain
+/chat               https://app.theottercoach.com/chat              301
+/chat/*             https://app.theottercoach.com/chat/:splat       301
+/dashboard          https://app.theottercoach.com/dashboard         301
+/dashboard/*        https://app.theottercoach.com/dashboard/:splat  301
+/profile            https://app.theottercoach.com/profile           301
+/profile/*          https://app.theottercoach.com/profile/:splat    301
+/signup             https://app.theottercoach.com/signup            301
+/login              https://app.theottercoach.com/login             301
+/check-email        https://app.theottercoach.com/check-email       301
+/ideas              https://app.theottercoach.com/ideas             301
+/focus-timeline     https://app.theottercoach.com/focus-timeline    301
+
+# www -> apex (single canonical hostname)
+https://www.theottercoach.com/*  https://theottercoach.com/:splat   301!
