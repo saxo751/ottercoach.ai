@@ -19,16 +19,17 @@ import { dirname, join } from 'node:path';
 import matter from 'gray-matter';
 import sharp from 'sharp';
 import { buildTechniquePrompt } from './lib/prompt-template.mjs';
+import { pickReference } from './lib/reference-map.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const TECHNIQUES_DIR = join(ROOT, 'src/content/techniques');
 const OUT_DIR = join(ROOT, 'public/img/techniques');
 
-// Public URL for style-reference image. Used as fal.ai nano-banana edit input
-// so generated characters match the existing otter mascot instead of inventing
-// a new one each call.
-const REFERENCE_IMAGE_URL = 'https://ottercoach-ai.pages.dev/otters/reference-stance.png';
+// Style-reference image passed to fal.ai so generated characters match the
+// existing otter mascot. The default is selected per technique via pickReference()
+// so pose-specific references (e.g. the armbar reference) anchor better results.
+// Override globally by setting REFERENCE_IMAGE env var to a URL or local path.
 
 const FAL_KEY = process.env.FAL_KEY;
 if (!FAL_KEY) {
@@ -41,9 +42,21 @@ if (!FAL_KEY) {
 const args = new Set(process.argv.slice(2));
 const force = args.has('--force');
 const slugArg = [...args].find((a) => a.startsWith('--slug='))?.split('=')[1];
+const candidatesArg = [...args].find((a) => a.startsWith('--candidates='))?.split('=')[1];
+const candidates = Math.max(1, Math.min(5, Number.parseInt(candidatesArg ?? '1', 10) || 1));
 
 function exists(path) {
   return access(path).then(() => true).catch(() => false);
+}
+
+async function resolveReferenceImage(urlOrPath) {
+  if (urlOrPath.startsWith('http://') || urlOrPath.startsWith('https://')) {
+    return urlOrPath;
+  }
+  const abs = urlOrPath.startsWith('/') ? urlOrPath : join(ROOT, urlOrPath);
+  const buf = await readFile(abs);
+  const ext = abs.toLowerCase().endsWith('.jpg') || abs.toLowerCase().endsWith('.jpeg') ? 'jpeg' : 'png';
+  return `data:image/${ext};base64,${buf.toString('base64')}`;
 }
 
 async function loadTechniques() {
@@ -104,35 +117,43 @@ async function main() {
     return;
   }
   console.log(`Found ${records.length} technique(s). Output dir: ${OUT_DIR}`);
-  console.log(`Reference image: ${REFERENCE_IMAGE_URL}`);
+  console.log(`Candidates per technique: ${candidates}`);
   console.log();
+  const globalReferenceOverride = process.env.REFERENCE_IMAGE;
 
   let generated = 0;
   let skipped = 0;
   let failed = 0;
 
   for (const { slug, data } of records) {
-    const outPath = join(OUT_DIR, `${slug}.webp`);
-    if (!force && (await exists(outPath))) {
+    const primaryPath = join(OUT_DIR, `${slug}.webp`);
+    if (!force && candidates === 1 && (await exists(primaryPath))) {
       console.log(`SKIP  ${slug}  (already exists — use --force to overwrite)`);
       skipped++;
       continue;
     }
 
+    const referencePath = globalReferenceOverride ?? pickReference({ slug, category: data.category });
+    const referenceInput = await resolveReferenceImage(referencePath);
     const prompt = buildTechniquePrompt({ ...data, slug });
-    console.log(`GEN   ${slug}`);
-    console.log(`      prompt: ${prompt.replace(/\n/g, ' ').slice(0, 220)}...`);
-    try {
-      const imageUrl = await callFalNanoBanana(prompt, REFERENCE_IMAGE_URL);
-      await downloadAndOptimize(imageUrl, outPath);
-      console.log(`OK    ${slug}  →  ${outPath}`);
-      generated++;
-    } catch (err) {
-      console.error(`FAIL  ${slug}: ${err.message}`);
-      failed++;
+    console.log(`GEN   ${slug}  (reference: ${referencePath})`);
+    console.log(`      prompt: ${prompt.replace(/\n/g, ' ').slice(0, 200)}...`);
+
+    for (let i = 1; i <= candidates; i++) {
+      const outPath = candidates === 1
+        ? primaryPath
+        : join(OUT_DIR, `${slug}-c${i}.webp`);
+      try {
+        const imageUrl = await callFalNanoBanana(prompt, referenceInput);
+        await downloadAndOptimize(imageUrl, outPath);
+        console.log(`OK    ${slug}${candidates > 1 ? ` [${i}/${candidates}]` : ''}  →  ${outPath}`);
+        generated++;
+      } catch (err) {
+        console.error(`FAIL  ${slug}${candidates > 1 ? ` [${i}/${candidates}]` : ''}: ${err.message}`);
+        failed++;
+      }
+      await new Promise((r) => setTimeout(r, 500));
     }
-    // small breather between API calls
-    await new Promise((r) => setTimeout(r, 500));
   }
 
   console.log();

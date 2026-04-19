@@ -92,6 +92,18 @@ if (data.videoEmbed) {
     <p class="font-semibold">{data.shortDescription}</p>
   </section>
 
+  <figure class="my-6">
+    <img
+      src={data.heroImage.src}
+      alt={data.heroImage.alt}
+      width={data.heroImage.width}
+      height={data.heroImage.height}
+      loading="eager"
+      fetchpriority="high"
+      class="w-full h-auto rounded"
+    />
+  </figure>
+
   {data.videoEmbed && (
     <VideoFacade
       provider={data.videoEmbed.provider}
