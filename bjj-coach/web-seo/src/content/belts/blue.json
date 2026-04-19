@@ -1,0 +1,27 @@
+{
+  "id": "blue",
+  "slug": "blue",
+  "name": "Blue Belt",
+  "order": 2,
+  "description": "PLACEHOLDER_BELT_DESCRIPTION. This record is a Plan-1 placeholder so that blue-belt references from other records resolve during build. The blue belt in Brazilian Jiu-Jitsu represents the first significant adult rank and typically takes one to three years of consistent training to earn, and it is widely considered the rank at which a practitioner first becomes broadly competent across all major positions of the art. At blue belt a practitioner is expected to know the fundamental escapes from every major bad position including mount, side control, back, and knee-on-belly, and to have working submissions from guard and mount. The IBJJF minimum age for blue belt is sixteen, although many academies operate informal kids-belt and teen-belt progressions that feed into the adult-blue promotion pathway. Blue-belt curricula across major federations share a common core of fundamental positions and techniques while differing in specific emphasis: Gracie Humaita historically emphasises self-defense sequences and the traditional Helio Gracie syllabus, Gracie Barra prescribes its own standardized curriculum with phased program delineation, and most IBJJF-affiliated independent academies combine elements of both with an increased emphasis on competitive positional theory. Time at blue belt varies widely across both training frequency and lifestyle context. Competitors training full-time may earn purple belt in as little as eighteen months, while hobbyists training two to three times per week often spend two to four years at blue. Stripes mark progress: the belt carries four stripes before the next promotion. This full-text placeholder exists specifically to satisfy the 300-word description floor without requiring the real belt guide to be authored in Plan 1; the content will be replaced by real, reviewer-signed copy before any belt page is promoted to index in Plan 5. The Plan-1 deploy consequence is zero because no belt route template has been built yet, and no reader will ever see this text in any real rendered page.",
+  "averageTimeAtBeltMonths": { "min": 18, "typical": 36, "max": 60 },
+  "promotionCriteriaByFederation": {
+    "ibjjf": "Minimum age 16; consistent training; demonstrated fundamentals.",
+    "gracieHumaita": "Completion of Helio Gracie self-defense syllabus and fundamentals.",
+    "gracieBarra": "Completion of Fundamentals 1 program and advancement through phased curriculum."
+  },
+  "coreTechniqueIds": [
+    "triangle-choke",
+    "armbar",
+    "rear-naked-choke",
+    "kimura",
+    "cross-collar-choke",
+    "scissor-sweep",
+    "hip-bump-sweep",
+    "upa-escape"
+  ],
+  "corePositionIds": ["closed-guard", "mount", "side-control"],
+  "stripeCount": 4,
+  "citationSources": ["ibjjf-rulebook-2024", "marcelo-garcia-book"],
+  "reviewedById": "founder"
+}

@@ -1,0 +1,30 @@
+---
+interface Props {
+  provider: 'youtube' | 'vimeo';
+  videoId: string;
+  thumbnailUrl: string;
+  description: string;
+  durationSeconds: number;
+}
+const { provider, videoId, thumbnailUrl, description, durationSeconds } = Astro.props;
+const playHref = provider === 'youtube'
+  ? `https://www.youtube.com/watch?v=${videoId}`
+  : `https://vimeo.com/${videoId}`;
+---
+<figure class="my-6">
+  <a href={playHref} class="block relative" rel="noopener" target="_blank">
+    <img
+      src={thumbnailUrl}
+      alt={description}
+      width="1280"
+      height="720"
+      loading="lazy"
+      class="w-full h-auto"
+    />
+    <span
+      class="absolute inset-0 flex items-center justify-center text-white text-5xl"
+      aria-hidden="true"
+    >▶</span>
+  </a>
+  <figcaption class="text-sm opacity-70 mt-1">{description} ({Math.floor(durationSeconds / 60)}:{String(durationSeconds % 60).padStart(2, '0')})</figcaption>
+</figure>

@@ -1,0 +1,14 @@
+---
+interface Props {
+  href: string;
+  title: string;
+  blurb?: string;
+  label?: string;
+}
+const { href, title, blurb, label } = Astro.props;
+---
+<a href={href} class="block border rounded p-3 hover:bg-white/40">
+  {label && <span class="block text-xs uppercase opacity-60">{label}</span>}
+  <span class="block font-heading">{title}</span>
+  {blurb && <span class="block text-sm opacity-80 mt-1">{blurb}</span>}
+</a>

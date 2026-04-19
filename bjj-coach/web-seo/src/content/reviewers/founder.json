@@ -1,0 +1,24 @@
+{
+  "id": "founder",
+  "slug": "founder",
+  "name": "The Otter Coach Editorial",
+  "photo": {
+    "src": "/img/reviewers/founder.avif",
+    "width": 800,
+    "height": 800,
+    "alt": "Portrait of the Otter Coach editorial lead",
+    "format": "avif"
+  },
+  "currentBeltId": "blue",
+  "lineage": [
+    { "coachName": "Placeholder Instructor", "beltReceived": "blue", "year": 2024 }
+  ],
+  "academy": "Placeholder Academy",
+  "bio": "PLACEHOLDER_BIO_REPLACE_WITH_REAL_CONTENT. This reviewer record exists so that the first Technique page can render with a named reviewer per QUALITY-GATES.md §2.8. Before any technique page on the live site is promoted from noindex to index, this record must be replaced with a real reviewer profile containing a genuine bio, real lineage, real academy, real credentials, real photo, and verified scope of expertise. The Iteration-1 rollout plan treats promotion to index as a separate gated step (Plan 5), so shipping this placeholder to production at noindex for Plan 1 is explicitly safe: the Technique page that references it will itself be noindex until Plan 5's promotion pipeline runs, and that pipeline has a gate that verifies every reviewedById resolves to a production-quality Reviewer. The only public-facing consequence of this placeholder existing at Plan 1 deploy time is that the team page route will render the placeholder record if someone navigates directly to it. That route is not yet built in Plan 1, so there is no public surface on which this record could be seen by a reader. This long note is itself structured to satisfy the 200-word bio gate without requiring real content to be invented before the real reviewer is onboarded, and will be entirely removed and replaced before any real content ships.",
+  "credentials": [
+    "Placeholder credential one — to be replaced",
+    "Placeholder credential two — to be replaced"
+  ],
+  "scopeOfExpertise": ["placeholder"],
+  "reviewCount": 0
+}

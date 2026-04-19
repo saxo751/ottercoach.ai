@@ -1,0 +1,44 @@
+name: web-seo build
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'bjj-coach/web-seo/**'
+      - '.github/workflows/web-seo-build.yml'
+  pull_request:
+    paths:
+      - 'bjj-coach/web-seo/**'
+      - '.github/workflows/web-seo-build.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bjj-coach/web-seo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: bjj-coach/web-seo/package-lock.json
+      - name: Install
+        run: npm ci
+      - name: Type check
+        run: npm run check
+      - name: Unit tests
+        run: npm test
+      - name: Build
+        run: npm run build
+      - name: Install Playwright
+        run: npx playwright install --with-deps chromium
+      - name: E2E
+        run: npm run test:e2e
+      - name: Lighthouse
+        run: npm run lighthouse
