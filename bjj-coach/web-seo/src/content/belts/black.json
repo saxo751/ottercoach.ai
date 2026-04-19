@@ -1,0 +1,27 @@
+{
+  "id": "black",
+  "slug": "black",
+  "name": "Black Belt",
+  "order": 5,
+  "description": "The black belt is the highest commonly-awarded rank in Brazilian Jiu-Jitsu and represents what is widely considered the slowest-earned black belt in any major martial art. Where most martial arts award a black belt within three to five years of consistent training, the BJJ black belt typically takes ten to fifteen years and signifies a level of demonstrated grappling skill against fully-resisting opponents that no other martial art's black-belt grade quite matches. The black belt itself is followed by six degrees: a coral belt, a red-and-black belt, and a red belt at the most senior levels. The IBJJF requires a minimum age of nineteen for black belt and at least one year of training at brown belt, with a typical practitioner having spent eight to fifteen years total in the art before promotion. There is no formal curriculum at black belt: by definition, a person promoted to this rank already has a complete game and is now expected to deepen, teach, and contribute to the art rather than learn it from scratch. Black belts are expected to coach actively, to compete at high levels if they choose to compete, and to embody the stylistic lineage of the academy or coach who promoted them. Time at black belt is no longer measured by promotions for most practitioners — the next promotion, to coral belt at first degree, requires three years at black belt. The black belt is unique among BJJ ranks in that it does not carry stripes in the same sense; instead, it carries degrees, awarded at three-year intervals for the first three degrees and then at five-to-ten-year intervals thereafter, marking the lifetime contribution of the practitioner to the art. The cultural weight of the black belt extends far beyond the rank itself: a black belt is held responsible for the conduct of their lower-belt students, for the technical lineage they represent, and for the standards of behavior expected on the mat at every academy where they train. Many black belts go on to open their own academies, lead seminars internationally, or serve as match-makers and coaches for competitive teams.",
+  "averageTimeAtBeltMonths": { "min": 36, "typical": 120, "max": 360 },
+  "promotionCriteriaByFederation": {
+    "ibjjf": "Minimum age 19; minimum 1 year at brown belt; demonstrated mastery and active contribution to the art.",
+    "gracieHumaita": "Lifetime mastery of the complete Gracie system and active leadership in the lineage.",
+    "gracieBarra": "Completion of all program requirements and demonstrated contribution to academy growth and student development."
+  },
+  "coreTechniqueIds": [
+    "leg-drag",
+    "berimbolo",
+    "darce-choke",
+    "heel-hook",
+    "north-south-choke",
+    "rear-naked-choke",
+    "kimura",
+    "triangle-choke"
+  ],
+  "corePositionIds": ["back-control", "x-guard", "ashi-garami"],
+  "stripeCount": 0,
+  "citationSources": ["ibjjf-rulebook-2024", "marcelo-garcia-book"],
+  "reviewedById": "founder"
+}

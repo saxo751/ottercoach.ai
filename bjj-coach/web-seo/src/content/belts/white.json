@@ -1,0 +1,27 @@
+{
+  "id": "white",
+  "slug": "white",
+  "name": "White Belt",
+  "order": 1,
+  "description": "The white belt is the entry rank in Brazilian Jiu-Jitsu and the belt that every adult practitioner begins their journey at, regardless of prior experience in other martial arts. There is no formal entry requirement: anyone who registers at a BJJ academy and pays for membership is, by definition, a white belt. The rank exists to mark the period during which a student builds the basic vocabulary of positions, learns to survive on the bottom of bad situations, and begins to understand why jiu-jitsu's emphasis on position before submission is the central organising principle of the art. Time at white belt varies more than any other rank because it spans every imaginable starting point, from a complete beginner who has never wrestled to a former Olympic judoka. Most adult hobbyists training two or three times per week spend between one and three years at white belt before being promoted to blue. Stripe progression marks intermediate progress: white belts can earn up to four stripes before promotion, with each stripe typically representing several months of consistent attendance and demonstrated improvement. The IBJJF sets no minimum age for white belt; children and teens train under separate kids-belt and teen-belt systems that feed into the adult-blue promotion at sixteen. The white-belt curriculum across major federations focuses overwhelmingly on survival, escape, and a small set of fundamental submissions and sweeps. Gracie Humaita's traditional Helio Gracie self-defense syllabus, Gracie Barra's Fundamentals 1 program, and most independent IBJJF-affiliated academies all share a common emphasis at white belt: learn to escape mount, side control, and back; learn the basic guard positions; learn one or two submissions reliably; and develop the conditioning and timing required to apply these techniques against a resisting opponent. White belt is also the rank at which the most physical and mental adaptation occurs: the practitioner learns how to breathe under pressure, how to move efficiently from the bottom, and how to recognise the difference between a position they are losing and a position that is already lost. These adaptations are the real foundation on which every later rank is built, and the depth with which they are developed at white belt often predicts how quickly and how reliably the practitioner will progress through subsequent belts.",
+  "averageTimeAtBeltMonths": { "min": 12, "typical": 24, "max": 36 },
+  "promotionCriteriaByFederation": {
+    "ibjjf": "No minimum age for white belt itself; promotion to blue requires minimum age 16, consistent training, and demonstrated fundamentals.",
+    "gracieHumaita": "Demonstrated competence in the Helio Gracie self-defense fundamentals before progression toward blue belt.",
+    "gracieBarra": "Completion of the Fundamentals 1 program covering core positions, escapes, and basic submissions."
+  },
+  "coreTechniqueIds": [
+    "upa-escape",
+    "elbow-knee-escape",
+    "shrimp",
+    "technical-stand-up",
+    "scissor-sweep",
+    "hip-bump-sweep",
+    "americana",
+    "kimura"
+  ],
+  "corePositionIds": ["closed-guard", "mount", "side-control"],
+  "stripeCount": 4,
+  "citationSources": ["ibjjf-rulebook-2024", "marcelo-garcia-book"],
+  "reviewedById": "founder"
+}

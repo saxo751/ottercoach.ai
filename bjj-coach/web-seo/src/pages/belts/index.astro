@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import { buildBreadcrumbList } from '@/lib/schema-ld';
+
+const belts = (await getCollection('belts')).sort((a, b) => a.data.order - b.data.order);
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Belts' },
+];
+
+const ldBlocks = [
+  buildBreadcrumbList(
+    crumbs.filter((c) => !!c.href).map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+];
+---
+<BaseLayout
+  title="BJJ Belts — Ranks, Promotion Criteria, and Curriculum"
+  description="Brazilian Jiu-Jitsu belts explained: white, blue, purple, brown, and black. Time at each belt, promotion criteria across IBJJF, Gracie Humaita, and Gracie Barra."
+  noindex={true}
+  canonicalPath="/belts"
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">BJJ Belts — The Five Adult Ranks</h1>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">
+      Brazilian Jiu-Jitsu's adult belt system runs through five colors — white, blue, purple, brown, and black — and the
+      full path typically takes ten to fifteen years of consistent training. Each rank carries its own expected curriculum,
+      typical time-in-grade, and federation-specific promotion criteria.
+    </p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-3">The five belts</h2>
+    <ul class="space-y-3 list-disc pl-5">
+      {belts.map((b) => (
+        <li>
+          <a href={`/belts/${b.data.slug}`} class="underline font-semibold">{b.data.name}</a>
+          <span class="opacity-70"> — typical time at belt: {b.data.averageTimeAtBeltMonths.typical} months.</span>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">How long does each belt take?</h2>
+    <p>
+      Time-at-belt varies dramatically with training frequency, prior grappling background, age, competition focus, and
+      the academy's promotion philosophy. The numbers below are typical for a hobbyist training two to four times per week
+      under an IBJJF-affiliated academy. Competitors training full-time can move significantly faster; casual practitioners
+      can take significantly longer.
+    </p>
+    <div class="overflow-x-auto my-4">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-left">
+            <th class="pr-4 py-2">Belt</th>
+            <th class="pr-4 py-2">Min</th>
+            <th class="pr-4 py-2">Typical</th>
+            <th class="pr-4 py-2">Max</th>
+          </tr>
+        </thead>
+        <tbody>
+          {belts.map((b) => (
+            <tr class="border-t">
+              <td class="pr-4 py-2 font-semibold">{b.data.name}</td>
+              <td class="pr-4 py-2">{b.data.averageTimeAtBeltMonths.min} mo</td>
+              <td class="pr-4 py-2">{b.data.averageTimeAtBeltMonths.typical} mo</td>
+              <td class="pr-4 py-2">{b.data.averageTimeAtBeltMonths.max} mo</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Why the BJJ belt path is so long</h2>
+    <p>
+      Compared to most martial arts, the BJJ black belt is famously slow to earn — a decade or more of consistent training
+      is the norm rather than the exception. The reason is structural: BJJ's belt ranks are tied to demonstrated live
+      performance against resisting opponents, not to choreographed kata or testing fees. A black belt is, in practice, a
+      person who can dominate most blue belts on the mat, handle most purple belts with effort, and compete with most brown
+      belts on equal footing. That standard cannot be shortcut by classroom hours alone.
+    </p>
+  </section>
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>

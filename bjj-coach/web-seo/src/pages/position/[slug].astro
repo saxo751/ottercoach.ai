@@ -1,0 +1,130 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import SourcesList from '@/components/SourcesList.astro';
+import ReviewerByline from '@/components/ReviewerByline.astro';
+import VideoFacade from '@/components/VideoFacade.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import { buildBreadcrumbList, buildVideoObject } from '@/lib/schema-ld';
+
+export async function getStaticPaths() {
+  const positions = await getCollection('positions');
+  return positions.map((p) => ({ params: { slug: p.data.slug }, props: { position: p } }));
+}
+
+const { position } = Astro.props;
+const { data } = position;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Positions', href: '/position' },
+  { label: data.name },
+];
+
+const ldBlocks: object[] = [
+  buildBreadcrumbList(
+    crumbs.filter((c) => !!c.href).map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+];
+
+if (data.videoEmbed) {
+  ldBlocks.push(
+    buildVideoObject({
+      name: data.name,
+      description: data.videoEmbed.description,
+      thumbnailUrl: data.videoEmbed.thumbnailUrl,
+      contentUrl:
+        data.videoEmbed.provider === 'youtube'
+          ? `https://www.youtube.com/watch?v=${data.videoEmbed.videoId}`
+          : `https://vimeo.com/${data.videoEmbed.videoId}`,
+      uploadDate: data.dateModified,
+      durationSeconds: data.videoEmbed.durationSeconds,
+    }),
+  );
+}
+---
+<BaseLayout
+  title={`${data.name} — BJJ Position Guide`}
+  description={`The ${data.name} position in Brazilian Jiu-Jitsu: when you are in it, primary attacks, primary escapes, top practitioners, and counter positions.`}
+  noindex={data.noindex}
+  canonicalPath={`/position/${data.slug}`}
+  dateModified={data.dateModified}
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">{data.name} — BJJ Position</h1>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">{data.whenYoureInIt}</p>
+  </section>
+
+  <figure class="my-6">
+    <img
+      src={data.heroImage.src}
+      alt={data.heroImage.alt}
+      width={data.heroImage.width}
+      height={data.heroImage.height}
+      loading="eager"
+      fetchpriority="high"
+      class="w-full h-auto rounded"
+    />
+  </figure>
+
+  {data.videoEmbed && (
+    <VideoFacade
+      provider={data.videoEmbed.provider}
+      videoId={data.videoEmbed.videoId}
+      thumbnailUrl={data.videoEmbed.thumbnailUrl}
+      description={data.videoEmbed.description}
+      durationSeconds={data.videoEmbed.durationSeconds}
+    />
+  )}
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Overview</h2>
+    <p>{data.description}</p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Primary attacks from {data.name}</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      {data.primaryAttackIds.map((id) => (
+        <li><a href={`/technique/${id}`} class="underline">{id.replace(/-/g, ' ')}</a></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Primary escapes / counters</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      {data.primaryEscapeIds.map((id) => (
+        <li><a href={`/technique/${id}`} class="underline">{id.replace(/-/g, ' ')}</a></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Top practitioners associated with this position</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      {data.topPractitionerIds.map((id) => (
+        <li>{id.replace(/-/g, ' ')}</li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Target belt level</h2>
+    <p>
+      This position is typically introduced at the <a href={`/belts/${data.targetBeltId}`} class="underline">{data.targetBeltId} belt</a>
+      level, although familiarity with it is expected at every higher rank.
+    </p>
+  </section>
+
+  <SourcesList citationIds={data.citationSources} />
+  <ReviewerByline reviewerId={data.reviewedById} dateModified={data.dateModified} />
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>

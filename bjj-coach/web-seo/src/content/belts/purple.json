@@ -1,0 +1,27 @@
+{
+  "id": "purple",
+  "slug": "purple",
+  "name": "Purple Belt",
+  "order": 3,
+  "description": "The purple belt is the third adult rank in Brazilian Jiu-Jitsu and is widely regarded as the rank at which a practitioner transitions from being a competent student of the art to being a competent practitioner of it. Where blue belt is about plugging the holes in a beginner's game, purple belt is about developing a personal style — selecting which guards, which passing systems, and which submission chains define how this individual practitioner expresses jiu-jitsu under pressure. Time at purple belt typically runs eighteen months to four years for hobbyists, and around eighteen months for full-time competitors, although there is wide variance based on competition cadence and academy promotion philosophy. The IBJJF requires a minimum age of sixteen for purple belt and requires that the practitioner have spent at least two years at blue belt, although in practice most purple belts have spent three to four years total in jiu-jitsu by the time of promotion. The purple-belt curriculum varies significantly across federations because the art itself is wider at this level: a purple belt under Gordon Ryan's curriculum will look different from a purple belt under Gracie Barra fundamentals, and both will look different from a purple belt produced by an old-school self-defense academy. The unifying expectation is that the purple belt has a complete game in at least one guard, one passing system, one back-control system, and at least three high-percentage submission chains they can hit on lower belts almost at will. Purple belts also begin to be expected to teach: most academies have purple belts running fundamentals classes or open mats, and many purple belts begin coaching responsibilities formally. Stripes mark intermediate progress: the purple belt carries up to four stripes before brown. Purple belt is widely considered the most enjoyable rank for the practitioner themselves — fundamentals are solid, options are wide, and the physical wear of training has not yet accumulated to the levels often seen at brown and black belt. For this reason many academies see their highest retention and engagement during the purple-belt years.",
+  "averageTimeAtBeltMonths": { "min": 18, "typical": 36, "max": 48 },
+  "promotionCriteriaByFederation": {
+    "ibjjf": "Minimum age 16; minimum 2 years at blue belt; demonstrated competence across all major positions and submission systems.",
+    "gracieHumaita": "Demonstrated mastery of the intermediate Gracie syllabus and consistent performance in advanced classes.",
+    "gracieBarra": "Completion of the Advanced curriculum and demonstrated personal style in at least one guard and one passing system."
+  },
+  "coreTechniqueIds": [
+    "triangle-choke",
+    "armbar",
+    "rear-naked-choke",
+    "kimura",
+    "berimbolo",
+    "x-pass",
+    "knee-cut-pass",
+    "back-take-from-turtle"
+  ],
+  "corePositionIds": ["de-la-riva", "half-guard", "back-control"],
+  "stripeCount": 4,
+  "citationSources": ["ibjjf-rulebook-2024", "marcelo-garcia-book"],
+  "reviewedById": "founder"
+}

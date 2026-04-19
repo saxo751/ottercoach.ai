@@ -1,11 +1,69 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
+import JsonLd from '@/components/JsonLd.astro';
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: 'The Otter Coach',
+  url: siteUrl,
+  description:
+    "A structured, citation-backed knowledge base for Brazilian Jiu-Jitsu. Techniques, positions, belts, drills, and more.",
+};
+
+const orgLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: 'The Otter Coach',
+  url: siteUrl,
+  logo: `${siteUrl}/img/logo.png`,
+  description: 'A structured BJJ knowledge base and AI training coach.',
+};
 ---
 <BaseLayout
-  title="The Otter Coach — BJJ Knowledge Base"
-  description="The open web's most structured BJJ knowledge base."
-  noindex={true}
+  title="The Otter Coach — A Structured BJJ Knowledge Base"
+  description="The open web's most structured Brazilian Jiu-Jitsu knowledge base. Techniques, positions, belts, drills, and more — every page citation-backed and reviewer-signed."
+  canonicalPath="/"
 >
   <h1 class="font-heading text-3xl mb-4">The Otter Coach</h1>
-  <p>Coming soon.</p>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">
+      A structured Brazilian Jiu-Jitsu knowledge base. Every technique, position, belt, and drill is organised the way a
+      coach actually thinks about them — connected, sourced, and signed off by a named reviewer.
+    </p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-3">Browse by topic</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      <li><a href="/technique" class="underline font-semibold">Techniques</a> — submissions, sweeps, escapes, passes, takedowns, and controls.</li>
+      <li><a href="/position" class="underline font-semibold">Positions</a> — guards, top positions, standing, and transitions.</li>
+      <li><a href="/belts" class="underline font-semibold">Belts</a> — white, blue, purple, brown, and black, with promotion criteria for IBJJF, Gracie Humaita, and Gracie Barra.</li>
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-3">Why this site exists</h2>
+    <p>
+      Most BJJ resources online are either short blog posts written for clicks or video instructionals locked behind
+      paywalls. There is very little in between: structured, accurate, free reference material that respects how the art
+      actually fits together. The Otter Coach is an attempt to build that missing reference layer — a place where every
+      technique links to its parent position, every position links to the techniques that come from it, and every claim
+      is tied to a named source or a named reviewer.
+    </p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-3">Coaching app</h2>
+    <p>
+      In addition to the reference content, The Otter Coach runs an AI training coach you can talk to via web, mobile, or
+      Telegram. The coach helps you focus your training, run pre-session briefings, and track what you're working on
+      across sessions. <a href="https://app.theottercoach.com/signup" class="underline font-semibold">Sign up at app.theottercoach.com →</a>
+    </p>
+  </section>
+
+  <JsonLd data={[websiteLd, orgLd]} />
 </BaseLayout>

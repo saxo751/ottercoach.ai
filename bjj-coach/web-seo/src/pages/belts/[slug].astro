@@ -1,0 +1,103 @@
+---
+import { getCollection, getEntry } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import SourcesList from '@/components/SourcesList.astro';
+import ReviewerByline from '@/components/ReviewerByline.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import { buildBreadcrumbList } from '@/lib/schema-ld';
+
+export async function getStaticPaths() {
+  const belts = await getCollection('belts');
+  return belts.map((b) => ({ params: { slug: b.data.slug }, props: { belt: b } }));
+}
+
+const { belt } = Astro.props;
+const { data } = belt;
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+const pageUrl = `${siteUrl}/belts/${data.slug}`;
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Belts', href: '/belts' },
+  { label: data.name },
+];
+
+const ldBlocks = [
+  buildBreadcrumbList(
+    crumbs.filter((c) => !!c.href).map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+];
+---
+<BaseLayout
+  title={`${data.name} in BJJ — Promotion Criteria, Time, Curriculum`}
+  description={`The ${data.name} in Brazilian Jiu-Jitsu: typical time at belt, promotion criteria across IBJJF, Gracie Humaita, and Gracie Barra, and the core techniques expected at this rank.`}
+  noindex={true}
+  canonicalPath={`/belts/${data.slug}`}
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">{data.name} — BJJ Rank Guide</h1>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">
+      Position {data.order} of 5 in the BJJ adult belt system. Typical time at this rank: {data.averageTimeAtBeltMonths.typical} months
+      ({data.averageTimeAtBeltMonths.min}–{data.averageTimeAtBeltMonths.max} months).
+    </p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Overview</h2>
+    <p>{data.description}</p>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Promotion criteria</h2>
+    <dl class="space-y-3">
+      <div>
+        <dt class="font-semibold">IBJJF</dt>
+        <dd>{data.promotionCriteriaByFederation.ibjjf}</dd>
+      </div>
+      <div>
+        <dt class="font-semibold">Gracie Humaita</dt>
+        <dd>{data.promotionCriteriaByFederation.gracieHumaita}</dd>
+      </div>
+      <div>
+        <dt class="font-semibold">Gracie Barra</dt>
+        <dd>{data.promotionCriteriaByFederation.gracieBarra}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Core techniques expected at {data.name}</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      {data.coreTechniqueIds.map((id) => (
+        <li><a href={`/technique/${id}`} class="underline">{id.replace(/-/g, ' ')}</a></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Core positions for {data.name}</h2>
+    <ul class="space-y-2 list-disc pl-5">
+      {data.corePositionIds.map((id) => (
+        <li><a href={`/position/${id}`} class="underline">{id.replace(/-/g, ' ')}</a></li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="my-6">
+    <h2 class="font-heading text-xl mb-2">Stripes at this belt</h2>
+    <p>
+      The {data.name.toLowerCase()} carries up to {data.stripeCount} stripes before the next promotion. Stripes are awarded
+      at the discretion of the head coach and serve as intermediate progress markers, not as formal federation ranks.
+    </p>
+  </section>
+
+  <SourcesList citationIds={data.citationSources} />
+  <ReviewerByline reviewerId={data.reviewedById} dateModified={'2026-04-19'} />
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>

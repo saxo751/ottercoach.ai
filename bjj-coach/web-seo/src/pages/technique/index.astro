@@ -1,0 +1,64 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import { buildBreadcrumbList } from '@/lib/schema-ld';
+
+const techniques = (await getCollection('techniques')).sort((a, b) =>
+  a.data.name.localeCompare(b.data.name),
+);
+const byCategory = techniques.reduce<Record<string, typeof techniques>>((acc, t) => {
+  (acc[t.data.category] ??= []).push(t);
+  return acc;
+}, {});
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Techniques' },
+];
+
+const ldBlocks = [
+  buildBreadcrumbList(
+    crumbs.filter((c) => !!c.href).map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+];
+---
+<BaseLayout
+  title="BJJ Techniques — Submissions, Sweeps, Escapes, Passes"
+  description="The Brazilian Jiu-Jitsu technique library: every submission, sweep, escape, pass, takedown, and control covered on the site, grouped by category."
+  noindex={true}
+  canonicalPath="/technique"
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">BJJ Techniques</h1>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">
+      Brazilian Jiu-Jitsu techniques are organised by what they accomplish: submissions end the fight, sweeps reverse
+      position, escapes restore it, passes advance it, takedowns initiate it, and controls maintain it. Browse by
+      category below — each technique page covers step-by-step execution, common mistakes, and counters.
+    </p>
+  </section>
+
+  {Object.entries(byCategory).map(([category, items]) => (
+    <section class="my-6">
+      <h2 class="font-heading text-xl mb-3 capitalize">{category}s</h2>
+      <ul class="space-y-2 list-disc pl-5">
+        {items.map((t) => (
+          <li>
+            <a href={`/technique/${t.slug}`} class="underline font-semibold">{t.data.name}</a>
+            {t.data.aliases.length > 0 && (
+              <span class="opacity-70"> — {t.data.aliases.join(', ')}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>

@@ -1,0 +1,62 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import JsonLd from '@/components/JsonLd.astro';
+import { buildBreadcrumbList } from '@/lib/schema-ld';
+
+const positions = (await getCollection('positions')).sort((a, b) => a.data.name.localeCompare(b.data.name));
+const byCategory = positions.reduce<Record<string, typeof positions>>((acc, p) => {
+  (acc[p.data.category] ??= []).push(p);
+  return acc;
+}, {});
+
+const siteUrl = Astro.site?.toString().replace(/\/$/, '') ?? '';
+
+const crumbs = [
+  { label: 'Home', href: '/' },
+  { label: 'Positions' },
+];
+
+const ldBlocks = [
+  buildBreadcrumbList(
+    crumbs.filter((c) => !!c.href).map((c) => ({ name: c.label, url: new URL(c.href!, siteUrl).toString() })),
+  ),
+];
+---
+<BaseLayout
+  title="BJJ Positions — Guard, Top, Standing, Transition"
+  description="Brazilian Jiu-Jitsu positions explained: guards, top positions, standing, and transitions. Each entry covers when you're in it, primary attacks, and escapes."
+  noindex={true}
+  canonicalPath="/position"
+>
+  <Breadcrumb crumbs={crumbs} />
+
+  <h1 class="font-heading text-3xl mb-4">BJJ Positions</h1>
+
+  <section class="my-4 p-4 bg-white/40 rounded">
+    <p class="font-semibold">
+      Position is the central organising concept of Brazilian Jiu-Jitsu. Before any submission, sweep, or escape becomes
+      reliable, the practitioner must understand which position they are in, what attacks are available from it, and what
+      the opponent's likely counter is. This page lists every position covered on the site, grouped by category.
+    </p>
+  </section>
+
+  {Object.entries(byCategory).map(([category, items]) => (
+    <section class="my-6">
+      <h2 class="font-heading text-xl mb-3 capitalize">{category}</h2>
+      <ul class="space-y-2 list-disc pl-5">
+        {items.map((p) => (
+          <li>
+            <a href={`/position/${p.data.slug}`} class="underline font-semibold">{p.data.name}</a>
+            {p.data.aliases.length > 0 && (
+              <span class="opacity-70"> — also known as {p.data.aliases.join(', ')}</span>
+            )}
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+
+  <JsonLd data={ldBlocks} />
+</BaseLayout>

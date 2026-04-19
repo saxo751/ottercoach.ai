@@ -1,0 +1,27 @@
+{
+  "id": "brown",
+  "slug": "brown",
+  "name": "Brown Belt",
+  "order": 4,
+  "description": "The brown belt is the fourth adult rank in Brazilian Jiu-Jitsu and represents the final stage before black belt. By the time a practitioner reaches brown belt, the question is no longer whether they can defend themselves on the mat — they can — but whether they can refine the gaps and inefficiencies in their game to a level worthy of the black belt that follows. Brown belt is about completion: closing out the few remaining areas of weakness, sharpening the favored attacks to the point of near-inevitability against lower belts, and beginning to compete or perform at the level expected of a future black belt. Time at brown belt is shorter than at purple for most practitioners, typically running twelve to thirty-six months, with eighteen months being a common figure for hobbyists who continue to train consistently. The IBJJF requires a minimum age of eighteen for brown belt and at least eighteen months of training at purple belt. Most brown belts have been training for six to ten years total by the time they earn the rank. The brown-belt curriculum is no longer about adding new positions — those have largely all been seen by this stage — but about refining timing, tightening control, and reducing the number of unnecessary movements during execution. Brown belts are routinely expected to coach in academies, judge or referee at lower-level competitions, and serve as informal mentors to lower belts. Stripes mark intermediate progress: the brown belt carries up to four stripes before promotion to black belt, and a four-stripe brown belt is often within months of the next promotion. The brown belt is also the rank at which many practitioners begin to think seriously about specialisation: gi competition versus no-gi, leg-lock-heavy systems versus traditional submission games, sport jiu-jitsu versus self-defense emphasis. The choices made at brown belt often define the kind of black belt the practitioner will eventually become and the kind of academy they will eventually run if they choose to teach.",
+  "averageTimeAtBeltMonths": { "min": 12, "typical": 24, "max": 36 },
+  "promotionCriteriaByFederation": {
+    "ibjjf": "Minimum age 18; minimum 18 months at purple belt; demonstrated mastery across all positions and active competition or coaching presence.",
+    "gracieHumaita": "Demonstrated mastery of the complete Gracie syllabus and consistent senior-belt mat presence.",
+    "gracieBarra": "Completion of all Black Belt program prerequisites and active mentorship of lower belts."
+  },
+  "coreTechniqueIds": [
+    "leg-drag",
+    "back-take-from-turtle",
+    "darce-choke",
+    "north-south-choke",
+    "heel-hook",
+    "inside-sankaku",
+    "knee-bar",
+    "ezekiel-choke"
+  ],
+  "corePositionIds": ["x-guard", "single-leg-x", "ashi-garami"],
+  "stripeCount": 4,
+  "citationSources": ["ibjjf-rulebook-2024", "marcelo-garcia-book"],
+  "reviewedById": "founder"
+}
