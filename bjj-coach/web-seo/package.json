@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
-    "lighthouse": "lhci autorun"
+    "lighthouse": "lhci autorun",
+    "gen:images": "node scripts/generate-images.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
@@ -28,7 +29,9 @@
     "@playwright/test": "^1.59.1",
     "@types/node": "^25.6.0",
     "@vitest/ui": "^2.1.9",
+    "gray-matter": "^4.0.3",
     "happy-dom": "^20.9.0",
+    "sharp": "^0.34.5",
     "typescript": "^5.9.3",
     "vitest": "^2.1.9"
   }
