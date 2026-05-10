@@ -3,7 +3,7 @@ import {
   View,
   Text,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   FlatList,
   StyleSheet,
   Linking,
@@ -18,23 +18,59 @@ import { Icon } from '../../src/components/icon';
 import type { LibraryTechnique } from '../../src/types';
 
 function TechniqueCard({ technique }: { technique: LibraryTechnique }) {
+  const [expanded, setExpanded] = useState(false);
   const url = technique.youtube_url || technique.youtube_search_url;
 
-  function handlePress() {
+  function handleToggle() {
+    setExpanded((prev) => !prev);
+  }
+
+  function handleOpenVideo() {
     if (url) Linking.openURL(url);
   }
 
   return (
-    <TouchableOpacity style={styles.card} onPress={handlePress} activeOpacity={url ? 0.7 : 1}>
+    <Pressable style={styles.card} onPress={handleToggle}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardName}>{technique.name}</Text>
-        {url && <Text style={styles.videoIcon}>▶</Text>}
+        <View style={styles.cardHeaderText}>
+          <Text style={styles.cardName}>{technique.name}</Text>
+          <Text style={styles.cardMeta}>{technique.category} — {technique.subcategory}</Text>
+        </View>
+        <Icon
+          name={expanded ? 'arrow-up-01' : 'arrow-down-01'}
+          size={18}
+          color={colors.textMuted}
+        />
       </View>
-      <Text style={styles.cardMeta}>{technique.category} — {technique.subcategory}</Text>
-      {technique.description && (
-        <Text style={styles.cardDesc} numberOfLines={2}>{technique.description}</Text>
+
+      {expanded && (
+        <View style={styles.expandedSection}>
+          {technique.starting_position ? (
+            <Text style={styles.cardPosition}>
+              <Text style={styles.cardPositionLabel}>Starts in: </Text>
+              {technique.starting_position}
+            </Text>
+          ) : null}
+
+          {technique.description ? (
+            <Text style={styles.cardDesc}>{technique.description}</Text>
+          ) : (
+            <Text style={styles.cardDescEmpty}>No description yet.</Text>
+          )}
+
+          {url && (
+            <Pressable
+              style={({ pressed }) => [styles.videoButton, pressed && styles.videoButtonPressed]}
+              onPress={handleOpenVideo}
+              hitSlop={6}
+            >
+              <Text style={styles.videoButtonIcon}>▶</Text>
+              <Text style={styles.videoButtonText}>Watch on YouTube</Text>
+            </Pressable>
+          )}
+        </View>
       )}
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -56,7 +92,7 @@ export default function TechniquesScreen() {
       <RetroWindow
         title="techniques/"
         statusLeft={`${techniques?.length ?? 0} techniques`}
-        statusRight="tap to watch"
+        statusRight="tap to expand"
         scrollable={false}
         otterImage={require('../../assets/otters/Otter-armbar-turtle.png')}
       >
@@ -109,11 +145,19 @@ const styles = StyleSheet.create({
   },
   list: { padding: 16 },
   card: { backgroundColor: colors.white, borderRadius: 8, padding: 14, borderWidth: 1, borderColor: colors.border },
-  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 4 },
-  cardName: { fontFamily: fonts.mono, fontSize: 14, color: colors.text, flex: 1, flexShrink: 1 },
-  videoIcon: { fontSize: 12, color: colors.accent, marginLeft: 8 },
-  cardMeta: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted, marginBottom: 6 },
-  cardDesc: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary, lineHeight: 18 },
+  cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
+  cardHeaderText: { flex: 1, flexShrink: 1 },
+  cardName: { fontFamily: fonts.mono, fontSize: 14, color: colors.text, marginBottom: 2 },
+  cardMeta: { fontFamily: fonts.mono, fontSize: 10, color: colors.textMuted },
+  expandedSection: { marginTop: 12, paddingTop: 12, borderTopWidth: 1, borderTopColor: colors.border, gap: 10 },
+  cardPosition: { fontFamily: fonts.body, fontSize: 13, color: colors.textSecondary },
+  cardPositionLabel: { fontFamily: fonts.mono, fontSize: 11, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
+  cardDesc: { fontFamily: fonts.body, fontSize: 14, color: colors.text, lineHeight: 20 },
+  cardDescEmpty: { fontFamily: fonts.body, fontSize: 13, color: colors.textMuted, fontStyle: 'italic' },
+  videoButton: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, alignSelf: 'flex-start', backgroundColor: colors.accent, paddingHorizontal: 16, paddingVertical: 10, borderRadius: 6, marginTop: 4 },
+  videoButtonPressed: { opacity: 0.85 },
+  videoButtonIcon: { color: colors.white, fontSize: 11 },
+  videoButtonText: { fontFamily: fonts.heading, fontSize: 13, fontWeight: '600', color: colors.white },
   separator: { height: 10 },
   empty: { fontFamily: fonts.mono, fontSize: 13, color: colors.textMuted, textAlign: 'center', padding: 32, fontStyle: 'italic' },
 });

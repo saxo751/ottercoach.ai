@@ -25,6 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen name="index" options={{ title: 'home', tabBarIcon: ({ color }) => <TabIcon name="home-01" color={color} /> }} />
       <Tabs.Screen name="dashboard" options={{ title: 'stats', tabBarIcon: ({ color }) => <TabIcon name="dashboard-speed-01" color={color} /> }} />
       <Tabs.Screen name="chat" options={{ title: 'coach', tabBarIcon: ({ color }) => <TabIcon name="message-02" color={color} /> }} />
+      <Tabs.Screen name="focus" options={{ title: 'focus', tabBarIcon: ({ color }) => <TabIcon name="flag-01" color={color} /> }} />
       <Tabs.Screen name="techniques" options={{ title: 'library', tabBarIcon: ({ color }) => <TabIcon name="award-01" color={color} /> }} />
       <Tabs.Screen name="profile" options={{ title: 'profile', tabBarIcon: ({ color }) => <TabIcon name="user-circle" color={color} /> }} />
     </Tabs>

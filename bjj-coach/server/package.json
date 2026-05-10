@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "build": "tsc",
+    "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
     "enrich-videos": "tsx src/scripts/enrichVideos.ts",
     "generate-descriptions": "tsx src/scripts/generateDescriptions.ts",

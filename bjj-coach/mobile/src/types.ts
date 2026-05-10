@@ -42,6 +42,31 @@ export interface ChatButton {
   data: string;
 }
 
+export interface Position {
+  id: number;
+  user_id: string;
+  name: string;
+  category: string;
+  confidence_level: number;
+  last_trained_at: string | null;
+  notes: string | null;
+}
+
+export interface Technique {
+  id: number;
+  user_id: string;
+  name: string;
+  position_from: number | null;
+  position_to: number | null;
+  technique_type: string;
+  confidence_level: number;
+  times_drilled: number;
+  times_hit_in_rolling: number;
+  last_trained_at: string | null;
+  video_url: string | null;
+  notes: string | null;
+}
+
 export interface TrainingSession {
   id: number;
   user_id: string;

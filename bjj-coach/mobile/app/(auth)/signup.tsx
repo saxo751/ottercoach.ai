@@ -181,7 +181,7 @@ export default function SignupScreen() {
               )}
               {step < 4 ? (
                 <TouchableOpacity style={styles.button} onPress={handleNext}>
-                  <Text style={styles.buttonText}>> NEXT</Text>
+                  <Text style={styles.buttonText}>{'> NEXT'}</Text>
                 </TouchableOpacity>
               ) : (
                 <TouchableOpacity style={[styles.button, loading && styles.buttonDisabled]} onPress={handleSubmit} disabled={loading}>
